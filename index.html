@@ -645,8 +645,8 @@ td {
             <div class="card stat-card">
                 <div>
                     <div class="stat-label">ຄົນເຈັບມື້ນີ້</div>
-                    <div class="stat-number">86</div>
-                    <div class="stat-growth up">▲ 8.2%</div>
+                    <div class="stat-number" id="today-patients">0</div>
+                    <div class="stat-growth up">▲ ຂໍ້ມູນຕົວຈິງ</div>
                 </div>
                 <div class="stat-icon" style="background:#e9f8ef;">🩺</div>
             </div>
@@ -772,7 +772,7 @@ td {
 <!-- ================= JAVASCRIPT LOCALSTORAGE & UI ================= -->
 <script>
     document.addEventListener('DOMContentLoaded', () => {
-        // เวลาปัจจุบัน
+        // ເວລາປະຈຸບັນ
         const timeDisplay = document.getElementById('current-time');
         const updateTime = () => {
             const now = new Date();
@@ -781,7 +781,7 @@ td {
         updateTime();
         setInterval(updateTime, 60000);
 
-        // เมນູ Sidebar
+        // ເມນູ Sidebar
         const menuItems = document.querySelectorAll('.menu-item');
         const pageHeaderTitle = document.getElementById('page-header-title');
         
@@ -805,7 +805,7 @@ td {
             }
         });
 
-        // ควบคุม Modal ລົງທະບຽນຄົນເຈັບ
+        // ຄວບຄຸມ Modal ລົງທະບຽນຄົນເຈັບ
         const modal = document.getElementById('patientModal');
         const btnOpen = document.getElementById('btn-register-patient');
         const btnClose = document.getElementById('btnCloseModal');
@@ -813,7 +813,7 @@ td {
         btnOpen.addEventListener('click', () => { modal.style.display = 'flex'; });
         btnClose.addEventListener('click', () => { modal.style.display = 'none'; });
 
-        // ควบคุม Modal ເພີ່ມນັດໝາຍ
+        // ຄວບຄຸມ Modal ເພີ່ມນັດໝາຍ
         const aptModal = document.getElementById('appointmentModal');
         const btnOpenApt = document.getElementById('btn-register-appointment');
         const btnCloseApt = document.getElementById('btnCloseAptModal');
@@ -825,7 +825,7 @@ td {
             btnCloseApt.addEventListener('click', () => { aptModal.style.display = 'none'; });
         }
 
-        // โหลดข้อมูลแสดงผลจาก LocalStorage ทันที
+        // โຫຼດຂໍ້ມູນສະແດງຜົນຈາກ LocalStorage ທັນທີ
         loadDashboardData();
     });
 
@@ -835,11 +835,16 @@ td {
         let patients = JSON.parse(localStorage.getItem('clinic_patients')) || [];
         document.getElementById('total-patients').innerText = patients.length;
 
+        // ນັບຈຳນວນຄົນເຈັບສະເພາະມື້ນີ້ (ທຽບວັນທີປະຈຸບັນ)
+        const todayDateStr = new Date().toLocaleDateString('lo-LA');
+        let todayCount = patients.filter(p => p.date_only === todayDateStr).length;
+        document.getElementById('today-patients').innerText = todayCount;
+
         const tbody = document.getElementById('patient-table-body');
         tbody.innerHTML = "";
 
         if (patients.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="3" style="text-align:center; color:#7b8794;">ຍັງບໍ່มีຂໍ້ມູນຄົນເຈັບในระบบ</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="3" style="text-align:center; color:#7b8794;">ຍັງບໍ່ມີຂໍ້ມູນຄົນເຈັບໃນລະບົບ</td></tr>`;
         } else {
             patients.forEach((p, index) => {
                 const name = p.fullname || 'ບໍ່ລະບຸຊື່';
@@ -868,7 +873,7 @@ td {
         let appointments = JSON.parse(localStorage.getItem('clinic_appointments')) || [];
         document.getElementById('total-appointments').innerText = appointments.length;
 
-        // 3. ດຶງຂໍ້ມູນລາຍຮັບ (Simulate จาก LocalStorage)
+        // 3. ດຶງຂໍ້ມູນລາຍຮັບ
         let payments = JSON.parse(localStorage.getItem('clinic_payments')) || [];
         let totalRevenue = payments.reduce((sum, item) => sum + Number(item.amount || 0), 0);
         
@@ -888,11 +893,14 @@ td {
         }
 
         let patients = JSON.parse(localStorage.getItem('clinic_patients')) || [];
-        const nowStr = new Date().toLocaleString('lo-LA');
+        const now = new Date();
+        const nowStr = now.toLocaleString('lo-LA');
+        const dateOnlyStr = now.toLocaleDateString('lo-LA');
 
         patients.push({
             fullname: fullname,
-            created_at: nowStr
+            created_at: nowStr,
+            date_only: dateOnlyStr
         });
 
         localStorage.setItem('clinic_patients', JSON.stringify(patients));
