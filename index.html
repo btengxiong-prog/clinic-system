@@ -16,7 +16,7 @@ body {
     font-family: "Phetsarath OT", "Times New Roman", serif;
     background: #f4f7fb;
     color: #172033;
-    font-size: 16.5px; /* ເພີ່ມຂະໜາດຕົວໜັງສືຂຶ້ນ 10% */
+    font-size: 16.5px;
 }
 
 /* ================= SIDEBAR ================= */
@@ -505,6 +505,67 @@ td {
     color: white;
 }
 
+/* ================= CUSTOM SYSTEM NOTIFICATION POPUP ================= */
+.sys-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.4);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+    animation: fadeIn 0.2s ease-in-out;
+}
+
+.sys-modal-card {
+    background: white;
+    padding: 25px;
+    border-radius: 12px;
+    width: 380px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+    text-align: center;
+}
+
+.sys-modal-icon {
+    font-size: 40px;
+    margin-bottom: 12px;
+}
+
+.sys-modal-title {
+    font-size: 19px;
+    font-weight: bold;
+    margin-bottom: 8px;
+    color: #102a43;
+}
+
+.sys-modal-message {
+    font-size: 16px;
+    color: #555;
+    margin-bottom: 20px;
+    line-height: 1.5;
+}
+
+.sys-modal-btn {
+    background: #1976d2;
+    color: white;
+    border: none;
+    padding: 10px 24px;
+    border-radius: 6px;
+    font-size: 16.5px;
+    font-weight: bold;
+    cursor: pointer;
+    width: 100%;
+    font-family: inherit;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
 /* ================= RESPONSIVE ================= */
 
 @media(max-width:1100px) {
@@ -627,7 +688,7 @@ td {
         </div>
 
         <div class="top-actions">
-            <div class="notification" onclick="alert('ບໍ່ມີການແຈ້ງເຕືອນໃໝ່')">
+            <div class="notification" onclick="showSysModal('ແຈ້ງເຕືອນລະບົບ', 'ບໍ່ມີການແຈ້ງເຕືອນໃໝ່ໃນຂະນະນີ້', '🔔')">
                 🔔<div class="notification-dot"></div>
             </div>
             <div class="user">
@@ -683,7 +744,7 @@ td {
             <div class="card">
                 <div class="card-header">
                     <h3>👥 ລາຍຊື່ຄົນເຈັບ / ການນັດໝາຍ (Local)</h3>
-                    <button onclick="alert('ເປີດໜ້າລາຍຊື່ຄົນເຈັບທັງໝົດ')">ເບິ່ງທັງໝົດ →</button>
+                    <button onclick="showSysModal('ຂໍ້ມູນທັງໝົດ', 'ເປີດໜ້າລາຍຊື່ຄົນເຈັບທັງໝົດໃນລະບົບ', '👥')">ເບິ່ງທັງໝົດ →</button>
                 </div>
                 <table>
                     <thead>
@@ -721,7 +782,7 @@ td {
             <div class="card">
                 <div class="card-header">
                     <h3>🔔 ການແຈ້ງເຕືອນ</h3>
-                    <button onclick="alert('ເປີດໜ້າຈັດການການແຈ້ງເຕືອນ')">ເບິ່ງທັງໝົດ</button>
+                    <button onclick="showSysModal('ການແຈ້ງເຕືອນ', 'ເປີດໜ້າຈັດການການແຈ້ງເຕືອນທັງໝົດ', '🔔')">ເບິ່ງທັງໝົດ</button>
                 </div>
                 <div class="alert alert-red">🔴 <strong>ຢາໝົດອາຍຸ:</strong>&nbsp; 5 ລາຍການ</div>
                 <div class="alert alert-yellow">🟡 <strong>Stock ຕ່ຳ:</strong>&nbsp; 12 ລາຍການ</div>
@@ -732,7 +793,7 @@ td {
             <div class="card">
                 <div class="card-header">
                     <h3>💵 ລາຍຮັບມື້ນີ້</h3>
-                    <button onclick="alert('ເປີດໜ້າລາຍງານການເງິນ')">ເບິ່ງລາຍລະອຽດ</button>
+                    <button onclick="showSysModal('ການເງິນ', 'ເປີດໜ້າລາຍງານການເງິນ ແລະ ຍອດຂາຍ', '💵')">ເບິ່ງລາຍລະອຽດ</button>
                 </div>
                 <div class="revenue-box">
                     <div class="revenue-label">ລາຍຮັບລວມຈາກ LocalStorage</div>
@@ -861,8 +922,56 @@ td {
     </div>
 </div>
 
+<!-- ================= MODAL POS / ຮັບເງິນ ================= -->
+<div class="modal-overlay" id="posModal">
+    <div class="modal-card large">
+        <h3>💰 POS / ລະບົບຮັບເງິນ & ຊຳລະບິນ</h3>
+        <div class="form-group">
+            <label>ລາຍການບິນຄ້າງຊຳລະ / ທີ່ຕ້ອງຮັບເງິນ:</label>
+            <table style="margin-bottom: 15px;">
+                <thead>
+                    <tr>
+                        <th>ຊື່ຄົນເຈັບ</th>
+                        <th>ລາຍລະອຽດ</th>
+                        <th>ຈຳນວນເງິນ (₭)</th>
+                        <th>ຈັດການ</th>
+                    </tr>
+                </thead>
+                <tbody id="pos-table-body">
+                    <tr><td colspan="4" style="text-align:center; color:#7b8794;">ບໍ່มีລາຍການຄ້າງຊຳລະ</td></tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="modal-actions">
+            <button class="btn-cancel" id="btnClosePosModal">ປິດໜ້າຕ່າງ</button>
+        </div>
+    </div>
+</div>
+
+<!-- ================= CUSTOM SYSTEM NOTIFICATION MODAL ================= -->
+<div class="sys-modal-overlay" id="sysModal">
+    <div class="sys-modal-card">
+        <div class="sys-modal-icon" id="sysModalIcon">🔔</div>
+        <div class="sys-modal-title" id="sysModalTitle">ແຈ້ງເຕືອນລະບົບ</div>
+        <div class="sys-modal-message" id="sysModalMessage">ຂໍ້ຄວາມແຈ້ງເຕືອນ...</div>
+        <button class="sys-modal-btn" onclick="closeSysModal()">ຕົກລົງ</button>
+    </div>
+</div>
+
 <!-- ================= JAVASCRIPT LOCALSTORAGE & UI ================= -->
 <script>
+    // ຟັງຊັນສຳລັບເປີດ Custom System Modal ແທນ alert() ເກົ່າ
+    function showSysModal(title, message, icon = '🔔') {
+        document.getElementById('sysModalTitle').innerText = title;
+        document.getElementById('sysModalMessage').innerText = message;
+        document.getElementById('sysModalIcon').innerText = icon;
+        document.getElementById('sysModal').style.display = 'flex';
+    }
+
+    function closeSysModal() {
+        document.getElementById('sysModal').style.display = 'none';
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
         // ເວລາປະຈຸບັນ
         const timeDisplay = document.getElementById('current-time');
@@ -883,18 +992,22 @@ td {
                 this.classList.add('active');
                 const menuName = this.querySelector('span').innerText;
                 pageHeaderTitle.innerText = menuName;
+                
+                // ຖ້າຄລິກເມນູ POS ຈາກ Sidebar ໃຫ້ເປີດ Modal POS ທັນທີ
+                const target = this.getAttribute('data-target');
+                if (target === 'pos') {
+                    openPosHandler();
+                } else if (target === 'reports') {
+                    showSysModal('ລາຍງານລະບົບ', 'ກຳລັງໂຫຼດໜ້າລາຍງານສະຖິຕິຄລີນິກ...', '📊');
+                } else if (target !== 'dashboard') {
+                    showSysModal('ເມນູລະບົບ', `ກຳລັງເປີດໜ້າຕ່າງ: ${menuName} ...`, '⚙️');
+                }
             });
         });
 
         // ປຸ່ມ Quick Actions ອື່ນໆ
-        const quickBtns = document.querySelectorAll('.quick-btn');
-        quickBtns.forEach(btn => {
-            if(btn.id !== 'btn-register-patient' && btn.id !== 'btn-register-appointment' && btn.id !== 'btn-open-examination' && btn.id !== 'btn-open-pharmacy-quick') {
-                btn.addEventListener('click', function() {
-                    const actionName = this.querySelector('span').innerText;
-                    alert(`ກຳລັງເປີດໜ້າຕ່າງ: ${actionName} ...`);
-                });
-            }
+        document.getElementById('btn-open-reports-quick').addEventListener('click', () => {
+            showSysModal('ລາຍງານລະບົບ', 'ເປີດໜ້າລາຍງານພາບລວມຂອງຄລີນິກ', '📊');
         });
 
         // ຄວບຄຸມ Modal ລົງທະບຽນຄົນເຈັບ
@@ -941,7 +1054,7 @@ td {
         const select = document.getElementById('examPatientSelect');
         select.innerHTML = '<option value="">-- ເລືອກຄົນເຈັບ --</option>';
         let patients = JSON.parse(localStorage.getItem('clinic_patients')) || [];
-        patients.forEach((p, index) => {
+        patients.forEach((p) => {
             const opt = document.createElement('option');
             opt.value = p.fullname;
             opt.textContent = `${p.fullname} (ລົງທະບຽນ: ${p.created_at})`;
@@ -951,11 +1064,9 @@ td {
 
     // ຟັງຊັນໂຫຼດຂໍ້ມູນມາສະແດງຜົນ Dashboard
     function loadDashboardData() {
-        // 1. ດຶງຂໍ້ມູນຄົນເຈັບຈາກ LocalStorage
         let patients = JSON.parse(localStorage.getItem('clinic_patients')) || [];
         document.getElementById('total-patients').innerText = patients.length;
 
-        // ນັບຈຳນວນຄົນເຈັບສະເພາະມື້ນີ້ (ທຽບວັນທີປະຈຸບັນ)
         const todayDateStr = new Date().toLocaleDateString('lo-LA');
         let todayCount = patients.filter(p => p.date_only === todayDateStr).length;
         document.getElementById('today-patients').innerText = todayCount;
@@ -989,11 +1100,9 @@ td {
             });
         }
 
-        // 2. ດຶງຂໍ້ມູນນັດໝາຍ
         let appointments = JSON.parse(localStorage.getItem('clinic_appointments')) || [];
         document.getElementById('total-appointments').innerText = appointments.length;
 
-        // 3. ດຶງຂໍ້ມູນລາຍຮັບ
         let payments = JSON.parse(localStorage.getItem('clinic_payments')) || [];
         let totalRevenue = payments.reduce((sum, item) => sum + Number(item.amount || 0), 0);
         
@@ -1008,7 +1117,7 @@ td {
         const fullname = fullnameInput.value.trim();
 
         if (!fullname) {
-            alert('ກະລຸນາປ້ອນຊື່ ແລະ ນາມສະກຸນຄົນເຈັບ!');
+            showSysModal('ຜິດພາດ', 'ກະລຸນາປ້ອນຊື່ ແລະ ນາມສະກຸນຄົນເຈັບ!', '⚠️');
             return;
         }
 
@@ -1025,7 +1134,7 @@ td {
 
         localStorage.setItem('clinic_patients', JSON.stringify(patients));
 
-        alert('ລົງທະບຽນຄົນເຈັບສຳເລັດ!');
+        showSysModal('ສຳເລັດ', 'ລົງທະບຽນຄົນເຈັບສຳເລັດແລ້ວ!', '✅');
         fullnameInput.value = '';
         document.getElementById('patientModal').style.display = 'none';
         loadDashboardData();
@@ -1040,7 +1149,7 @@ td {
         const aptDate = aptDateTimeInput.value;
 
         if (!patientName || !aptDate) {
-            alert('ກະລຸນາປ້ອນຂໍ້ມູນໃຫ້ຄົບຖ້ວນ!');
+            showSysModal('ຜິດພາດ', 'ກະລຸນາປ້ອນຂໍ້ມູນໃຫ້ຄົບຖ້ວນ!', '⚠️');
             return;
         }
 
@@ -1055,7 +1164,7 @@ td {
 
         localStorage.setItem('clinic_appointments', JSON.stringify(appointments));
 
-        alert('ເພີ່ມນັດໝາຍສຳເລັດ!');
+        showSysModal('ສຳເລັດ', 'ເພີ່ມນັດໝາຍສຳເລັດແລ້ວ!', '✅');
         patientNameInput.value = '';
         aptDateTimeInput.value = '';
         document.getElementById('appointmentModal').style.display = 'none';
@@ -1071,11 +1180,10 @@ td {
         const fee = Number(document.getElementById('examFee').value) || 0;
 
         if (!patientName) {
-            alert('ກະລຸນາເລືອກຄົນເຈັບ!');
+            showSysModal('ຜິດພາດ', 'ກະລຸນາເລືອກຄົນເຈັບ!', '⚠️');
             return;
         }
 
-        // 1. ບັນທຶກປະຫວັດການກວດ
         let examinations = JSON.parse(localStorage.getItem('clinic_examinations')) || [];
         examinations.push({
             patient_name: patientName,
@@ -1087,10 +1195,10 @@ td {
         });
         localStorage.setItem('clinic_examinations', JSON.stringify(examinations));
 
-        // 2. ບັນທຶກລາຍຮັບອັດຕະໂນມັດລົງ clinic_payments (POS)
         if (fee > 0) {
             let payments = JSON.parse(localStorage.getItem('clinic_payments')) || [];
             payments.push({
+                id: Date.now(),
                 patient_name: patientName,
                 amount: fee,
                 description: 'ຄ່າກວດສຸຂະພາບ: ' + (diagnosis || 'ກວດທົ່ວໄປ'),
@@ -1099,9 +1207,8 @@ td {
             localStorage.setItem('clinic_payments', JSON.stringify(payments));
         }
 
-        alert('ບັນທຶກຜົນການກວດ ແລະ ສ້າງລາຍການຄິດໄລ່ເງິນສຳເລັດ!');
+        showSysModal('ສຳເລັດ', 'ບັນທຶກຜົນການກວດ ແລະ ສ້າງລາຍການຄິດໄລ່ເງິນສຳເລັດ!', '✅');
         
-        // ລ້າງຄ່າໃນຟອມ
         document.getElementById('examPatientSelect').value = '';
         document.getElementById('examSymptoms').value = '';
         document.getElementById('examDiagnosis').value = '';
@@ -1109,7 +1216,6 @@ td {
         document.getElementById('examFee').value = '50000';
         document.getElementById('examinationModal').style.display = 'none';
 
-        // ໂຫຼດຂໍ້ມູນ Dashboard ໃໝ່
         loadDashboardData();
     });
 
@@ -1149,7 +1255,7 @@ td {
         const qty = parseInt(document.getElementById('medicineQty').value) || 1;
 
         if (!medSelectVal) {
-            alert('ກະລຸນາເລືອກລາຍການຢາ!');
+            showSysModal('ຜິດພາດ', 'ກະລຸນາເລືອກລາຍການຢາ!', '⚠️');
             return;
         }
 
@@ -1201,12 +1307,12 @@ td {
         const patientName = document.getElementById('pharmacyPatientSelect').value;
 
         if (!patientName) {
-            alert('ກະລຸນາເລືອກຄົນເຈັບ!');
+            showSysModal('ຜິດພາດ', 'ກະລຸນາເລືອກຄົນເຈັບ!', '⚠️');
             return;
         }
 
         if (pharmacyCart.length === 0) {
-            alert('ກະລຸນາເພີ່ມລາຍການຢາຢ່າງໜ້ອຍ 1 ລາຍການ!');
+            showSysModal('ຜິດພາດ', 'ກະລຸນາເພີ່ມລາຍການຢາຢ່າງໜ້ອຍ 1 ລາຍການ!', '⚠️');
             return;
         }
 
@@ -1223,6 +1329,7 @@ td {
 
         let payments = JSON.parse(localStorage.getItem('clinic_payments')) || [];
         payments.push({
+            id: Date.now(),
             patient_name: patientName,
             amount: grandTotal,
             description: 'ຄ່າຈ່າຍຢາ (' + pharmacyCart.map(i => i.name + ' x' + i.qty).join(', ') + ')',
@@ -1230,7 +1337,7 @@ td {
         });
         localStorage.setItem('clinic_payments', JSON.stringify(payments));
 
-        alert('ຈ່າຍຢາ ແລະ ບັນທຶກເຂົ້າ POS ສຳເລັດ!');
+        showSysModal('ສຳເລັດ', 'ຈ່າຍຢາ ແລະ ບັນທຶກເຂົ້າ POS ສຳເລັດ!', '✅');
 
         pharmacyCart = [];
         renderPharmacyCart();
@@ -1239,6 +1346,60 @@ td {
 
         loadDashboardData();
     });
+
+    // ---------------------------------------------------------
+    // ລະບົບ POS / ຮັບເງິນ Module
+    // ---------------------------------------------------------
+    const posModal = document.getElementById('posModal');
+    const btnOpenPosQuick = document.getElementById('btn-open-pos-quick');
+    const btnClosePos = document.getElementById('btnClosePosModal');
+
+    const openPosHandler = () => {
+        loadPosTable();
+        posModal.style.display = 'flex';
+    };
+
+    if(btnOpenPosQuick) btnOpenPosQuick.addEventListener('click', openPosHandler);
+    if(btnClosePos) btnClosePos.addEventListener('click', () => { posModal.style.display = 'none'; });
+
+    function loadPosTable() {
+        const tbody = document.getElementById('pos-table-body');
+        tbody.innerHTML = '';
+        let payments = JSON.parse(localStorage.getItem('clinic_payments')) || [];
+
+        if (payments.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:#7b8794;">ບໍ່ມີລາຍການຮັບເງິນ</td></tr>`;
+            return;
+        }
+
+        payments.forEach((item, index) => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td><strong>${item.patient_name}</strong><br><small>${item.created_at}</small></td>
+                <td>${item.description || 'ຄ່າບໍລິການຄລີນິກ'}</td>
+                <td style="color: #1976d2; font-weight: bold;">${Number(item.amount).toLocaleString()} ₭</td>
+                <td><button type="button" onclick="checkoutPayment(${item.id || index})" style="background:#159957; color:white; border:none; padding:6px 12px; border-radius:4px; cursor:pointer; font-weight:bold;">ຮັບເງິນແລ້ວ</button></td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    function checkoutPayment(id) {
+        let payments = JSON.parse(localStorage.getItem('clinic_payments')) || [];
+        // ກໍລະນີມີ id ໃຫ້ກອງອອກ ຖ້າບໍ່ມີໃຫ້ລຶບຕາມ index
+        payments = payments.filter(p => p.id !== id && p.id != null);
+        // ຖ້າເປັນແບບເກົ່າທີ່ບໍ່ມີ id ໃຫ້ລຶບໂດຍໃຊ້ index ຜ່ານ parameter
+        if (typeof id === 'number' && payments.length === 0) {
+            // fallback
+            let allPay = JSON.parse(localStorage.getItem('clinic_payments')) || [];
+            allPay.splice(id, 1);
+            payments = allPay;
+        }
+        localStorage.setItem('clinic_payments', JSON.stringify(payments));
+        showSysModal('ສຳເລັດ', 'ບັນທຶກການຮັບເງິນສຳເລັດແລ້ວ!', '💰');
+        loadPosTable();
+        loadDashboardData();
+    }
 </script>
 </body>
 </html>
