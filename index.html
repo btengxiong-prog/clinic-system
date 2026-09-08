@@ -811,6 +811,56 @@ td {
     </div>
 </div>
 
+<!-- ================= MODAL ຫ້ອງຈ່າຍຢາ (PHARMACY) ================= -->
+<div class="modal-overlay" id="pharmacyModal">
+    <div class="modal-card large">
+        <h3>💊 ຫ້ອງຈ່າຍຢາ & ຕັດ Stock</h3>
+        <div class="form-group">
+            <label>ເລືອກຄົນເຈັບທີ່ມາຮັບຢາ:</label>
+            <select id="pharmacyPatientSelect">
+                <option value="">-- ເລືອກຄົນເຈັບ --</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>ລາຍການຢາໃນ Stock (ເລືອກເພີ່ມ):</label>
+            <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                <select id="medicineSelect" style="flex: 2;">
+                    <option value="">-- ເລືອກຢາ --</option>
+                    <option value="Paracetamol 500mg|5000">Paracetamol 500mg (ລາຄາ: 5,000 ₭)</option>
+                    <option value="Amoxicillin 500mg|15000">Amoxicillin 500mg (ລາຄາ: 15,000 ₭)</option>
+                    <option value="Omeprazole 20mg|10000">Omeprazole 20mg (ລາຄາ: 10,000 ₭)</option>
+                    <option value="Vitamin C 1000mg|8000">Vitamin C 1000mg (ລາຄາ: 8,000 ₭)</option>
+                </select>
+                <input type="number" id="medicineQty" value="1" min="1" style="flex: 1;" placeholder="ຈຳນວນ">
+                <button type="button" class="btn-submit" id="btnAddMedicine" style="flex: 1;">ເພີ່ມຢາ</button>
+            </div>
+        </div>
+        <div class="form-group">
+            <label>ລາຍການຢາທີ່ສັ່ງຈ່າຍ:</label>
+            <table style="margin-bottom: 15px;">
+                <thead>
+                    <tr>
+                        <th>ຊື່ຢາ</th>
+                        <th>ຈຳນວນ</th>
+                        <th>ລາຄາລວມ (₭)</th>
+                        <th>ຈັດການ</th>
+                    </tr>
+                </thead>
+                <tbody id="prescription-cart-body">
+                    <tr><td colspan="4" style="text-align:center; color:#7b8794;">ຍັງບໍ່ມີລາຍການຢາ</td></tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="form-group">
+            <label><strong>ລວມເງິນຄ່າຢາທັງໝົດ:</strong> <span id="totalPharmacyFee" style="color: #1976d2; font-size: 20px;">0 ₭</span></label>
+        </div>
+        <div class="modal-actions">
+            <button class="btn-cancel" id="btnClosePharmacyModal">ຍົກເລີກ</button>
+            <button class="btn-submit" id="btnSavePharmacy">ຢືນຢັນຈ່າຍຢາ & ສົ່ງ POS</button>
+        </div>
+    </div>
+</div>
+
 <!-- ================= JAVASCRIPT LOCALSTORAGE & UI ================= -->
 <script>
     document.addEventListener('DOMContentLoaded', () => {
@@ -839,7 +889,7 @@ td {
         // ປຸ່ມ Quick Actions ອື່ນໆ
         const quickBtns = document.querySelectorAll('.quick-btn');
         quickBtns.forEach(btn => {
-            if(btn.id !== 'btn-register-patient' && btn.id !== 'btn-register-appointment' && btn.id !== 'btn-open-examination') {
+            if(btn.id !== 'btn-register-patient' && btn.id !== 'btn-register-appointment' && btn.id !== 'btn-open-examination' && btn.id !== 'btn-open-pharmacy-quick') {
                 btn.addEventListener('click', function() {
                     const actionName = this.querySelector('span').innerText;
                     alert(`ກຳລັງເປີດໜ້າຕ່າງ: ${actionName} ...`);
@@ -881,11 +931,6 @@ td {
         if(btnOpenExam) btnOpenExam.addEventListener('click', openExamHandler);
         if(sidebarExamBtn) sidebarExamBtn.addEventListener('click', openExamHandler);
         if(btnCloseExam) btnCloseExam.addEventListener('click', () => { examModal.style.display = 'none'; });
-
-        // Quick buttons ສໍາລັບ pharmacy ແລະ pos
-        document.getElementById('btn-open-pharmacy-quick').addEventListener('click', () => { alert('ເປີດລະບົບຈ່າຍຢາ (Pharmacy)'); });
-        document.getElementById('btn-open-pos-quick').addEventListener('click', () => { alert('ເປີດລະບົບ POS ຮັບເງິນ'); });
-        document.getElementById('btn-open-reports-quick').addEventListener('click', () => { alert('ເປີດໜ້າລາຍງານ'); });
 
         // ໂຫຼດຂໍ້ມູນສະແດງຜົນຈາກ LocalStorage ທັນທີ
         loadDashboardData();
@@ -1067,193 +1112,133 @@ td {
         // ໂຫຼດຂໍ້ມູນ Dashboard ໃໝ່
         loadDashboardData();
     });
-// ---------------------------------------------------------
-// ລະບົບຫ້ອງຈ່າຍຢາ (Pharmacy Module)
-// ---------------------------------------------------------
 
-// ຕົວແປເກັບລາຍການຢາຊົ່ວຄາວໃນກະຕ່າຂາຍ
-let pharmacyCart = [];
+    // ---------------------------------------------------------
+    // ລະບົບຫ້ອງຈ່າຍຢາ (Pharmacy Module)
+    // ---------------------------------------------------------
+    let pharmacyCart = [];
 
-// ເປີດ Modal ຫ້ອງຈ່າຍຢາ
-const pharmacyModal = document.getElementById('pharmacyModal');
-const btnOpenPharmacy = document.getElementById('btn-open-pharmacy-quick');
-const sidebarPharmacyBtn = document.querySelector('.menu-item[data-target="pharmacy"]');
-const btnClosePharmacy = document.getElementById('btnClosePharmacyModal');
+    const pharmacyModal = document.getElementById('pharmacyModal');
+    const btnOpenPharmacy = document.getElementById('btn-open-pharmacy-quick');
+    const sidebarPharmacyBtn = document.querySelector('.menu-item[data-target="pharmacy"]');
+    const btnClosePharmacy = document.getElementById('btnClosePharmacyModal');
 
-const openPharmacyHandler = () => {
-    loadPharmacyPatientDropdown();
-    pharmacyModal.style.display = 'flex';
-};
+    const openPharmacyHandler = () => {
+        loadPharmacyPatientDropdown();
+        pharmacyModal.style.display = 'flex';
+    };
 
-if(btnOpenPharmacy) btnOpenPharmacy.addEventListener('click', openPharmacyHandler);
-if(sidebarPharmacyBtn) sidebarPharmacyBtn.addEventListener('click', openPharmacyHandler);
-if(btnClosePharmacy) btnClosePharmacy.addEventListener('click', () => { pharmacyModal.style.display = 'none'; });
+    if(btnOpenPharmacy) btnOpenPharmacy.addEventListener('click', openPharmacyHandler);
+    if(sidebarPharmacyBtn) sidebarPharmacyBtn.addEventListener('click', openPharmacyHandler);
+    if(btnClosePharmacy) btnClosePharmacy.addEventListener('click', () => { pharmacyModal.style.display = 'none'; });
 
-// ໂຫຼດຊື່ຄົນເຈັບລົງໃນ Dropdown ຫ້ອງຈ່າຍຢາ
-function loadPharmacyPatientDropdown() {
-    const select = document.getElementById('pharmacyPatientSelect');
-    select.innerHTML = '<option value="">-- ເລືອກຄົນເຈັບ --</option>';
-    let patients = JSON.parse(localStorage.getItem('clinic_patients')) || [];
-    patients.forEach((p) => {
-        const opt = document.createElement('option');
-        opt.value = p.fullname;
-        opt.textContent = `${p.fullname} (ລົງທະບຽນ: ${p.created_at})`;
-        select.appendChild(opt);
-    });
-}
-
-// ປຸ່ມເພີ່ມຢາເຂົ້າກະຕ່າ
-document.getElementById('btnAddMedicine').addEventListener('click', () => {
-    const medSelectVal = document.getElementById('medicineSelect').value;
-    const qty = parseInt(document.getElementById('medicineQty').value) || 1;
-
-    if (!medSelectVal) {
-        alert('ກະລຸນາເລືອກລາຍການຢາ!');
-        return;
-    }
-
-    const [medName, medPrice] = medSelectVal.split('|');
-    const totalPrice = parseInt(medPrice) * qty;
-
-    pharmacyCart.push({
-        name: medName,
-        price: parseInt(medPrice),
-        qty: qty,
-        total: totalPrice
-    });
-
-    renderPharmacyCart();
-});
-
-// ສະແດງລາຍການຢາໃນຕາຕະລາງກະຕ່າ
-function renderPharmacyCart() {
-    const tbody = document.getElementById('prescription-cart-body');
-    tbody.innerHTML = '';
-    let grandTotal = 0;
-
-    if (pharmacyCart.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:#7b8794;">ຍັງບໍ່ມີລາຍການຢາ</td></tr>`;
-        document.getElementById('totalPharmacyFee').innerText = '0 ₭';
-        return;
-    }
-
-    pharmacyCart.forEach((item, index) => {
-        grandTotal += item.total;
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-            <td>${item.name}</td>
-            <td>${item.qty}</td>
-            <td>${item.total.toLocaleString()} ₭</td>
-            <td><button type="button" onclick="removePharmacyItem(${index})" style="background:#e53935; color:white; border:none; padding:4px 8px; border-radius:4px; cursor:pointer;">ລຶບ</button></td>
-        `;
-        tbody.appendChild(tr);
-    });
-
-    document.getElementById('totalPharmacyFee').innerText = grandTotal.toLocaleString() + ' ₭';
-}
-
-// ຟັງຊັນລຶບລາຍການຢາໃນກະຕ່າ
-function removePharmacyItem(index) {
-    pharmacyCart.splice(index, 1);
-    renderPharmacyCart();
-}
-
-        // ບັນທຶກການຈ່າຍຢາ ແລະ ສ້າງລາຍຮັບເຂົ້າ POS ອັດຕະໂນມັດ
-        document.getElementById('btnSavePharmacy').addEventListener('click', () => {
-            const patientName = document.getElementById('pharmacyPatientSelect').value;
-
-            if (!patientName) {
-                alert('ກະລຸນາເລືອກຄົນເຈັບ!');
-                return;
-            }
-
-            if (pharmacyCart.length === 0) {
-                alert('ກະລຸນາເພີ່ມລາຍການຢາຢ່າງໜ້ອຍ 1 ລາຍການ!');
-                return;
-            }
-
-            let grandTotal = pharmacyCart.reduce((sum, item) => sum + item.total, 0);
-
-            // 1. ບັນທຶກປະຫວັດການຈ່າຍຢາລົງ LocalStorage
-            let pharmacyRecords = JSON.parse(localStorage.getItem('clinic_pharmacy_records')) || [];
-            pharmacyRecords.push({
-                patient_name: patientName,
-                items: pharmacyCart,
-                total_amount: grandTotal,
-                created_at: new Date().toLocaleString('lo-LA')
-            });
-            localStorage.setItem('clinic_pharmacy_records', JSON.stringify(pharmacyRecords));
-
-            // 2. ສ້າງລາຍຮັບເຂົ້າລະບົບ POS / Payments ອັດຕະໂນມັດ
-            let payments = JSON.parse(localStorage.getItem('clinic_payments')) || [];
-            payments.push({
-                patient_name: patientName,
-                amount: grandTotal,
-                description: 'ຄ່າຈ່າຍຢາ (' + pharmacyCart.map(i => i.name + ' x' + i.qty).join(', ') + ')',
-                created_at: new Date().toLocaleString('lo-LA')
-            });
-            localStorage.setItem('clinic_payments', JSON.stringify(payments));
-
-            alert('ຈ່າຍຢາ ແລະ ບັນທຶກເຂົ້າ POS ສຳເລັດ!');
-
-            // ລ້າງຄ່າ
-            pharmacyCart = [];
-            renderPharmacyCart();
-            document.getElementById('pharmacyPatientSelect').value = '';
-            pharmacyModal.style.display = 'none';
-
-            // ໂຫຼດຂໍ້ມູນ Dashboard ໃໝ່
-            loadDashboardData();
+    function loadPharmacyPatientDropdown() {
+        const select = document.getElementById('pharmacyPatientSelect');
+        select.innerHTML = '<option value="">-- ເລືອກຄົນເຈັບ --</option>';
+        let patients = JSON.parse(localStorage.getItem('clinic_patients')) || [];
+        patients.forEach((p) => {
+            const opt = document.createElement('option');
+            opt.value = p.fullname;
+            opt.textContent = `${p.fullname} (ລົງທະບຽນ: ${p.created_at})`;
+            select.appendChild(opt);
         });
+    }
+
+    document.getElementById('btnAddMedicine').addEventListener('click', () => {
+        const medSelectVal = document.getElementById('medicineSelect').value;
+        const qty = parseInt(document.getElementById('medicineQty').value) || 1;
+
+        if (!medSelectVal) {
+            alert('ກະລຸນາເລືອກລາຍການຢາ!');
+            return;
+        }
+
+        const [medName, medPrice] = medSelectVal.split('|');
+        const totalPrice = parseInt(medPrice) * qty;
+
+        pharmacyCart.push({
+            name: medName,
+            price: parseInt(medPrice),
+            qty: qty,
+            total: totalPrice
+        });
+
+        renderPharmacyCart();
+    });
+
+    function renderPharmacyCart() {
+        const tbody = document.getElementById('prescription-cart-body');
+        tbody.innerHTML = '';
+        let grandTotal = 0;
+
+        if (pharmacyCart.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:#7b8794;">ຍັງບໍ່ມີລາຍການຢາ</td></tr>`;
+            document.getElementById('totalPharmacyFee').innerText = '0 ₭';
+            return;
+        }
+
+        pharmacyCart.forEach((item, index) => {
+            grandTotal += item.total;
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${item.name}</td>
+                <td>${item.qty}</td>
+                <td>${item.total.toLocaleString()} ₭</td>
+                <td><button type="button" onclick="removePharmacyItem(${index})" style="background:#e53935; color:white; border:none; padding:4px 8px; border-radius:4px; cursor:pointer;">ລຶບ</button></td>
+            `;
+            tbody.appendChild(tr);
+        });
+
+        document.getElementById('totalPharmacyFee').innerText = grandTotal.toLocaleString() + ' ₭';
+    }
+
+    function removePharmacyItem(index) {
+        pharmacyCart.splice(index, 1);
+        renderPharmacyCart();
+    }
+
+    document.getElementById('btnSavePharmacy').addEventListener('click', () => {
+        const patientName = document.getElementById('pharmacyPatientSelect').value;
+
+        if (!patientName) {
+            alert('ກະລຸນາເລືອກຄົນເຈັບ!');
+            return;
+        }
+
+        if (pharmacyCart.length === 0) {
+            alert('ກະລຸນາເພີ່ມລາຍການຢາຢ່າງໜ້ອຍ 1 ລາຍການ!');
+            return;
+        }
+
+        let grandTotal = pharmacyCart.reduce((sum, item) => sum + item.total, 0);
+
+        let pharmacyRecords = JSON.parse(localStorage.getItem('clinic_pharmacy_records')) || [];
+        pharmacyRecords.push({
+            patient_name: patientName,
+            items: pharmacyCart,
+            total_amount: grandTotal,
+            created_at: new Date().toLocaleString('lo-LA')
+        });
+        localStorage.setItem('clinic_pharmacy_records', JSON.stringify(pharmacyRecords));
+
+        let payments = JSON.parse(localStorage.getItem('clinic_payments')) || [];
+        payments.push({
+            patient_name: patientName,
+            amount: grandTotal,
+            description: 'ຄ່າຈ່າຍຢາ (' + pharmacyCart.map(i => i.name + ' x' + i.qty).join(', ') + ')',
+            created_at: new Date().toLocaleString('lo-LA')
+        });
+        localStorage.setItem('clinic_payments', JSON.stringify(payments));
+
+        alert('ຈ່າຍຢາ ແລະ ບັນທຶກເຂົ້າ POS ສຳເລັດ!');
+
+        pharmacyCart = [];
+        renderPharmacyCart();
+        document.getElementById('pharmacyPatientSelect').value = '';
+        pharmacyModal.style.display = 'none';
+
+        loadDashboardData();
+    });
 </script>
-<!-- ================= MODAL ຫ້ອງຈ່າຍຢາ (PHARMACY) ================= -->
-<div class="modal-overlay" id="pharmacyModal">
-    <div class="modal-card large">
-        <h3>💊 ຫ້ອງຈ່າຍຢາ & ຕັດ Stock</h3>
-        <div class="form-group">
-            <label>ເລືອກຄົນເຈັບທີ່ມາຮັບຢາ:</label>
-            <select id="pharmacyPatientSelect">
-                <option value="">-- ເລືອກຄົນເຈັບ --</option>
-            </select>
-        </div>
-        <div class="form-group">
-            <label>ລາຍການຢາໃນ Stock (ເລືອກເພີ່ມ):</label>
-            <div style="display: flex; gap: 10px; margin-bottom: 10px;">
-                <select id="medicineSelect" style="flex: 2;">
-                    <option value="">-- ເລືອກຢາ --</option>
-                    <option value="Paracetamol 500mg|5000">Paracetamol 500mg (ລາຄາ: 5,000 ₭)</option>
-                    <option value="Amoxicillin 500mg|15000">Amoxicillin 500mg (ລາຄາ: 15,000 ₭)</option>
-                    <option value="Omeprazole 20mg|10000">Omeprazole 20mg (ລາຄາ: 10,000 ₭)</option>
-                    <option value="Vitamin C 1000mg|8000">Vitamin C 1000mg (ລາຄາ: 8,000 ₭)</option>
-                </select>
-                <input type="number" id="medicineQty" value="1" min="1" style="flex: 1;" placeholder="ຈຳນວນ">
-                <button type="button" class="btn-submit" id="btnAddMedicine" style="flex: 1;">ເພີ່ມຢາ</button>
-            </div>
-        </div>
-        <div class="form-group">
-            <label>ລາຍການຢາທີ່ສັ່ງຈ່າຍ:</label>
-            <table style="margin-bottom: 15px;">
-                <thead>
-                    <tr>
-                        <th>ຊື່ຢາ</th>
-                        <th>ຈຳນວນ</th>
-                        <th>ລາຄາລວມ (₭)</th>
-                        <th>ຈັດການ</th>
-                    </tr>
-                </thead>
-                <tbody id="prescription-cart-body">
-                    <tr><td colspan="4" style="text-align:center; color:#7b8794;">ຍັງບໍ່ມີລາຍການຢາ</td></tr>
-                </tbody>
-            </table>
-        </div>
-        <div class="form-group">
-            <label><strong>ລວມເງິນຄ່າຢາທັງໝົດ:</strong> <span id="totalPharmacyFee" style="color: #1976d2; font-size: 20px;">0 ₭</span></label>
-        </div>
-        <div class="modal-actions">
-            <button class="btn-cancel" id="btnClosePharmacyModal">ຍົກເລີກ</button>
-            <button class="btn-submit" id="btnSavePharmacy">ຢືນຢັນຈ່າຍຢາ & ສົ່ງ POS</button>
-        </div>
-    </div>
-</div>
 </body>
 </html>
