@@ -803,6 +803,36 @@ td {
             </div>
         </div>
     </section>
+
+    <!-- ================= MODAL ລາຍງານສະຖິຕິ (REPORTS) ================= -->
+    <div class="modal-overlay" id="reportsModal">
+        <div class="modal-card large">
+            <h3>📊 ລາຍງານພາບລວມສະຖິຕິຄລີນິກ</h3>
+            <div class="form-group">
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 15px;">
+                    <div class="card" style="padding: 15px; background: #f8fafc;">
+                        <div class="stat-label">ຄົນເຈັບທັງໝົດໃນລະບົບ</div>
+                        <div class="stat-number" id="report-total-patients">0</div>
+                    </div>
+                    <div class="card" style="padding: 15px; background: #f8fafc;">
+                        <div class="stat-label">ນັດໝາຍທັງໝົດ</div>
+                        <div class="stat-number" id="report-total-appointments">0</div>
+                    </div>
+                    <div class="card" style="padding: 15px; background: #f8fafc;">
+                        <div class="stat-label">ລາຍຮັບລວມທັງໝົດ</div>
+                        <div class="stat-number" id="report-total-revenue" style="color: #1976d2;">0 ₭</div>
+                    </div>
+                    <div class="card" style="padding: 15px; background: #f8fafc;">
+                        <div class="stat-label">ຈຳນວນໃບສັ່ງຢາ</div>
+                        <div class="stat-number" id="report-total-pharmacy">0</div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="btn-cancel" id="btnCloseReportsModal">ປິດໜ້າຕ່າງ</button>
+            </div>
+        </div>
+    </div>
 </main>
 
 <!-- ================= MODAL ຟອມລົງທະບຽນຄົນເຈັບ ================= -->
@@ -1030,7 +1060,7 @@ td {
             btnCloseApt.addEventListener('click', () => { aptModal.style.display = 'none'; });
         }
 
-        // ຄວບຄຸມ Modal ຫ້ອງກວດ (Examination)
+    // ຄວບຄຸມ Modal ຫ້ອງກວດ (Examination)
         const examModal = document.getElementById('examinationModal');
         const btnOpenExam = document.getElementById('btn-open-examination');
         const btnCloseExam = document.getElementById('btnCloseExamModal');
@@ -1045,7 +1075,36 @@ td {
         if(sidebarExamBtn) sidebarExamBtn.addEventListener('click', openExamHandler);
         if(btnCloseExam) btnCloseExam.addEventListener('click', () => { examModal.style.display = 'none'; });
 
-        // ໂຫຼດຂໍ້ມູນສະແດງຜົນຈາກ LocalStorage ທັນທີ
+        // ==========================================
+        // 📌 ເອົາໂຄດຄວບຄຸມ Modal ລາຍງານ (Reports) ມາວາງໄວ້ບ່ອນນີ້
+        // ==========================================
+        const reportsModal = document.getElementById('reportsModal');
+        const btnOpenReportsQuick = document.getElementById('btn-open-reports-quick');
+        const sidebarReportsBtn = document.querySelector('.menu-item[data-target="reports"]');
+        const btnCloseReports = document.getElementById('btnCloseReportsModal');
+
+        const openReportsHandler = () => {
+            let patients = JSON.parse(localStorage.getItem('clinic_patients')) || [];
+            let appointments = JSON.parse(localStorage.getItem('clinic_appointments')) || [];
+            let payments = JSON.parse(localStorage.getItem('clinic_payments')) || [];
+            let pharmacyRecords = JSON.parse(localStorage.getItem('clinic_pharmacy_records')) || [];
+
+            let totalRev = payments.reduce((sum, item) => sum + Number(item.amount || 0), 0);
+
+            document.getElementById('report-total-patients').innerText = patients.length;
+            document.getElementById('report-total-appointments').innerText = appointments.length;
+            document.getElementById('report-total-revenue').innerText = totalRev.toLocaleString() + ' ₭';
+            document.getElementById('report-total-pharmacy').innerText = pharmacyRecords.length;
+
+            reportsModal.style.display = 'flex';
+        };
+
+        if(btnOpenReportsQuick) btnOpenReportsQuick.addEventListener('click', openReportsHandler);
+        if(sidebarReportsBtn) sidebarReportsBtn.addEventListener('click', openReportsHandler);
+        if(btnCloseReports) btnCloseReports.addEventListener('click', () => { reportsModal.style.display = 'none'; });
+        // ==========================================
+
+        // ໂຫຼດຂໍ້ມູນສະແດງຜົນຈາກ LocalStorage ທັນຊີ
         loadDashboardData();
     });
 
