@@ -784,9 +784,9 @@ td {
                     <h3>🔔 ການແຈ້ງເຕືອນ</h3>
                     <button onclick="showSysModal('ການແຈ້ງເຕືອນ', 'ເປີດໜ້າຈັດການການແຈ້ງເຕືອນທັງໝົດ', '🔔')">ເບິ່ງທັງໝົດ</button>
                 </div>
-                <div class="alert alert-red">🔴 <strong>ຢາໝົດອາຍຸ:</strong>&nbsp; 5 ລາຍການ</div>
-                <div class="alert alert-yellow">🟡 <strong>Stock ຕ່ຳ:</strong>&nbsp; 12 ລາຍການ</div>
-                <div class="alert alert-blue">🔵 <strong>Lab:</strong>&nbsp; ມີ 4 ຜົນກວດລໍຖ້າ</div>
+                <div class="alert alert-red">🔴 <strong>ຢາໝົດອາຍຸ:</strong>&nbsp; <span id="alert-expired">0</span> ລາຍການ</div>
+                <div class="alert alert-yellow">🟡 <strong>Stock ຕ່ຳ:</strong>&nbsp; <span id="alert-low-stock">0</span> ລາຍການ</div>
+                <div class="alert alert-blue">🔵 <strong>Lab:</strong>&nbsp; ມີ <span id="alert-lab">0</span> ຜົນກວດລໍຖ້າ</div>
             </div>
 
             <!-- REVENUE -->
@@ -1116,6 +1116,7 @@ td {
 
     // ຟັງຊັນໂຫຼດຂໍ້ມູນມາສະແດງຜົນ Dashboard
     function loadDashboardData() {
+        // ອັບເດດສະຖິຕິຄົນເຈັບ
         let patients = JSON.parse(localStorage.getItem('clinic_patients')) || [];
         document.getElementById('total-patients').innerText = patients.length;
 
@@ -1152,6 +1153,7 @@ td {
             });
         }
 
+        // ອັບເດດນັດໝາຍ ແລະ ລາຍຮັບ
         let appointments = JSON.parse(localStorage.getItem('clinic_appointments')) || [];
         document.getElementById('total-appointments').innerText = appointments.length;
 
@@ -1161,6 +1163,22 @@ td {
         const formattedRevenue = totalRevenue.toLocaleString() + ' ₭';
         document.getElementById('total-revenue').innerText = formattedRevenue;
         document.getElementById('revenue-box-display').innerText = formattedRevenue;
+
+        // ອັບເດດການແຈ້ງເຕືອນ (Notifications) ໃຫ້ເປັນ Dynamic
+        let inventory = JSON.parse(localStorage.getItem('clinic_inventory')) || [];
+        let labs = JSON.parse(localStorage.getItem('clinic_labs')) || [];
+
+        let expiredCount = inventory.filter(item => item.is_expired === true).length;
+        let lowStockCount = inventory.filter(item => item.qty > 0 && item.qty <= 5).length;
+        let pendingLabCount = labs.filter(lab => lab.status === 'pending').length;
+
+        const alertExpired = document.getElementById('alert-expired');
+        const alertLowStock = document.getElementById('alert-low-stock');
+        const alertLab = document.getElementById('alert-lab');
+
+        if (alertExpired) alertExpired.innerText = expiredCount;
+        if (alertLowStock) alertLowStock.innerText = lowStockCount;
+        if (alertLab) alertLab.innerText = pendingLabCount;
     }
 
     // ບັນທຶກຄົນເຈັບໃໝ່ລົງ LocalStorage
