@@ -968,7 +968,7 @@ td {
                     </tr>
                 </thead>
                 <tbody id="pos-table-body">
-                    <tr><td colspan="4" style="text-align:center; color:#7b8794;">ບໍ່มีລາຍການຄ້າງຊຳລະ</td></tr>
+                    <tr><td colspan="4" style="text-align:center; color:#7b8794;">ບໍ່ມີລາຍການຄ້າງຊຳລະ</td></tr>
                 </tbody>
             </table>
         </div>
@@ -1028,16 +1028,11 @@ td {
                 if (target === 'pos') {
                     openPosHandler();
                 } else if (target === 'reports') {
-                    showSysModal('ລາຍງານລະບົບ', 'ກຳລັງໂຫຼດໜ້າລາຍງານສະຖິຕິຄລີນິກ...', '📊');
+                    openReportsHandler();
                 } else if (target !== 'dashboard') {
                     showSysModal('ເມນູລະບົບ', `ກຳລັງເປີດໜ້າຕ່າງ: ${menuName} ...`, '⚙️');
                 }
             });
-        });
-
-        // ປຸ່ມ Quick Actions ອື່ນໆ
-        document.getElementById('btn-open-reports-quick').addEventListener('click', () => {
-            showSysModal('ລາຍງານລະບົບ', 'ເປີດໜ້າລາຍງານພາບລວມຂອງຄລີນິກ', '📊');
         });
 
         // ຄວບຄຸມ Modal ລົງທະບຽນຄົນເຈັບ
@@ -1060,7 +1055,7 @@ td {
             btnCloseApt.addEventListener('click', () => { aptModal.style.display = 'none'; });
         }
 
-    // ຄວບຄຸມ Modal ຫ້ອງກວດ (Examination)
+        // ຄວບຄຸມ Modal ຫ້ອງກວດ (Examination)
         const examModal = document.getElementById('examinationModal');
         const btnOpenExam = document.getElementById('btn-open-examination');
         const btnCloseExam = document.getElementById('btnCloseExamModal');
@@ -1075,9 +1070,7 @@ td {
         if(sidebarExamBtn) sidebarExamBtn.addEventListener('click', openExamHandler);
         if(btnCloseExam) btnCloseExam.addEventListener('click', () => { examModal.style.display = 'none'; });
 
-        // ==========================================
-        // 📌 ເອົາໂຄດຄວບຄຸມ Modal ລາຍງານ (Reports) ມາວາງໄວ້ບ່ອນນີ້
-        // ==========================================
+        // ຄວບຄຸມ Modal ລາຍງານ (Reports)
         const reportsModal = document.getElementById('reportsModal');
         const btnOpenReportsQuick = document.getElementById('btn-open-reports-quick');
         const sidebarReportsBtn = document.querySelector('.menu-item[data-target="reports"]');
@@ -1099,12 +1092,13 @@ td {
             reportsModal.style.display = 'flex';
         };
 
+        window.openReportsHandler = openReportsHandler;
+
         if(btnOpenReportsQuick) btnOpenReportsQuick.addEventListener('click', openReportsHandler);
         if(sidebarReportsBtn) sidebarReportsBtn.addEventListener('click', openReportsHandler);
         if(btnCloseReports) btnCloseReports.addEventListener('click', () => { reportsModal.style.display = 'none'; });
-        // ==========================================
 
-        // ໂຫຼດຂໍ້ມູນສະແດງຜົນຈາກ LocalStorage ທັນຊີ
+        // ໂຫຼດຂໍ້ມູນສະແດງຜົນຈາກ LocalStorage ທັນທີ
         loadDashboardData();
     });
 
@@ -1445,11 +1439,8 @@ td {
 
     function checkoutPayment(id) {
         let payments = JSON.parse(localStorage.getItem('clinic_payments')) || [];
-        // ກໍລະນີມີ id ໃຫ້ກອງອອກ ຖ້າບໍ່ມີໃຫ້ລຶບຕາມ index
         payments = payments.filter(p => p.id !== id && p.id != null);
-        // ຖ້າເປັນແບບເກົ່າທີ່ບໍ່ມີ id ໃຫ້ລຶບໂດຍໃຊ້ index ຜ່ານ parameter
         if (typeof id === 'number' && payments.length === 0) {
-            // fallback
             let allPay = JSON.parse(localStorage.getItem('clinic_payments')) || [];
             allPay.splice(id, 1);
             payments = allPay;
