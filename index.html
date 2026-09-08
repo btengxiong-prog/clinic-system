@@ -447,6 +447,12 @@ td {
     box-shadow: 0 4px 15px rgba(0,0,0,0.1);
 }
 
+.modal-card.large {
+    width: 650px;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
 .modal-card h3 {
     margin-bottom: 15px;
     font-size: 20px;
@@ -463,7 +469,7 @@ td {
     font-size: 16.5px;
 }
 
-.form-group input {
+.form-group input, .form-group select, .form-group textarea {
     width: 100%;
     padding: 12px;
     border: 1px solid #ccc;
@@ -566,48 +572,48 @@ td {
     </div>
 
     <div class="menu-title">MAIN MENU</div>
-    <div class="menu-item active">
+    <div class="menu-item active" data-target="dashboard">
         <div class="menu-icon">🏠</div><span>Dashboard</span>
     </div>
-    <div class="menu-item">
+    <div class="menu-item" data-target="patients">
         <div class="menu-icon">👥</div><span>ຄົນເຈັບ</span>
     </div>
-    <div class="menu-item">
+    <div class="menu-item" data-target="appointments">
         <div class="menu-icon">📅</div><span>ນັດໝາຍ</span>
     </div>
-    <div class="menu-item">
+    <div class="menu-item" data-target="examination">
         <div class="menu-icon">🩺</div><span>ຫ້ອງກວດ</span>
     </div>
-    <div class="menu-item">
+    <div class="menu-item" data-target="laboratory">
         <div class="menu-icon">🧪</div><span>Laboratory</span>
     </div>
-    <div class="menu-item">
+    <div class="menu-item" data-target="pharmacy">
         <div class="menu-icon">💊</div><span>Pharmacy</span>
     </div>
-    <div class="menu-item">
+    <div class="menu-item" data-target="inventory">
         <div class="menu-icon">📦</div><span>Inventory</span>
     </div>
-    <div class="menu-item">
+    <div class="menu-item" data-target="pos">
         <div class="menu-icon">💰</div><span>POS / ຮັບເງິນ</span>
     </div>
 
     <div class="menu-title">MANAGEMENT</div>
-    <div class="menu-item">
+    <div class="menu-item" data-target="finance">
         <div class="menu-icon">💵</div><span>ການເງິນ</span>
     </div>
-    <div class="menu-item">
+    <div class="menu-item" data-target="staff">
         <div class="menu-icon">👨‍⚕️</div><span>ພະນັກງານ</span>
     </div>
-    <div class="menu-item">
+    <div class="menu-item" data-target="reports">
         <div class="menu-icon">📊</div><span>ລາຍງານ</span>
     </div>
-    <div class="menu-item">
+    <div class="menu-item" data-target="notifications">
         <div class="menu-icon">🔔</div><span>ແຈ້ງເຕືອນ</span>
     </div>
-    <div class="menu-item">
+    <div class="menu-item" data-target="users">
         <div class="menu-icon">🔐</div><span>Users & Permissions</span>
     </div>
-    <div class="menu-item">
+    <div class="menu-item" data-target="settings">
         <div class="menu-icon">⚙️</div><span>Settings</span>
     </div>
 </aside>
@@ -701,10 +707,10 @@ td {
                 <div class="quick-actions">
                     <button class="quick-btn" id="btn-register-patient"><div>👤</div><span>ລົງທະບຽນຄົນເຈັບ</span></button>
                     <button class="quick-btn" id="btn-register-appointment"><div>📅</div><span>ເພີ່ມນັດໝາຍ</span></button>
-                    <button class="quick-btn"><div>🩺</div><span>ເປີດການກວດ</span></button>
-                    <button class="quick-btn"><div>💊</div><span>ຈ່າຍຢາ</span></button>
-                    <button class="quick-btn"><div>💰</div><span>ເປີດ POS</span></button>
-                    <button class="quick-btn"><div>📊</div><span>ເບິ່ງລາຍງານ</span></button>
+                    <button class="quick-btn" id="btn-open-examination"><div>🩺</div><span>ເປີດການກວດ</span></button>
+                    <button class="quick-btn" id="btn-open-pharmacy-quick"><div>💊</div><span>ຈ່າຍຢາ</span></button>
+                    <button class="quick-btn" id="btn-open-pos-quick"><div>💰</div><span>ເປີດ POS</span></button>
+                    <button class="quick-btn" id="btn-open-reports-quick"><div>📊</div><span>ເບິ່ງລາຍງານ</span></button>
                 </div>
             </div>
         </div>
@@ -772,6 +778,39 @@ td {
     </div>
 </div>
 
+<!-- ================= MODAL ຫ້ອງກວດ (EXAMINATION) ================= -->
+<div class="modal-overlay" id="examinationModal">
+    <div class="modal-card large">
+        <h3>🩺 ຫ້ອງກວດ / ບັນທຶກການປິ່ນປົວ</h3>
+        <div class="form-group">
+            <label>ເລືອກຄົນເຈັບ:</label>
+            <select id="examPatientSelect">
+                <option value="">-- ເລືອກຄົນເຈັບ --</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>ອາການເບື້ອງຕົ້ນ (Symptoms):</label>
+            <textarea id="examSymptoms" rows="3" placeholder="ອາການຂອງຄົນເຈັບ..."></textarea>
+        </div>
+        <div class="form-group">
+            <label>ຜົນການວິນິດໄສ (Diagnosis):</label>
+            <textarea id="examDiagnosis" rows="3" placeholder="ຜົນການວິນິດໄສຂອງທ່ານໝໍ..."></textarea>
+        </div>
+        <div class="form-group">
+            <label>ສັ່ງຢາ / ວິທີໃຊ້:</label>
+            <textarea id="examPrescription" rows="3" placeholder="ລາຍການຢາ ແລະ ຂະໜາດກິນ..."></textarea>
+        </div>
+        <div class="form-group">
+            <label>ຄ່າບໍລິການກວດ (₭):</label>
+            <input type="number" id="examFee" value="50000" placeholder="ຄ່າກວດ...">
+        </div>
+        <div class="modal-actions">
+            <button class="btn-cancel" id="btnCloseExamModal">ຍົກເລີກ</button>
+            <button class="btn-submit" id="btnSaveExamination">ບັນທຶກຜົນການກວດ & ສົ່ງ POS</button>
+        </div>
+    </div>
+</div>
+
 <!-- ================= JAVASCRIPT LOCALSTORAGE & UI ================= -->
 <script>
     document.addEventListener('DOMContentLoaded', () => {
@@ -800,7 +839,7 @@ td {
         // ປຸ່ມ Quick Actions ອື່ນໆ
         const quickBtns = document.querySelectorAll('.quick-btn');
         quickBtns.forEach(btn => {
-            if(btn.id !== 'btn-register-patient' && btn.id !== 'btn-register-appointment') {
+            if(btn.id !== 'btn-register-patient' && btn.id !== 'btn-register-appointment' && btn.id !== 'btn-open-examination') {
                 btn.addEventListener('click', function() {
                     const actionName = this.querySelector('span').innerText;
                     alert(`ກຳລັງເປີດໜ້າຕ່າງ: ${actionName} ...`);
@@ -828,11 +867,44 @@ td {
             btnCloseApt.addEventListener('click', () => { aptModal.style.display = 'none'; });
         }
 
-        // โຫຼດຂໍ້ມູນສະແດງຜົນຈາກ LocalStorage ທັນທີ
+        // ຄວບຄຸມ Modal ຫ້ອງກວດ (Examination)
+        const examModal = document.getElementById('examinationModal');
+        const btnOpenExam = document.getElementById('btn-open-examination');
+        const btnCloseExam = document.getElementById('btnCloseExamModal');
+        const sidebarExamBtn = document.querySelector('.menu-item[data-target="examination"]');
+
+        const openExamHandler = () => {
+            loadPatientDropdown();
+            examModal.style.display = 'flex';
+        };
+
+        if(btnOpenExam) btnOpenExam.addEventListener('click', openExamHandler);
+        if(sidebarExamBtn) sidebarExamBtn.addEventListener('click', openExamHandler);
+        if(btnCloseExam) btnCloseExam.addEventListener('click', () => { examModal.style.display = 'none'; });
+
+        // Quick buttons ສໍາລັບ pharmacy ແລະ pos
+        document.getElementById('btn-open-pharmacy-quick').addEventListener('click', () => { alert('ເປີດລະບົບຈ່າຍຢາ (Pharmacy)'); });
+        document.getElementById('btn-open-pos-quick').addEventListener('click', () => { alert('ເປີດລະບົບ POS ຮັບເງິນ'); });
+        document.getElementById('btn-open-reports-quick').addEventListener('click', () => { alert('ເປີດໜ້າລາຍງານ'); });
+
+        // ໂຫຼດຂໍ້ມູນສະແດງຜົນຈາກ LocalStorage ທັນທີ
         loadDashboardData();
     });
 
-    // ຟັງຊັນໂຫຼດຂໍ້ມູນມາສະແດງຜົນ
+    // ຟັງຊັນໂຫຼດລາຍຊື່ຄົນເຈັບລົງໃນ Dropdown ຂອງຫ້ອງກວດ
+    function loadPatientDropdown() {
+        const select = document.getElementById('examPatientSelect');
+        select.innerHTML = '<option value="">-- ເລືອກຄົນເຈັບ --</option>';
+        let patients = JSON.parse(localStorage.getItem('clinic_patients')) || [];
+        patients.forEach((p, index) => {
+            const opt = document.createElement('option');
+            opt.value = p.fullname;
+            opt.textContent = `${p.fullname} (ລົງທະບຽນ: ${p.created_at})`;
+            select.appendChild(opt);
+        });
+    }
+
+    // ຟັງຊັນໂຫຼດຂໍ້ມູນມາສະແດງຜົນ Dashboard
     function loadDashboardData() {
         // 1. ດຶງຂໍ້ມູນຄົນເຈັບຈາກ LocalStorage
         let patients = JSON.parse(localStorage.getItem('clinic_patients')) || [];
@@ -923,7 +995,7 @@ td {
         const aptDate = aptDateTimeInput.value;
 
         if (!patientName || !aptDate) {
-            alert('ກະລຸນາປ້ອນຂໍ້ມູນໃຫ້ຄົບຖ้วน!');
+            alert('ກະລຸນາປ້ອນຂໍ້ມູນໃຫ້ຄົບຖ້ວນ!');
             return;
         }
 
@@ -942,6 +1014,57 @@ td {
         patientNameInput.value = '';
         aptDateTimeInput.value = '';
         document.getElementById('appointmentModal').style.display = 'none';
+        loadDashboardData();
+    });
+
+    // ບັນທຶກຜົນການກວດ (Examination) ລົງ LocalStorage ແລະ ສ້າງລາຍຮັບເຂົ້າ POS
+    document.getElementById('btnSaveExamination').addEventListener('click', () => {
+        const patientName = document.getElementById('examPatientSelect').value;
+        const symptoms = document.getElementById('examSymptoms').value.trim();
+        const diagnosis = document.getElementById('examDiagnosis').value.trim();
+        const prescription = document.getElementById('examPrescription').value.trim();
+        const fee = Number(document.getElementById('examFee').value) || 0;
+
+        if (!patientName) {
+            alert('ກະລຸນາເລືອກຄົນເຈັບ!');
+            return;
+        }
+
+        // 1. ບັນທຶກປະຫວັດການກວດ
+        let examinations = JSON.parse(localStorage.getItem('clinic_examinations')) || [];
+        examinations.push({
+            patient_name: patientName,
+            symptoms: symptoms,
+            diagnosis: diagnosis,
+            prescription: prescription,
+            fee: fee,
+            created_at: new Date().toLocaleString('lo-LA')
+        });
+        localStorage.setItem('clinic_examinations', JSON.stringify(examinations));
+
+        // 2. ບັນທຶກລາຍຮັບອັດຕະໂນມັດລົງ clinic_payments (POS)
+        if (fee > 0) {
+            let payments = JSON.parse(localStorage.getItem('clinic_payments')) || [];
+            payments.push({
+                patient_name: patientName,
+                amount: fee,
+                description: 'ຄ່າກວດສຸຂະພາບ: ' + (diagnosis || 'ກວດທົ່ວໄປ'),
+                created_at: new Date().toLocaleString('lo-LA')
+            });
+            localStorage.setItem('clinic_payments', JSON.stringify(payments));
+        }
+
+        alert('ບັນທຶກຜົນການກວດ ແລະ ສ້າງລາຍການຄິດໄລ່ເງິນສຳເລັດ!');
+        
+        // ລ້າງຄ່າໃນຟອມ
+        document.getElementById('examPatientSelect').value = '';
+        document.getElementById('examSymptoms').value = '';
+        document.getElementById('examDiagnosis').value = '';
+        document.getElementById('examPrescription').value = '';
+        document.getElementById('examFee').value = '50000';
+        document.getElementById('examinationModal').style.display = 'none';
+
+        // ໂຫຼດຂໍ້ມູນ Dashboard ໃໝ່
         loadDashboardData();
     });
 </script>
