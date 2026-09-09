@@ -1,14 +1,3 @@
-Phase 1: index.html + Dashboard + Patient Management
-Phase 2: Doctor + Nurse + Queue + Visit
-Phase 3: Laboratory + Pharmacy
-Phase 4: POS + Payment + Receipt
-Phase 5: Inventory + Supplier + Purchase + Batch/Expiry
-Phase 6: Finance + Reports
-Phase 7: Firebase Authentication + Firestore + Security Rules
-Phase 8: Cloudinary
-Phase 9: GitHub + Deploy + Backup
-Phase 10: Testing + Security Audit + Final Optimization
------------------------------------------------------------------------------------
 <!DOCTYPE html>
 
 <html lang="lo">
@@ -710,7 +699,6 @@ td{
         <div class="dot"></div>
     </div>
 
-```
 <div class="user">
     <div class="avatar">SA</div>
     <div class="user-info">
@@ -718,7 +706,6 @@ td{
         <span>Administrator</span>
     </div>
 </div>
-```
 
 </div>
 
@@ -1110,7 +1097,594 @@ onchange="renderPatients()">
 
 </div>
 
+
+
+<!-- ================= QUEUE VIEW ================= -->
+
+<div id="queueView" class="view">
+
+<div class="page-toolbar">
+
+<div>
+<h2>🎫 Queue Management</h2>
+<p>ຈັດການຄິວຄົນເຈັບ</p>
+</div>
+
+<button class="primary-btn"
+onclick="openCheckinModal()">
+＋ Check-in
+</button>
+
+</div>
+
+
+<div class="stats">
+
+<div class="card stat-card">
+<div>
+<div class="stat-label">ລໍຖ້າ</div>
+<div class="stat-number"
+id="waitingCount">0</div>
+</div>
+<div class="stat-icon"
+style="background:#fff5dc">⏳</div>
+</div>
+
+<div class="card stat-card">
+<div>
+<div class="stat-label">ກຳລັງກວດ</div>
+<div class="stat-number"
+id="doctorCount">0</div>
+</div>
+<div class="stat-icon"
+style="background:#e8f3ff">🩺</div>
+</div>
+
+<div class="card stat-card">
+<div>
+<div class="stat-label">ສຳເລັດ</div>
+<div class="stat-number"
+id="completedCount">0</div>
+</div>
+<div class="stat-icon"
+style="background:#e9f8ef">✅</div>
+</div>
+
+<div class="card stat-card">
+<div>
+<div class="stat-label">ທັງໝົດມື້ນີ້</div>
+<div class="stat-number"
+id="todayQueueCount">0</div>
+</div>
+<div class="stat-icon"
+style="background:#f1eaff">🎫</div>
+</div>
+
+</div>
+
+
+<div class="card" style="margin-top:18px">
+
+<div class="card-header">
+<h3>🎫 ຄິວມື້ນີ້</h3>
+
+<button class="secondary-btn"
+onclick="refreshQueue()">
+↻ Refresh
+</button>
+</div>
+
+<table>
+
+<thead>
+<tr>
+<th>Queue</th>
+<th>Patient</th>
+<th>HN</th>
+<th>ປະເພດ</th>
+<th>ເວລາ</th>
+<th>Doctor</th>
+<th>Status</th>
+<th>Action</th>
+</tr>
+</thead>
+
+<tbody id="queueTableBody"></tbody>
+
+</table>
+
+</div>
+
+</div>
+
+
+<!-- ================= DOCTOR VIEW ================= -->
+
+<div id="doctorView" class="view">
+
+<div class="page-toolbar">
+
+<div>
+<h2>🩺 Doctor / Consultation</h2>
+<p>ຫ້ອງກວດ ແລະ ບັນທຶກການກວດ</p>
+</div>
+
+<button class="secondary-btn"
+onclick="openView('queue')">
+← Queue
+</button>
+
+</div>
+
+
+<div class="card">
+
+<div class="card-header">
+<h3>👥 ຄົນເຈັບທີ່ລໍຖ້າກວດ</h3>
+</div>
+
+<table>
+
+<thead>
+<tr>
+<th>Queue</th>
+<th>Patient</th>
+<th>Vital Signs</th>
+<th>Doctor</th>
+<th>Status</th>
+<th>Action</th>
+</tr>
+</thead>
+
+<tbody id="doctorQueueBody"></tbody>
+
+</table>
+
+</div>
+
+</div>
+
+
+<!-- ================= VISIT VIEW ================= -->
+
+<div id="visitView" class="view">
+
+<div class="page-toolbar">
+
+<div>
+<h2>🩺 Patient Visit</h2>
+<p>ບັນທຶກການກວດຄົນເຈັບ</p>
+</div>
+
+<button class="secondary-btn"
+onclick="openView('doctor')">
+← Doctor
+</button>
+
+</div>
+
+<div id="visitContent"></div>
+
+</div>
+
+
+<!-- ================= CHECK-IN MODAL ================= -->
+
+<div id="checkinModal" class="modal">
+
+<div class="modal-box">
+
+<div class="modal-header">
+
+<h3>🎫 Patient Check-in</h3>
+
+<button class="close"
+onclick="closeCheckinModal()">×</button>
+
+</div>
+
+<form onsubmit="saveCheckin(event)">
+
+<div class="modal-body">
+
+<div class="form-grid">
+
+<div class="form-group full">
+
+<label>ຄົ້ນຫາຄົນເຈັບ *</label>
+
+<select id="checkinPatient"
+required>
+
+<option value="">
+-- ເລືອກຄົນເຈັບ --
+</option>
+
+</select>
+
+</div>
+
+
+<div class="form-group">
+
+<label>ປະເພດການມາ</label>
+
+<select id="visitType">
+
+<option value="ກວດທົ່ວໄປ">
+ກວດທົ່ວໄປ
+</option>
+
+<option value="ສຸກເສີນ">
+ສຸກເສີນ
+</option>
+
+<option value="ນັດຕິດຕາມ">
+ນັດຕິດຕາມ
+</option>
+
+<option value="ສົ່ງຕໍ່">
+ສົ່ງຕໍ່
+</option>
+
+</select>
+
+</div>
+
+
+<div class="form-group">
+
+<label>Doctor</label>
+
+<select id="checkinDoctor">
+
+<option value="ນພ. ສົມພອນ">
+ນພ. ສົມພອນ
+</option>
+
+<option value="ພຍ. ນິດາ">
+ພຍ. ນິດາ
+</option>
+
+<option value="ນພ. ວິໄລ">
+ນພ. ວິໄລ
+</option>
+
+</select>
+
+</div>
+
+
+<div class="form-group full">
+
+<label>ໝາຍເຫດ</label>
+
+<textarea
+id="checkinNote"
+placeholder="ໝາຍເຫດສຳລັບ Check-in">
+</textarea>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="modal-footer">
+
+<button
+type="button"
+class="secondary-btn"
+onclick="closeCheckinModal()">
+ຍົກເລີກ </button>
+
+<button
+type="submit"
+class="primary-btn">
+🎫 ອອກຄິວ </button>
+
+</div>
+
+</form>
+
+</div>
+
+</div>
+
+<!-- ================= VITAL MODAL ================= -->
+
+<div id="vitalModal" class="modal">
+
+<div class="modal-box">
+
+<div class="modal-header">
+
+<h3>❤️ Vital Signs</h3>
+
+<button class="close"
+onclick="closeVitalModal()">×</button>
+
+</div>
+
+<form onsubmit="saveVital(event)">
+
+<div class="modal-body">
+
+<input
+type="hidden"
+id="vitalQueueId">
+
+<div class="form-grid">
+
+<div class="form-group">
+
+<label>Temperature °C</label>
+
+<input
+id="temperature"
+type="number"
+step="0.1"
+placeholder="36.5">
+
+</div>
+
+<div class="form-group">
+
+<label>Blood Pressure</label>
+
+<input
+id="bloodPressure"
+placeholder="120/80">
+
+</div>
+
+<div class="form-group">
+
+<label>Heart Rate / bpm</label>
+
+<input
+id="heartRate"
+type="number"
+placeholder="72">
+
+</div>
+
+<div class="form-group">
+
+<label>Respiratory Rate</label>
+
+<input
+id="respiratoryRate"
+type="number"
+placeholder="18">
+
+</div>
+
+<div class="form-group">
+
+<label>SpO₂ %</label>
+
+<input
+id="spo2"
+type="number"
+placeholder="98">
+
+</div>
+
+<div class="form-group">
+
+<label>Weight kg</label>
+
+<input
+id="weight"
+type="number"
+step="0.1"
+placeholder="65">
+
+</div>
+
+<div class="form-group">
+
+<label>Height cm</label>
+
+<input
+id="height"
+type="number"
+step="0.1"
+placeholder="165">
+
+</div>
+
+<div class="form-group">
+
+<label>Pain Score 0–10</label>
+
+<input
+id="painScore"
+type="number"
+min="0"
+max="10"
+placeholder="0">
+
+</div>
+
+<div class="form-group full">
+
+<label>ອາການເບື້ອງຕົ້ນ</label>
+
+<textarea
+id="vitalNote"
+placeholder="ອາການຂອງຄົນເຈັບ">
+</textarea>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="modal-footer">
+
+<button
+type="button"
+class="secondary-btn"
+onclick="closeVitalModal()">
+ຍົກເລີກ </button>
+
+<button
+type="submit"
+class="primary-btn">
+💾 ບັນທຶກ Vital Signs </button>
+
+</div>
+
+</form>
+
+</div>
+
+</div>
+
+<!-- ================= PRESCRIPTION MODAL ================= -->
+
+<div id="prescriptionModal" class="modal">
+
+<div class="modal-box">
+
+<div class="modal-header">
+
+<h3>💊 Prescription</h3>
+
+<button
+class="close"
+onclick="closePrescriptionModal()">
+× </button>
+
+</div>
+
+<form onsubmit="savePrescription(event)">
+
+<div class="modal-body">
+
+<input
+type="hidden"
+id="prescriptionVisitId">
+
+<div class="form-grid">
+
+<div class="form-group">
+
+<label>ຊື່ຢາ *</label>
+
+<input
+id="medicineName"
+required
+placeholder="ຕົວຢ່າງ: Paracetamol 500mg">
+
+</div>
+
+<div class="form-group">
+
+<label>ຈຳນວນ *</label>
+
+<input
+id="medicineQty"
+type="number"
+min="1"
+required
+placeholder="10">
+
+</div>
+
+<div class="form-group">
+
+<label>ວິທີໃຊ້ *</label>
+
+<input
+id="medicineDose"
+required
+placeholder="1 ເມັດ">
+
+</div>
+
+<div class="form-group">
+
+<label>ຄວາມຖີ່</label>
+
+<select id="medicineFrequency">
+
+<option>1 ເທື່ອ/ມື້</option>
+<option>2 ເທື່ອ/ມື້</option>
+<option>3 ເທື່ອ/ມື້</option>
+<option>4 ເທື່ອ/ມື້</option>
+<option>ເມື່ອມີອາການ</option>
+
+</select>
+
+</div>
+
+<div class="form-group">
+
+<label>ໄລຍະເວລາ</label>
+
+<input
+id="medicineDuration"
+placeholder="5 ມື້">
+
+</div>
+
+<div class="form-group">
+
+<label>ເວລາກິນ</label>
+
+<select id="medicineTiming">
+
+<option>ຫຼັງອາຫານ</option>
+<option>ກ່ອນອາຫານ</option>
+<option>ກ່ອນນອນ</option>
+<option>ຕາມອາການ</option>
+
+</select>
+
+</div>
+
+<div class="form-group full">
+
+<label>ຄຳແນະນຳ</label>
+
+<textarea
+id="medicineInstruction"
+placeholder="ຄຳແນະນຳເພີ່ມເຕີມ">
+</textarea>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="modal-footer">
+
+<button
+type="button"
+class="secondary-btn"
+onclick="closePrescriptionModal()">
+ຍົກເລີກ </button>
+
+<button
+type="submit"
+class="primary-btn">
+💊 ບັນທຶກຢາ </button>
+
+</div>
+
+</form>
+
+</div>
+
+</div>
+
 <script>
+
 
 /* =========================================================
    CLINIC SYSTEM — PHASE 1
@@ -1728,14 +2302,14 @@ document.getElementById("patientModal")
 
 });
 
-<!-- =========================================================
+/* =========================================================
      PHASE 2 — DOCTOR + QUEUE + CHECK-IN + VITAL SIGNS
      + VISIT + DIAGNOSIS + TREATMENT + PRESCRIPTION
-     ========================================================= -->
+     ========================================================= */
 
-<!-- ================= ADD THESE MENU ITEMS ================= -->
+/* ================= ADD THESE MENU ITEMS ================= */
 
-<script>
+
 
 /* =========================================================
    PHASE 2 DATA
@@ -1757,599 +2331,12 @@ let clinicPrescriptions =
    CREATE PHASE 2 VIEWS
    ========================================================= */
 
-const phase2HTML = `
 
-<!-- ================= QUEUE VIEW ================= -->
 
-<div id="queueView" class="view">
-
-<div class="page-toolbar">
-
-<div>
-<h2>🎫 Queue Management</h2>
-<p>ຈັດການຄິວຄົນເຈັບ</p>
-</div>
-
-<button class="primary-btn"
-onclick="openCheckinModal()">
-＋ Check-in
-</button>
-
-</div>
-
-
-<div class="stats">
-
-<div class="card stat-card">
-<div>
-<div class="stat-label">ລໍຖ້າ</div>
-<div class="stat-number"
-id="waitingCount">0</div>
-</div>
-<div class="stat-icon"
-style="background:#fff5dc">⏳</div>
-</div>
-
-<div class="card stat-card">
-<div>
-<div class="stat-label">ກຳລັງກວດ</div>
-<div class="stat-number"
-id="doctorCount">0</div>
-</div>
-<div class="stat-icon"
-style="background:#e8f3ff">🩺</div>
-</div>
-
-<div class="card stat-card">
-<div>
-<div class="stat-label">ສຳເລັດ</div>
-<div class="stat-number"
-id="completedCount">0</div>
-</div>
-<div class="stat-icon"
-style="background:#e9f8ef">✅</div>
-</div>
-
-<div class="card stat-card">
-<div>
-<div class="stat-label">ທັງໝົດມື້ນີ້</div>
-<div class="stat-number"
-id="todayQueueCount">0</div>
-</div>
-<div class="stat-icon"
-style="background:#f1eaff">🎫</div>
-</div>
-
-</div>
-
-
-<div class="card" style="margin-top:18px">
-
-<div class="card-header">
-<h3>🎫 ຄິວມື້ນີ້</h3>
-
-<button class="secondary-btn"
-onclick="refreshQueue()">
-↻ Refresh
-</button>
-</div>
-
-<table>
-
-<thead>
-<tr>
-<th>Queue</th>
-<th>Patient</th>
-<th>HN</th>
-<th>ປະເພດ</th>
-<th>ເວລາ</th>
-<th>Doctor</th>
-<th>Status</th>
-<th>Action</th>
-</tr>
-</thead>
-
-<tbody id="queueTableBody"></tbody>
-
-</table>
-
-</div>
-
-</div>
-
-
-<!-- ================= DOCTOR VIEW ================= -->
-
-<div id="doctorView" class="view">
-
-<div class="page-toolbar">
-
-<div>
-<h2>🩺 Doctor / Consultation</h2>
-<p>ຫ້ອງກວດ ແລະ ບັນທຶກການກວດ</p>
-</div>
-
-<button class="secondary-btn"
-onclick="openView('queue')">
-← Queue
-</button>
-
-</div>
-
-
-<div class="card">
-
-<div class="card-header">
-<h3>👥 ຄົນເຈັບທີ່ລໍຖ້າກວດ</h3>
-</div>
-
-<table>
-
-<thead>
-<tr>
-<th>Queue</th>
-<th>Patient</th>
-<th>Vital Signs</th>
-<th>Doctor</th>
-<th>Status</th>
-<th>Action</th>
-</tr>
-</thead>
-
-<tbody id="doctorQueueBody"></tbody>
-
-</table>
-
-</div>
-
-</div>
-
-
-<!-- ================= VISIT VIEW ================= -->
-
-<div id="visitView" class="view">
-
-<div class="page-toolbar">
-
-<div>
-<h2>🩺 Patient Visit</h2>
-<p>ບັນທຶກການກວດຄົນເຈັບ</p>
-</div>
-
-<button class="secondary-btn"
-onclick="openView('doctor')">
-← Doctor
-</button>
-
-</div>
-
-<div id="visitContent"></div>
-
-</div>
-
-
-<!-- ================= CHECK-IN MODAL ================= -->
-
-<div id="checkinModal" class="modal">
-
-<div class="modal-box">
-
-<div class="modal-header">
-
-<h3>🎫 Patient Check-in</h3>
-
-<button class="close"
-onclick="closeCheckinModal()">×</button>
-
-</div>
-
-<form onsubmit="saveCheckin(event)">
-
-<div class="modal-body">
-
-<div class="form-grid">
-
-<div class="form-group full">
-
-<label>ຄົ້ນຫາຄົນເຈັບ *</label>
-
-<select id="checkinPatient"
-required>
-
-<option value="">
--- ເລືອກຄົນເຈັບ --
-</option>
-
-</select>
-
-</div>
-
-
-<div class="form-group">
-
-<label>ປະເພດການມາ</label>
-
-<select id="visitType">
-
-<option value="ກວດທົ່ວໄປ">
-ກວດທົ່ວໄປ
-</option>
-
-<option value="ສຸກເສີນ">
-ສຸກເສີນ
-</option>
-
-<option value="ນັດຕິດຕາມ">
-ນັດຕິດຕາມ
-</option>
-
-<option value="ສົ່ງຕໍ່">
-ສົ່ງຕໍ່
-</option>
-
-</select>
-
-</div>
-
-
-<div class="form-group">
-
-<label>Doctor</label>
-
-<select id="checkinDoctor">
-
-<option value="ນພ. ສົມພອນ">
-ນພ. ສົມພອນ
-</option>
-
-<option value="ພຍ. ນິດາ">
-ພຍ. ນິດາ
-</option>
-
-<option value="ນພ. ວິໄລ">
-ນພ. ວິໄລ
-</option>
-
-</select>
-
-</div>
-
-
-<div class="form-group full">
-
-<label>ໝາຍເຫດ</label>
-
-<textarea
-id="checkinNote"
-placeholder="ໝາຍເຫດສຳລັບ Check-in">
-</textarea>
-
-</div>
-
-</div>
-
-</div>
-
-<div class="modal-footer">
-
-<button
-type="button"
-class="secondary-btn"
-onclick="closeCheckinModal()">
-ຍົກເລີກ </button>
-
-<button
-type="submit"
-class="primary-btn">
-🎫 ອອກຄິວ </button>
-
-</div>
-
-</form>
-
-</div>
-
-</div>
-
-<!-- ================= VITAL MODAL ================= -->
-
-<div id="vitalModal" class="modal">
-
-<div class="modal-box">
-
-<div class="modal-header">
-
-<h3>❤️ Vital Signs</h3>
-
-<button class="close"
-onclick="closeVitalModal()">×</button>
-
-</div>
-
-<form onsubmit="saveVital(event)">
-
-<div class="modal-body">
-
-<input
-type="hidden"
-id="vitalQueueId">
-
-<div class="form-grid">
-
-<div class="form-group">
-
-<label>Temperature °C</label>
-
-<input
-id="temperature"
-type="number"
-step="0.1"
-placeholder="36.5">
-
-</div>
-
-<div class="form-group">
-
-<label>Blood Pressure</label>
-
-<input
-id="bloodPressure"
-placeholder="120/80">
-
-</div>
-
-<div class="form-group">
-
-<label>Heart Rate / bpm</label>
-
-<input
-id="heartRate"
-type="number"
-placeholder="72">
-
-</div>
-
-<div class="form-group">
-
-<label>Respiratory Rate</label>
-
-<input
-id="respiratoryRate"
-type="number"
-placeholder="18">
-
-</div>
-
-<div class="form-group">
-
-<label>SpO₂ %</label>
-
-<input
-id="spo2"
-type="number"
-placeholder="98">
-
-</div>
-
-<div class="form-group">
-
-<label>Weight kg</label>
-
-<input
-id="weight"
-type="number"
-step="0.1"
-placeholder="65">
-
-</div>
-
-<div class="form-group">
-
-<label>Height cm</label>
-
-<input
-id="height"
-type="number"
-step="0.1"
-placeholder="165">
-
-</div>
-
-<div class="form-group">
-
-<label>Pain Score 0–10</label>
-
-<input
-id="painScore"
-type="number"
-min="0"
-max="10"
-placeholder="0">
-
-</div>
-
-<div class="form-group full">
-
-<label>ອາການເບື້ອງຕົ້ນ</label>
-
-<textarea
-id="vitalNote"
-placeholder="ອາການຂອງຄົນເຈັບ">
-</textarea>
-
-</div>
-
-</div>
-
-</div>
-
-<div class="modal-footer">
-
-<button
-type="button"
-class="secondary-btn"
-onclick="closeVitalModal()">
-ຍົກເລີກ </button>
-
-<button
-type="submit"
-class="primary-btn">
-💾 ບັນທຶກ Vital Signs </button>
-
-</div>
-
-</form>
-
-</div>
-
-</div>
-
-<!-- ================= PRESCRIPTION MODAL ================= -->
-
-<div id="prescriptionModal" class="modal">
-
-<div class="modal-box">
-
-<div class="modal-header">
-
-<h3>💊 Prescription</h3>
-
-<button
-class="close"
-onclick="closePrescriptionModal()">
-× </button>
-
-</div>
-
-<form onsubmit="savePrescription(event)">
-
-<div class="modal-body">
-
-<input
-type="hidden"
-id="prescriptionVisitId">
-
-<div class="form-grid">
-
-<div class="form-group">
-
-<label>ຊື່ຢາ *</label>
-
-<input
-id="medicineName"
-required
-placeholder="ຕົວຢ່າງ: Paracetamol 500mg">
-
-</div>
-
-<div class="form-group">
-
-<label>ຈຳນວນ *</label>
-
-<input
-id="medicineQty"
-type="number"
-min="1"
-required
-placeholder="10">
-
-</div>
-
-<div class="form-group">
-
-<label>ວິທີໃຊ້ *</label>
-
-<input
-id="medicineDose"
-required
-placeholder="1 ເມັດ">
-
-</div>
-
-<div class="form-group">
-
-<label>ຄວາມຖີ່</label>
-
-<select id="medicineFrequency">
-
-<option>1 ເທື່ອ/ມື້</option>
-<option>2 ເທື່ອ/ມື້</option>
-<option>3 ເທື່ອ/ມື້</option>
-<option>4 ເທື່ອ/ມື້</option>
-<option>ເມື່ອມີອາການ</option>
-
-</select>
-
-</div>
-
-<div class="form-group">
-
-<label>ໄລຍະເວລາ</label>
-
-<input
-id="medicineDuration"
-placeholder="5 ມື້">
-
-</div>
-
-<div class="form-group">
-
-<label>ເວລາກິນ</label>
-
-<select id="medicineTiming">
-
-<option>ຫຼັງອາຫານ</option>
-<option>ກ່ອນອາຫານ</option>
-<option>ກ່ອນນອນ</option>
-<option>ຕາມອາການ</option>
-
-</select>
-
-</div>
-
-<div class="form-group full">
-
-<label>ຄຳແນະນຳ</label>
-
-<textarea
-id="medicineInstruction"
-placeholder="ຄຳແນະນຳເພີ່ມເຕີມ">
-</textarea>
-
-</div>
-
-</div>
-
-</div>
-
-<div class="modal-footer">
-
-<button
-type="button"
-class="secondary-btn"
-onclick="closePrescriptionModal()">
-ຍົກເລີກ </button>
-
-<button
-type="submit"
-class="primary-btn">
-💊 ບັນທຶກຢາ </button>
-
-</div>
-
-</form>
-
-</div>
-
-</div>
-
-`;
 
 /* Insert Phase 2 before closing main content */
 
-document
-.querySelector(".content")
-.insertAdjacentHTML("beforeend", phase2HTML);
+
 
 /* =========================================================
 ADD MENU ITEMS TO SIDEBAR
@@ -2368,7 +2355,6 @@ sidebar.appendChild(menuTitle);
 
 function createMenuItem(icon,text,view){
 
-```
 const item =
 document.createElement("div");
 
@@ -2395,7 +2381,6 @@ item.addEventListener("click",function(){
 });
 
 sidebar.appendChild(item);
-```
 
 }
 
@@ -2410,7 +2395,6 @@ const originalOpenView = window.openView;
 
 window.openView = function(view){
 
-```
 originalOpenView(view);
 
 if(view === "queue"){
@@ -2443,7 +2427,6 @@ if(view === "visit"){
     );
 
 }
-```
 
 };
 
@@ -2453,7 +2436,6 @@ CHECK-IN
 
 function openCheckinModal(){
 
-```
 const select =
 document.getElementById("checkinPatient");
 
@@ -2483,17 +2465,14 @@ patients
 document
 .getElementById("checkinModal")
 .classList.add("show");
-```
 
 }
 
 function closeCheckinModal(){
 
-```
 document
 .getElementById("checkinModal")
 .classList.remove("show");
-```
 
 }
 
@@ -2503,7 +2482,6 @@ QUEUE NUMBER
 
 function generateQueueNumber(){
 
-```
 const today =
     new Date().toISOString().slice(0,10);
 
@@ -2528,7 +2506,6 @@ todayQueues.forEach(q => {
 
 return "Q" +
     String(max + 1).padStart(3,"0");
-```
 
 }
 
@@ -2538,7 +2515,6 @@ SAVE CHECK-IN
 
 function saveCheckin(event){
 
-```
 event.preventDefault();
 
 const patientId =
@@ -2633,7 +2609,6 @@ alert(
     "Patient: " +
     queue.patientName
 );
-```
 
 }
 
@@ -2643,7 +2618,6 @@ RENDER QUEUE
 
 function renderQueue(){
 
-```
 const body =
 document.getElementById("queueTableBody");
 
@@ -2783,7 +2757,6 @@ list.map(q => {
 
 
 updateQueueStats();
-```
 
 }
 
@@ -2793,7 +2766,6 @@ QUEUE STATS
 
 function updateQueueStats(){
 
-```
 const today =
 new Date().toISOString().slice(0,10);
 
@@ -2843,19 +2815,16 @@ if(completedElement)
 
 if(totalElement)
     totalElement.textContent = list.length;
-```
 
 }
 
 function refreshQueue(){
 
-```
 renderQueue();
 
 renderDoctorQueue();
 
 alert("Queue Refresh ສຳເລັດ");
-```
 
 }
 
@@ -2865,7 +2834,6 @@ START DOCTOR
 
 function startDoctor(queueId){
 
-```
 const queue =
 clinicQueue.find(
     q => q.id === queueId
@@ -2893,7 +2861,6 @@ renderDoctorQueue();
 updateQueueStats();
 
 openVisit(queueId);
-```
 
 }
 
@@ -2903,7 +2870,6 @@ DOCTOR QUEUE
 
 function renderDoctorQueue(){
 
-```
 const body =
 document.getElementById("doctorQueueBody");
 
@@ -3009,7 +2975,6 @@ list.map(q => `
     </tr>
 
 `).join("");
-```
 
 }
 
@@ -3019,7 +2984,6 @@ VITAL SIGNS
 
 function openVitalModal(queueId){
 
-```
 const q =
 clinicQueue.find(
     x => x.id === queueId
@@ -3076,23 +3040,19 @@ document.getElementById(
 document
 .getElementById("vitalModal")
 .classList.add("show");
-```
 
 }
 
 function closeVitalModal(){
 
-```
 document
 .getElementById("vitalModal")
 .classList.remove("show");
-```
 
 }
 
 function saveVital(event){
 
-```
 event.preventDefault();
 
 
@@ -3179,7 +3139,6 @@ renderQueue();
 alert(
     "Vital Signs ບັນທຶກສຳເລັດ"
 );
-```
 
 }
 
@@ -3189,7 +3148,6 @@ VISIT
 
 function openVisit(queueId){
 
-```
 const q =
 clinicQueue.find(
     x => x.id === queueId
@@ -3267,7 +3225,6 @@ if(!visit){
 renderVisit(visit,q);
 
 openView("visit");
-```
 
 }
 
@@ -3277,7 +3234,6 @@ RENDER VISIT
 
 function renderVisit(visit,q){
 
-```
 const content =
 document.getElementById(
     "visitContent"
@@ -3327,7 +3283,7 @@ content.innerHTML = `
     </div>
 
 
-    <!-- VITAL SIGNS -->
+    /* VITAL SIGNS */
 
     <h3 class="section-title">
         ❤️ Vital Signs
@@ -3404,7 +3360,7 @@ content.innerHTML = `
     </div>
 
 
-    <!-- CLINICAL -->
+    /* CLINICAL */
 
     <h3 class="section-title">
         🩺 Clinical Assessment
@@ -3547,7 +3503,7 @@ content.innerHTML = `
     </div>
 
 
-    <!-- PRESCRIPTIONS -->
+    /* PRESCRIPTIONS */
 
     <h3 class="section-title">
         💊 Prescription
@@ -3615,7 +3571,6 @@ content.innerHTML = `
 </div>
 
 `;
-```
 
 }
 
@@ -3625,7 +3580,6 @@ SAVE VISIT
 
 function saveVisit(visitId){
 
-```
 const visit =
 clinicVisits.find(
     v => v.id === visitId
@@ -3683,7 +3637,6 @@ localStorage.setItem(
 alert(
     "Visit ບັນທຶກສຳເລັດ"
 );
-```
 
 }
 
@@ -3693,7 +3646,6 @@ COMPLETE VISIT
 
 function completeVisit(visitId){
 
-```
 const visit =
 clinicVisits.find(
     v => v.id === visitId
@@ -3769,7 +3721,6 @@ renderDoctorQueue();
 updateQueueStats();
 
 openView("queue");
-```
 
 }
 
@@ -3779,7 +3730,6 @@ PRESCRIPTION
 
 function openPrescriptionModal(visitId){
 
-```
 document.getElementById(
     "prescriptionVisitId"
 ).value = visitId;
@@ -3811,25 +3761,21 @@ document
     "prescriptionModal"
 )
 .classList.add("show");
-```
 
 }
 
 function closePrescriptionModal(){
 
-```
 document
 .getElementById(
     "prescriptionModal"
 )
 .classList.remove("show");
-```
 
 }
 
 function savePrescription(event){
 
-```
 event.preventDefault();
 
 
@@ -3942,7 +3888,6 @@ alert(
     "Prescription ບັນທຶກສຳເລັດ\n" +
     "ສົ່ງໄປ Pharmacy ແລ້ວ"
 );
-```
 
 }
 
@@ -3956,7 +3901,6 @@ CLOSE MODALS WHEN CLICK OUTSIDE
 "prescriptionModal"
 ].forEach(id => {
 
-```
 const modal =
 document.getElementById(id);
 
@@ -3978,7 +3922,6 @@ if(modal){
     );
 
 }
-```
 
 });
 
@@ -3992,9 +3935,7 @@ renderQueue();
 
 renderDoctorQueue();
 
-</script>
 
 </script>
-
 </body>
 </html>
