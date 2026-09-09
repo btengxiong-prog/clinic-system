@@ -1,1488 +1,4000 @@
+Phase 1: index.html + Dashboard + Patient Management
+Phase 2: Doctor + Nurse + Queue + Visit
+Phase 3: Laboratory + Pharmacy
+Phase 4: POS + Payment + Receipt
+Phase 5: Inventory + Supplier + Purchase + Batch/Expiry
+Phase 6: Finance + Reports
+Phase 7: Firebase Authentication + Firestore + Security Rules
+Phase 8: Cloudinary
+Phase 9: GitHub + Deploy + Backup
+Phase 10: Testing + Security Audit + Final Optimization
+-----------------------------------------------------------------------------------
 <!DOCTYPE html>
+
 <html lang="lo">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Clinic Management System - LocalStorage</title>
+<title>Clinic Management System</title>
 
 <style>
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-
-body {
-    font-family: "Phetsarath OT", "Times New Roman", serif;
-    background: #f4f7fb;
-    color: #172033;
-    font-size: 16.5px;
-}
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Lao:wght@400;500;600;700;800&display=swap');
 
-/* ================= SIDEBAR ================= */
+*{box-sizing:border-box;margin:0;padding:0}
 
-.sidebar {
-    position: fixed;
-    left: 0;
-    top: 0;
-    width: 260px; 
-    height: 100vh;
-    background: #102a43;
-    color: white;
-    padding: 20px 15px;
-    overflow-y: auto;
+body{
+    font-family:"Noto Sans Lao",Arial,sans-serif;
+    background:#f4f7fb;
+    color:#172033;
 }
 
-.logo {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 5px 5px 25px;
-}
+button,input,select,textarea{font-family:inherit}
 
-.logo-icon {
-    width: 44px;
-    height: 44px;
-    border-radius: 12px;
-    background: white;
-    color: #1976d2;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 22px; 
-    font-weight: 800;
+.sidebar{
+    position:fixed;
+    left:0;
+    top:0;
+    width:255px;
+    height:100vh;
+    background:#102a43;
+    color:#fff;
+    padding:18px 13px;
+    overflow-y:auto;
+    z-index:100;
 }
 
-.logo-text h2 {
-    font-size: 19px; 
+.logo{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:4px 10px 24px;
+}
+
+.logo-icon{
+    width:44px;
+    height:44px;
+    border-radius:12px;
+    background:#fff;
+    color:#1976d2;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:24px;
+    font-weight:800;
 }
 
-.logo-text span {
-    font-size: 14px; 
-    opacity: .65;
-}
+.logo h2{font-size:16px}
+.logo span{font-size:10px;opacity:.6}
 
-.menu-title {
-    font-size: 14px; 
-    opacity: .45;
-    padding: 15px 10px 10px;
-    font-weight: bold;
+.menu-title{
+    font-size:10px;
+    opacity:.45;
+    padding:14px 12px 7px;
 }
 
-.menu-item {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 12px 14px;
-    border-radius: 8px;
-    margin-bottom: 5px;
-    cursor: pointer;
-    font-size: 16.5px; 
-    transition: .2s;
+.menu-item{
+    display:flex;
+    align-items:center;
+    gap:11px;
+    padding:10px 12px;
+    border-radius:8px;
+    margin-bottom:3px;
+    cursor:pointer;
+    font-size:13px;
 }
 
-.menu-item:hover {
-    background: rgba(255,255,255,.08);
-}
+.menu-item:hover{background:rgba(255,255,255,.08)}
+.menu-item.active{background:#1976d2}
 
-.menu-item.active {
-    background: #1976d2;
+.menu-icon{
+    width:22px;
+    text-align:center;
+    font-size:17px;
 }
 
-.menu-icon {
-    width: 24px;
-    text-align: center;
-    font-size: 18px; 
+.main{
+    margin-left:255px;
+    min-height:100vh;
 }
 
-/* ================= MAIN ================= */
-
-.main {
-    margin-left: 260px; 
-    min-height: 100vh;
+.topbar{
+    height:70px;
+    background:#fff;
+    border-bottom:1px solid #e5e9ef;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 28px;
+    position:sticky;
+    top:0;
+    z-index:50;
 }
 
-/* ================= TOPBAR ================= */
+.page-title h1{font-size:20px}
+.page-title p{font-size:11px;color:#7b8794}
 
-.topbar {
-    height: 70px; 
-    background: white;
-    border-bottom: 1px solid #e5e9ef;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 25px;
-    position: sticky;
-    top: 0;
-    z-index: 10;
+.top-actions{
+    display:flex;
+    align-items:center;
+    gap:18px;
 }
 
-.page-title h1 {
-    font-size: 21px; 
+.notification{
+    position:relative;
+    font-size:20px;
+    cursor:pointer;
 }
 
-.page-title p {
-    color: #7b8794;
-    font-size: 16px; 
-    margin-top: 2px;
+.dot{
+    position:absolute;
+    right:-2px;
+    top:-1px;
+    width:8px;
+    height:8px;
+    background:#e53935;
+    border-radius:50%;
 }
 
-.top-actions {
-    display: flex;
-    align-items: center;
-    gap: 20px;
+.user{
+    display:flex;
+    align-items:center;
+    gap:9px;
 }
 
-.notification {
-    position: relative;
-    font-size: 21px; 
-    cursor: pointer;
+.avatar{
+    width:38px;
+    height:38px;
+    border-radius:50%;
+    background:#1976d2;
+    color:white;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    font-weight:700;
 }
 
-.notification-dot {
-    position: absolute;
-    right: -2px;
-    top: -2px;
-    width: 9px;
-    height: 9px;
-    background: #e53935;
-    border-radius: 50%;
-}
+.user strong{font-size:12px;display:block}
+.user span{font-size:9px;color:#7b8794}
 
-.user {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
+.content{padding:24px 28px}
 
-.avatar {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background: #1976d2;
-    color: white;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 700;
-    font-size: 14px; 
-}
+.view{display:none}
+.view.active{display:block}
 
-.user-info strong {
-    font-size: 16.5px; 
-    display: block;
-}
+/* Dashboard */
 
-.user-info span {
-    font-size: 13px; 
-    color: #7b8794;
+.stats{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:16px;
 }
-
-/* ================= CONTENT ================= */
 
-.content {
-    padding: 25px;
+.card{
+    background:#fff;
+    border:1px solid #e7ecf2;
+    border-radius:13px;
+    padding:18px;
+    box-shadow:0 2px 7px rgba(0,0,0,.03);
 }
 
-/* ================= CARDS ================= */
-
-.stats {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 18px;
+.stat-card{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
 }
 
-.card {
-    background: white;
-    border-radius: 12px;
-    padding: 22px;
-    border: 1px solid #e8edf3;
-    box-shadow: 0 2px 7px rgba(0,0,0,.03);
+.stat-label{
+    color:#7b8794;
+    font-size:11px;
 }
 
-.stat-card {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+.stat-number{
+    font-size:26px;
+    font-weight:800;
+    margin-top:4px;
 }
 
-.stat-label {
-    font-size: 16.5px; 
-    color: #7b8794;
+.stat-growth{
+    font-size:10px;
+    margin-top:4px;
 }
+
+.up{color:#159957}
 
-.stat-number {
-    font-size: 22px; 
-    font-weight: 800;
-    margin-top: 6px;
+.stat-icon{
+    width:50px;
+    height:50px;
+    border-radius:12px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:22px;
 }
 
-.stat-growth {
-    font-size: 14px; 
-    margin-top: 6px;
+.dashboard-grid{
+    display:grid;
+    grid-template-columns:2fr 1fr;
+    gap:18px;
+    margin-top:18px;
 }
 
-.up {
-    color: #159957;
+.card-header{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-bottom:16px;
 }
 
-.down {
-    color: #e53935;
+.card-header h3{font-size:14px}
+
+.link-btn{
+    background:none;
+    border:0;
+    color:#1976d2;
+    cursor:pointer;
+    font-size:11px;
 }
 
-.stat-icon {
-    width: 50px;
-    height: 50px;
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 22px; 
+table{
+    width:100%;
+    border-collapse:collapse;
 }
 
-/* ================= GRID ================= */
+th{
+    text-align:left;
+    color:#7b8794;
+    font-size:10px;
+    font-weight:500;
+    padding:8px;
+    border-bottom:1px solid #edf0f4;
+}
 
-.dashboard-grid {
-    display: grid;
-    grid-template-columns: 2fr 1fr;
-    gap: 20px;
-    margin-top: 25px;
+td{
+    padding:10px 8px;
+    font-size:11px;
+    border-bottom:1px solid #f0f2f5;
 }
 
-.card-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 18px;
+.patient{
+    display:flex;
+    align-items:center;
+    gap:8px;
 }
 
-.card-header h3 {
-    font-size: 19px; 
+.patient-avatar{
+    width:30px;
+    height:30px;
+    border-radius:50%;
+    background:#e5f2ff;
+    color:#1976d2;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-weight:700;
 }
 
-.card-header button {
-    border: none;
-    background: transparent;
-    color: #1976d2;
-    cursor: pointer;
-    font-family: inherit;
-    font-size: 15px; 
-    font-weight: bold;
+.badge{
+    display:inline-block;
+    padding:4px 8px;
+    border-radius:20px;
+    font-size:9px;
 }
 
-/* ================= TABLE ================= */
+.green{background:#e8f7ef;color:#16864b}
+.yellow{background:#fff6d8;color:#9a6800}
+.blue{background:#e7f2ff;color:#1769aa}
 
-table {
-    width: 100%;
-    border-collapse: collapse;
+.quick-actions{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:9px;
 }
 
-th {
-    text-align: left;
-    color: #7b8794;
-    font-size: 16.5px; 
-    font-weight: bold;
-    padding: 14px 10px;
-    border-bottom: 1px solid #edf0f4;
+.quick-btn{
+    border:1px solid #e4eaf1;
+    background:#fff;
+    padding:13px 6px;
+    border-radius:9px;
+    cursor:pointer;
 }
 
-td {
-    padding: 16px 10px;
-    font-size: 16.5px; 
-    border-bottom: 1px solid #f0f2f5;
+.quick-btn:hover{
+    border-color:#1976d2;
+    transform:translateY(-1px);
 }
 
-.patient {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
+.quick-btn div{font-size:21px;margin-bottom:4px}
+.quick-btn span{font-size:10px}
 
-.patient-avatar {
-    width: 40px; 
-    height: 40px;
-    border-radius: 50%;
-    background: #e3f2fd;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #1976d2;
-    font-weight: 700;
-    font-size: 16.5px; 
+.bottom-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:18px;
+    margin-top:18px;
 }
 
-.patient small {
-    font-size: 13px; 
-    color: #7b8794;
+.alert{
+    padding:10px;
+    border-radius:8px;
+    font-size:10px;
+    margin-bottom:8px;
 }
 
-.badge {
-    padding: 6px 14px; 
-    border-radius: 20px;
-    font-size: 13px; 
-    font-weight: 500;
-}
+.alert-red{background:#fff0f0;color:#b42318}
+.alert-yellow{background:#fff8df;color:#8a6100}
+.alert-blue{background:#edf6ff;color:#155b91}
 
-.badge-green {
-    background: #e7f7ef;
-    color: #16864b;
-}
+/* Patient */
 
-.badge-yellow {
-    background: #fff6d8;
-    color: #a36b00;
+.page-toolbar{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:18px;
 }
 
-.badge-blue {
-    background: #e5f1ff;
-    color: #1769aa;
+.page-toolbar h2{font-size:19px}
+.page-toolbar p{font-size:11px;color:#7b8794}
+
+.primary-btn{
+    border:0;
+    background:#1976d2;
+    color:white;
+    padding:10px 16px;
+    border-radius:8px;
+    cursor:pointer;
+    font-size:12px;
 }
 
-/* ================= QUICK ACTION ================= */
+.primary-btn:hover{background:#125ca8}
 
-.quick-actions {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 12px;
+.secondary-btn{
+    border:1px solid #dce3eb;
+    background:white;
+    padding:9px 14px;
+    border-radius:8px;
+    cursor:pointer;
+    font-size:11px;
 }
 
-.quick-btn {
-    border: 1px solid #e4eaf1;
-    background: white;
-    padding: 20px 10px;
-    border-radius: 12px;
-    cursor: pointer;
-    text-align: center;
-    font-family: inherit;
-    transition: .2s;
+.patient-toolbar{
+    display:flex;
+    gap:10px;
+    margin-bottom:15px;
 }
 
-.quick-btn:hover {
-    border-color: #1976d2;
-    transform: translateY(-2px);
+.search-box{
+    flex:1;
+    position:relative;
 }
 
-.quick-btn div {
-    font-size: 24px; 
-    margin-bottom: 8px;
+.search-box input{
+    width:100%;
+    padding:11px 13px;
+    border:1px solid #dfe5ec;
+    border-radius:8px;
+    outline:none;
 }
 
-.quick-btn span {
-    font-size: 16.5px; 
-    font-weight: 500;
+.search-box input:focus{
+    border-color:#1976d2;
 }
-
-/* ================= ALERT ================= */
 
-.alert {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 16px;
-    border-radius: 10px;
-    margin-bottom: 12px;
-    font-size: 16.5px; 
+.filter-select{
+    min-width:140px;
+    border:1px solid #dfe5ec;
+    border-radius:8px;
+    padding:8px;
+    background:white;
 }
 
-.alert-red {
-    background: #fff0f0;
-    color: #b42318;
+.patient-table-card{
+    overflow-x:auto;
 }
 
-.alert-yellow {
-    background: #fff8df;
-    color: #8a6100;
+.patient-table td{
+    vertical-align:middle;
 }
 
-.alert-blue {
-    background: #edf6ff;
-    color: #155b91;
+.action-btn{
+    border:0;
+    background:#f1f5f9;
+    border-radius:6px;
+    padding:6px 8px;
+    cursor:pointer;
+    margin-right:3px;
+    font-size:11px;
 }
 
-/* ================= BOTTOM ================= */
+.action-btn:hover{background:#e1e8f0}
 
-.bottom-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 20px;
-    margin-top: 25px;
+.empty{
+    text-align:center;
+    padding:35px;
+    color:#7b8794;
 }
 
-.revenue-box {
-    text-align: center;
-    padding: 20px;
-}
+/* Modal */
 
-.revenue-number {
-    font-size: 24px; 
-    font-weight: 800;
-    margin: 10px 0;
-    color: #1976d2;
+.modal{
+    display:none;
+    position:fixed;
+    inset:0;
+    background:rgba(10,25,40,.55);
+    z-index:300;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
 }
 
-.revenue-label {
-    color: #7b8794;
-    font-size: 16.5px; 
-}
+.modal.show{display:flex}
 
-/* ================= MODAL POPUP ================= */
-.modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0,0,0,0.5);
-    display: none;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
+.modal-box{
+    width:min(850px,100%);
+    max-height:92vh;
+    overflow-y:auto;
+    background:white;
+    border-radius:15px;
+    box-shadow:0 15px 50px rgba(0,0,0,.25);
 }
 
-.modal-card {
-    background: white;
-    padding: 25px;
-    border-radius: 12px;
-    width: 420px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+.modal-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:18px 20px;
+    border-bottom:1px solid #edf0f4;
 }
 
-.modal-card.large {
-    width: 650px;
-    max-height: 90vh;
-    overflow-y: auto;
-}
+.modal-header h3{font-size:16px}
 
-.modal-card h3 {
-    margin-bottom: 15px;
-    font-size: 20px;
+.close{
+    border:0;
+    background:#f1f3f6;
+    width:32px;
+    height:32px;
+    border-radius:50%;
+    cursor:pointer;
+    font-size:17px;
 }
 
-.form-group {
-    margin-bottom: 15px;
-}
+.modal-body{padding:20px}
 
-.form-group label {
-    display: block;
-    margin-bottom: 5px;
-    color: #555;
-    font-size: 16.5px;
+.form-grid{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:14px;
 }
 
-.form-group input, .form-group select, .form-group textarea {
-    width: 100%;
-    padding: 12px;
-    border: 1px solid #ccc;
-    border-radius: 6px;
-    font-family: inherit;
-    font-size: 16.5px;
+.form-group label{
+    display:block;
+    font-size:11px;
+    margin-bottom:5px;
+    color:#4d5968;
 }
 
-.modal-actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: 10px;
-    margin-top: 20px;
+.form-group input,
+.form-group select,
+.form-group textarea{
+    width:100%;
+    border:1px solid #dce3eb;
+    border-radius:7px;
+    padding:9px 10px;
+    outline:none;
+    font-size:12px;
 }
 
-.modal-actions button {
-    padding: 10px 18px;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    font-family: inherit;
-    font-weight: bold;
-    font-size: 16.5px;
+.form-group textarea{
+    min-height:75px;
+    resize:vertical;
 }
 
-.btn-cancel {
-    background: #e2e8f0;
-    color: #333;
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus{
+    border-color:#1976d2;
 }
 
-.btn-submit {
-    background: #1976d2;
-    color: white;
-}
+.full{grid-column:1/-1}
 
-/* ================= CUSTOM SYSTEM NOTIFICATION POPUP ================= */
-.sys-modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0,0,0,0.4);
-    display: none;
-    justify-content: center;
-    align-items: center;
-    z-index: 2000;
-    animation: fadeIn 0.2s ease-in-out;
+.modal-footer{
+    display:flex;
+    justify-content:flex-end;
+    gap:8px;
+    padding:15px 20px;
+    border-top:1px solid #edf0f4;
 }
 
-.sys-modal-card {
-    background: white;
-    padding: 25px;
-    border-radius: 12px;
-    width: 380px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
-    text-align: center;
-}
+/* Profile */
 
-.sys-modal-icon {
-    font-size: 40px;
-    margin-bottom: 12px;
+.profile-head{
+    display:flex;
+    align-items:center;
+    gap:15px;
+    padding-bottom:18px;
+    border-bottom:1px solid #edf0f4;
 }
 
-.sys-modal-title {
-    font-size: 19px;
-    font-weight: bold;
-    margin-bottom: 8px;
-    color: #102a43;
+.profile-avatar{
+    width:70px;
+    height:70px;
+    border-radius:50%;
+    background:#e5f2ff;
+    color:#1976d2;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:27px;
+    font-weight:800;
 }
 
-.sys-modal-message {
-    font-size: 16px;
-    color: #555;
-    margin-bottom: 20px;
-    line-height: 1.5;
-}
+.profile-head h2{font-size:19px}
+.profile-head p{font-size:11px;color:#7b8794}
 
-.sys-modal-btn {
-    background: #1976d2;
-    color: white;
-    border: none;
-    padding: 10px 24px;
-    border-radius: 6px;
-    font-size: 16.5px;
-    font-weight: bold;
-    cursor: pointer;
-    width: 100%;
-    font-family: inherit;
+.profile-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:15px;
+    margin-top:18px;
 }
 
-@keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+.info-box{
+    border:1px solid #edf0f4;
+    border-radius:9px;
+    padding:13px;
 }
-
-/* ================= RESPONSIVE ================= */
 
-@media(max-width:1100px) {
-    .stats {
-        grid-template-columns: repeat(2,1fr);
-    }
+.info-box label{
+    display:block;
+    color:#7b8794;
+    font-size:10px;
+    margin-bottom:4px;
 }
 
-@media(max-width:900px) {
-    .sidebar {
-        width: 80px;
-        padding: 20px 10px;
-    }
+.info-box strong{
+    font-size:12px;
+}
 
-    .logo-text,
-    .menu-title,
-    .menu-item span {
-        display: none;
-    }
+.section-title{
+    font-size:14px;
+    margin:22px 0 10px;
+}
 
-    .menu-item {
-        justify-content: center;
-        padding: 14px 0;
-    }
+.history-item{
+    border-left:3px solid #1976d2;
+    background:#f8fafc;
+    padding:11px 13px;
+    margin-bottom:8px;
+    border-radius:0 8px 8px 0;
+}
 
-    .main {
-        margin-left: 80px;
-    }
+.history-item strong{font-size:11px}
+.history-item p{font-size:10px;color:#657184;margin-top:3px}
 
-    .dashboard-grid,
-    .bottom-grid {
-        grid-template-columns: 1fr;
-    }
+/* Responsive */
 
-    .content {
-        padding: 15px;
-    }
+@media(max-width:1100px){
+    .stats{grid-template-columns:repeat(2,1fr)}
 }
 
-@media(max-width:600px) {
-    .stats {
-        grid-template-columns: 1fr;
-    }
-
-    .topbar {
-        padding: 0 15px;
-    }
+@media(max-width:850px){
+    .sidebar{width:70px}
+    .logo-text,.menu-title,.menu-item span{display:none}
+    .menu-item{justify-content:center}
+    .main{margin-left:70px}
+    .dashboard-grid,.bottom-grid{grid-template-columns:1fr}
+}
 
-    .user-info {
-        display: none;
-    }
+@media(max-width:600px){
+    .stats{grid-template-columns:1fr}
+    .form-grid,.profile-grid{grid-template-columns:1fr}
+    .full{grid-column:auto}
+    .patient-toolbar{flex-direction:column}
+    .filter-select{width:100%}
+    .user-info{display:none}
+    .content{padding:16px}
 }
 </style>
+
 </head>
+
 <body>
 
 <!-- ================= SIDEBAR ================= -->
+
 <aside class="sidebar">
-    <div class="logo">
-        <div class="logo-icon">✚</div>
-        <div class="logo-text">
-            <h2>CLINIC SYSTEM</h2>
-            <span>Management Center</span>
-        </div>
-    </div>
 
-    <div class="menu-title">MAIN MENU</div>
-    <div class="menu-item active" data-target="dashboard">
-        <div class="menu-icon">🏠</div><span>Dashboard</span>
+<div class="logo">
+    <div class="logo-icon">✚</div>
+    <div class="logo-text">
+        <h2>CLINIC SYSTEM</h2>
+        <span>Management Center</span>
     </div>
-    <div class="menu-item" data-target="patients">
-        <div class="menu-icon">👥</div><span>ຄົນເຈັບ</span>
-    </div>
-    <div class="menu-item" data-target="appointments">
-        <div class="menu-icon">📅</div><span>ນັດໝາຍ</span>
-    </div>
-    <div class="menu-item" data-target="examination">
-        <div class="menu-icon">🩺</div><span>ຫ້ອງກວດ</span>
-    </div>
-    <div class="menu-item" data-target="laboratory">
-        <div class="menu-icon">🧪</div><span>Laboratory</span>
-    </div>
-    <div class="menu-item" data-target="pharmacy">
-        <div class="menu-icon">💊</div><span>Pharmacy</span>
-    </div>
-    <div class="menu-item" data-target="inventory">
-        <div class="menu-icon">📦</div><span>Inventory</span>
-    </div>
-    <div class="menu-item" data-target="pos">
-        <div class="menu-icon">💰</div><span>POS / ຮັບເງິນ</span>
-    </div>
+</div>
 
-    <div class="menu-title">MANAGEMENT</div>
-    <div class="menu-item" data-target="finance">
-        <div class="menu-icon">💵</div><span>ການເງິນ</span>
-    </div>
-    <div class="menu-item" data-target="staff">
-        <div class="menu-icon">👨‍⚕️</div><span>ພະນັກງານ</span>
-    </div>
-    <div class="menu-item" data-target="reports">
-        <div class="menu-icon">📊</div><span>ລາຍງານ</span>
-    </div>
-    <div class="menu-item" data-target="notifications">
-        <div class="menu-icon">🔔</div><span>ແຈ້ງເຕືອນ</span>
-    </div>
-    <div class="menu-item" data-target="users">
-        <div class="menu-icon">🔐</div><span>Users & Permissions</span>
-    </div>
-    <div class="menu-item" data-target="settings">
-        <div class="menu-icon">⚙️</div><span>Settings</span>
-    </div>
+<div class="menu-title">MAIN MENU</div>
+
+<div class="menu-item active" data-view="dashboard">
+    <div class="menu-icon">🏠</div>
+    <span>Dashboard</span>
+</div>
+
+<div class="menu-item" data-view="patients">
+    <div class="menu-icon">👥</div>
+    <span>ຄົນເຈັບ</span>
+</div>
+
+<div class="menu-item">
+    <div class="menu-icon">📅</div>
+    <span>ນັດໝາຍ</span>
+</div>
+
+<div class="menu-item">
+    <div class="menu-icon">🩺</div>
+    <span>ຫ້ອງກວດ</span>
+</div>
+
+<div class="menu-item">
+    <div class="menu-icon">🧪</div>
+    <span>Laboratory</span>
+</div>
+
+<div class="menu-item">
+    <div class="menu-icon">💊</div>
+    <span>Pharmacy</span>
+</div>
+
+<div class="menu-item">
+    <div class="menu-icon">📦</div>
+    <span>Inventory</span>
+</div>
+
+<div class="menu-item">
+    <div class="menu-icon">💰</div>
+    <span>POS / ຮັບເງິນ</span>
+</div>
+
+<div class="menu-title">MANAGEMENT</div>
+
+<div class="menu-item">
+    <div class="menu-icon">💵</div>
+    <span>ການເງິນ</span>
+</div>
+
+<div class="menu-item">
+    <div class="menu-icon">👨‍⚕️</div>
+    <span>ພະນັກງານ</span>
+</div>
+
+<div class="menu-item">
+    <div class="menu-icon">📊</div>
+    <span>ລາຍງານ</span>
+</div>
+
+<div class="menu-item">
+    <div class="menu-icon">🔔</div>
+    <span>ແຈ້ງເຕືອນ</span>
+</div>
+
+<div class="menu-item">
+    <div class="menu-icon">🔐</div>
+    <span>Users & Permissions</span>
+</div>
+
+<div class="menu-item">
+    <div class="menu-icon">📜</div>
+    <span>Audit Log</span>
+</div>
+
+<div class="menu-item">
+    <div class="menu-icon">⚙️</div>
+    <span>Settings</span>
+</div>
+
 </aside>
 
 <!-- ================= MAIN ================= -->
+
 <main class="main">
-    <header class="topbar">
-        <div class="page-title">
-            <h1 id="page-header-title">Dashboard</h1>
-            <p>ພາບລວມລະບົບຄລີນິກ (ອັບເດດ: <span id="current-time"></span>)</p>
-        </div>
 
-        <div class="top-actions">
-            <div class="notification" onclick="showSysModal('ແຈ້ງເຕືອນລະບົບ', 'ບໍ່ມີການແຈ້ງເຕືອນໃໝ່ໃນຂະນະນີ້', '🔔')">
-                🔔<div class="notification-dot"></div>
-            </div>
-            <div class="user">
-                <div class="avatar">SA</div>
-                <div class="user-info">
-                    <strong>Super Admin</strong>
-                    <span>Administrator</span>
-                </div>
-            </div>
-        </div>
-    </header>
+<header class="topbar">
 
-    <section class="content">
-        <!-- STATISTICS -->
-        <div class="stats">
-            <div class="card stat-card">
-                <div>
-                    <div class="stat-label">ຄົນເຈັບທັງໝົດ</div>
-                    <div class="stat-number" id="total-patients">0</div>
-                    <div class="stat-growth up">▲ ຈາກ LocalStorage</div>
-                </div>
-                <div class="stat-icon" style="background:#e8f3ff;">👥</div>
-            </div>
-            <div class="card stat-card">
-                <div>
-                    <div class="stat-label">ຄົນເຈັບມື້ນີ້</div>
-                    <div class="stat-number" id="today-patients">0</div>
-                    <div class="stat-growth up">▲ ຂໍ້ມູນຕົວຈິງ</div>
-                </div>
-                <div class="stat-icon" style="background:#e9f8ef;">🩺</div>
-            </div>
-            <div class="card stat-card">
-                <div>
-                    <div class="stat-label">ນັດໝາຍມື້ນີ້</div>
-                    <div class="stat-number" id="total-appointments">0</div>
-                    <div class="stat-growth">ຈາກ LocalStorage</div>
-                </div>
-                <div class="stat-icon" style="background:#fff5dc;">📅</div>
-            </div>
-            <div class="card stat-card">
-                <div>
-                    <div class="stat-label">ລາຍຮັບມື້ນີ້</div>
-                    <div class="stat-number" id="total-revenue">0 ₭</div>
-                    <div class="stat-growth up">▲ ຈາກ LocalStorage</div>
-                </div>
-                <div class="stat-icon" style="background:#f1eaff;">💰</div>
-            </div>
-        </div>
+<div class="page-title">
+    <h1 id="pageTitle">Dashboard</h1>
+    <p id="pageSubtitle">ພາບລວມລະບົບຄລີນິກ</p>
+</div>
 
-        <!-- MAIN GRID -->
-        <div class="dashboard-grid">
-            <!-- TODAY PATIENTS -->
-            <div class="card">
-                <div class="card-header">
-                    <h3>👥 ລາຍຊື່ຄົນເຈັບ / ການນັດໝາຍ (Local)</h3>
-                    <button onclick="showSysModal('ຂໍ້ມູນທັງໝົດ', 'ເປີດໜ້າລາຍຊື່ຄົນເຈັບທັງໝົດໃນລະບົບ', '👥')">ເບິ່ງທັງໝົດ →</button>
-                </div>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>ຄົນເຈັບ / ລະຫັດ</th>
-                            <th>ວັນທີ / ເວລາ</th>
-                            <th>ສະຖານະ</th>
-                        </tr>
-                    </thead>
-                    <tbody id="patient-table-body">
-                        <!-- ຂໍ້ມູນຈະຖືກດຶງມາຈາກ LocalStorage -->
-                    </tbody>
-                </table>
-            </div>
-
-            <!-- QUICK ACTIONS -->
-            <div class="card">
-                <div class="card-header">
-                    <h3>⚡ Quick Actions</h3>
-                </div>
-                <div class="quick-actions">
-                    <button class="quick-btn" id="btn-register-patient"><div>👤</div><span>ລົງທະບຽນຄົນເຈັບ</span></button>
-                    <button class="quick-btn" id="btn-register-appointment"><div>📅</div><span>ເພີ່ມນັດໝາຍ</span></button>
-                    <button class="quick-btn" id="btn-open-examination"><div>🩺</div><span>ເປີດການກວດ</span></button>
-                    <button class="quick-btn" id="btn-open-pharmacy-quick"><div>💊</div><span>ຈ່າຍຢາ</span></button>
-                    <button class="quick-btn" id="btn-open-pos-quick"><div>💰</div><span>ເປີດ POS</span></button>
-                    <button class="quick-btn" id="btn-open-reports-quick"><div>📊</div><span>ເບິ່ງລາຍງານ</span></button>
-                </div>
-            </div>
-        </div>
-
-        <!-- BOTTOM -->
-        <div class="bottom-grid">
-            <!-- ALERTS -->
-            <div class="card">
-                <div class="card-header">
-                    <h3>🔔 ການແຈ້ງເຕືອນ</h3>
-                    <button onclick="showSysModal('ການແຈ້ງເຕືອນ', 'ເປີດໜ້າຈັດການການແຈ້ງເຕືອນທັງໝົດ', '🔔')">ເບິ່ງທັງໝົດ</button>
-                </div>
-                <div class="alert alert-red">🔴 <strong>ຢາໝົດອາຍຸ:</strong>&nbsp; <span id="alert-expired">0</span> ລາຍການ</div>
-                <div class="alert alert-yellow">🟡 <strong>Stock ຕ່ຳ:</strong>&nbsp; <span id="alert-low-stock">0</span> ລາຍການ</div>
-                <div class="alert alert-blue">🔵 <strong>Lab:</strong>&nbsp; ມີ <span id="alert-lab">0</span> ຜົນກວດລໍຖ້າ</div>
-            </div>
-
-            <!-- REVENUE -->
-            <div class="card">
-                <div class="card-header">
-                    <h3>💵 ລາຍຮັບມື້ນີ້</h3>
-                    <button onclick="showSysModal('ການເງິນ', 'ເປີດໜ້າລາຍງານການເງິນ ແລະ ຍອດຂາຍ', '💵')">ເບິ່ງລາຍລະອຽດ</button>
-                </div>
-                <div class="revenue-box">
-                    <div class="revenue-label">ລາຍຮັບລວມຈາກ LocalStorage</div>
-                    <div class="revenue-number" id="revenue-box-display">0 ₭</div>
-                    <div class="revenue-label">ຄ່າກວດ + ຢາ + Lab + ບໍລິການ</div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- ================= MODAL ລາຍງານສະຖິຕິ (REPORTS) ================= -->
-    <div class="modal-overlay" id="reportsModal">
-        <div class="modal-card large">
-            <h3>📊 ລາຍງານພາບລວມສະຖິຕິຄລີນິກ</h3>
-            <div class="form-group">
-                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 15px;">
-                    <div class="card" style="padding: 15px; background: #f8fafc;">
-                        <div class="stat-label">ຄົນເຈັບທັງໝົດໃນລະບົບ</div>
-                        <div class="stat-number" id="report-total-patients">0</div>
-                    </div>
-                    <div class="card" style="padding: 15px; background: #f8fafc;">
-                        <div class="stat-label">ນັດໝາຍທັງໝົດ</div>
-                        <div class="stat-number" id="report-total-appointments">0</div>
-                    </div>
-                    <div class="card" style="padding: 15px; background: #f8fafc;">
-                        <div class="stat-label">ລາຍຮັບລວມທັງໝົດ</div>
-                        <div class="stat-number" id="report-total-revenue" style="color: #1976d2;">0 ₭</div>
-                    </div>
-                    <div class="card" style="padding: 15px; background: #f8fafc;">
-                        <div class="stat-label">ຈຳນວນໃບສັ່ງຢາ</div>
-                        <div class="stat-number" id="report-total-pharmacy">0</div>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-actions">
-                <button class="btn-cancel" id="btnCloseReportsModal">ປິດໜ້າຕ່າງ</button>
-            </div>
-        </div>
+<div class="top-actions">
+    <div class="notification">
+        🔔
+        <div class="dot"></div>
     </div>
+
+```
+<div class="user">
+    <div class="avatar">SA</div>
+    <div class="user-info">
+        <strong>Super Admin</strong>
+        <span>Administrator</span>
+    </div>
+</div>
+```
+
+</div>
+
+</header>
+
+<section class="content">
+
+<!-- ================= DASHBOARD ================= -->
+
+<div id="dashboardView" class="view active">
+
+<div class="stats">
+
+<div class="card stat-card">
+<div>
+<div class="stat-label">ຄົນເຈັບທັງໝົດ</div>
+<div class="stat-number" id="totalPatients">0</div>
+<div class="stat-growth up">ລົງທະບຽນໃນລະບົບ</div>
+</div>
+<div class="stat-icon" style="background:#e8f3ff">👥</div>
+</div>
+
+<div class="card stat-card">
+<div>
+<div class="stat-label">ຄົນເຈັບມື້ນີ້</div>
+<div class="stat-number">86</div>
+<div class="stat-growth up">▲ 8.2%</div>
+</div>
+<div class="stat-icon" style="background:#e9f8ef">🩺</div>
+</div>
+
+<div class="card stat-card">
+<div>
+<div class="stat-label">ນັດໝາຍມື້ນີ້</div>
+<div class="stat-number">42</div>
+<div class="stat-growth">18 ຄົນຍັງບໍ່ມາ</div>
+</div>
+<div class="stat-icon" style="background:#fff5dc">📅</div>
+</div>
+
+<div class="card stat-card">
+<div>
+<div class="stat-label">ລາຍຮັບມື້ນີ້</div>
+<div class="stat-number">8.65M</div>
+<div class="stat-growth up">▲ 15.4%</div>
+</div>
+<div class="stat-icon" style="background:#f1eaff">💰</div>
+</div>
+
+</div>
+
+<div class="dashboard-grid">
+
+<div class="card">
+
+<div class="card-header">
+<h3>👥 ຄົນເຈັບມື້ນີ້</h3>
+<button class="link-btn" onclick="openView('patients')">
+ເບິ່ງທັງໝົດ →
+</button>
+</div>
+
+<table>
+<thead>
+<tr>
+<th>ຄົນເຈັບ</th>
+<th>ເວລາ</th>
+<th>ໝໍ</th>
+<th>ສະຖານະ</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td>
+<div class="patient">
+<div class="patient-avatar">ສ</div>
+<div><strong>ສົມໃຈ ພົມມະວົງ</strong><br>
+<small>PT-000125</small></div>
+</div>
+</td>
+<td>08:30</td>
+<td>ນພ. ສົມພອນ</td>
+<td><span class="badge green">ສຳເລັດ</span></td>
+</tr>
+
+<tr>
+<td>
+<div class="patient">
+<div class="patient-avatar">ຈ</div>
+<div><strong>ຈັນທະລາ ສີວິໄລ</strong><br>
+<small>PT-000126</small></div>
+</div>
+</td>
+<td>09:15</td>
+<td>ພຍ. ນິດາ</td>
+<td><span class="badge yellow">ກຳລັງກວດ</span></td>
+</tr>
+
+<tr>
+<td>
+<div class="patient">
+<div class="patient-avatar">ວ</div>
+<div><strong>ວິໄລ ຄຳພັນ</strong><br>
+<small>PT-000127</small></div>
+</div>
+</td>
+<td>10:00</td>
+<td>ນພ. ສົມພອນ</td>
+<td><span class="badge blue">ລໍຖ້າ</span></td>
+</tr>
+</tbody>
+</table>
+
+</div>
+
+<div class="card">
+
+<div class="card-header">
+<h3>⚡ Quick Actions</h3>
+</div>
+
+<div class="quick-actions">
+
+<button class="quick-btn" onclick="openPatientModal()">
+<div>👤</div>
+<span>ລົງທະບຽນຄົນເຈັບ</span>
+</button>
+
+<button class="quick-btn">
+<div>📅</div>
+<span>ເພີ່ມນັດໝາຍ</span>
+</button>
+
+<button class="quick-btn">
+<div>🩺</div>
+<span>ເປີດການກວດ</span>
+</button>
+
+<button class="quick-btn">
+<div>💊</div>
+<span>ຈ່າຍຢາ</span>
+</button>
+
+<button class="quick-btn">
+<div>💰</div>
+<span>ເປີດ POS</span>
+</button>
+
+<button class="quick-btn">
+<div>📊</div>
+<span>ເບິ່ງລາຍງານ</span>
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="bottom-grid">
+
+<div class="card">
+<div class="card-header">
+<h3>🔔 ການແຈ້ງເຕືອນ</h3>
+</div>
+
+<div class="alert alert-red">🔴 <strong>ຢາໝົດອາຍຸ:</strong> 5 ລາຍການ</div>
+<div class="alert alert-yellow">🟡 <strong>Stock ຕ່ຳ:</strong> 12 ລາຍການ</div>
+<div class="alert alert-blue">🔵 <strong>Lab:</strong> 4 ຜົນກວດລໍຖ້າ</div>
+</div>
+
+<div class="card">
+<div class="card-header">
+<h3>💵 ລາຍຮັບມື້ນີ້</h3>
+</div>
+
+<div style="text-align:center;padding:10px">
+<div style="font-size:28px;font-weight:800">8,650,000 ₭</div>
+<div style="font-size:10px;color:#7b8794">
+ຄ່າກວດ + ຢາ + Lab + ບໍລິການ
+</div>
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<!-- ================= PATIENTS ================= -->
+
+<div id="patientsView" class="view">
+
+<div class="page-toolbar">
+
+<div>
+<h2>👥 ຈັດການຄົນເຈັບ</h2>
+<p>Patient Management</p>
+</div>
+
+<button class="primary-btn" onclick="openPatientModal()">
+＋ ເພີ່ມຄົນເຈັບ
+</button>
+
+</div>
+
+<div class="card">
+
+<div class="patient-toolbar">
+
+<div class="search-box">
+<input id="patientSearch"
+type="text"
+placeholder="🔍 ຄົ້ນຫາດ້ວຍ Patient ID, ຊື່, ເບີໂທ..."
+oninput="renderPatients()">
+</div>
+
+<select id="genderFilter"
+class="filter-select"
+onchange="renderPatients()">
+
+<option value="">ທຸກເພດ</option>
+<option value="ຊາຍ">ຊາຍ</option>
+<option value="ຍິງ">ຍິງ</option>
+</select>
+
+</div>
+
+<div class="patient-table-card">
+
+<table class="patient-table">
+
+<thead>
+<tr>
+<th>Patient ID</th>
+<th>ຊື່ຄົນເຈັບ</th>
+<th>ເພດ</th>
+<th>ວັນເກີດ</th>
+<th>ເບີໂທ</th>
+<th>ສະຖານະ</th>
+<th>ຈັດການ</th>
+</tr>
+</thead>
+
+<tbody id="patientTableBody"></tbody>
+
+</table>
+
+</div>
+
+</div>
+
+</div>
+
+<!-- ================= PROFILE ================= -->
+
+<div id="profileView" class="view">
+
+<div class="page-toolbar">
+
+<div>
+<h2>👤 Patient Profile</h2>
+<p>ຂໍ້ມູນລາຍລະອຽດຄົນເຈັບ</p>
+</div>
+
+<button class="secondary-btn" onclick="openView('patients')">
+← ກັບຄືນ
+</button>
+
+</div>
+
+<div class="card" id="profileContent"></div>
+
+</div>
+
+</section>
+
 </main>
 
-<!-- ================= MODAL ຟອມລົງທະບຽນຄົນເຈັບ ================= -->
-<div class="modal-overlay" id="patientModal">
-    <div class="modal-card">
-        <h3>👤 ລົງທະບຽນຄົນເຈັບໃໝ່</h3>
-        <div class="form-group">
-            <label>ຊື່ ແລະ ນາມສະກຸນ:</label>
-            <input type="text" id="patientFullName" placeholder="ພິມຊື່ຄົນເຈັບ...">
-        </div>
-        <div class="modal-actions">
-            <button class="btn-cancel" id="btnCloseModal">ຍົກເລີກ</button>
-            <button class="btn-submit" id="btnSavePatient">ບັນທຶກລົງ Local</button>
-        </div>
-    </div>
+<!-- ================= PATIENT MODAL ================= -->
+
+<div id="patientModal" class="modal">
+
+<div class="modal-box">
+
+<div class="modal-header">
+<h3 id="modalTitle">＋ ເພີ່ມຄົນເຈັບ</h3>
+<button class="close" onclick="closePatientModal()">×</button>
 </div>
 
-<!-- ================= MODAL ຟອມເພີ່ມນັດໝາຍ ================= -->
-<div class="modal-overlay" id="appointmentModal">
-    <div class="modal-card">
-        <h3>📅 ເພີ່ມນັດໝາຍໃໝ່</h3>
-        <div class="form-group">
-            <label>ຊື່ຄົນເຈັບ / ລະຫັດ:</label>
-            <input type="text" id="aptPatientName" placeholder="ຊື່ຄົນເຈັບ...">
-        </div>
-        <div class="form-group">
-            <label>ວັນທີ ແລະ ເວລານັດ:</label>
-            <input type="datetime-local" id="aptDateTime">
-        </div>
-        <div class="modal-actions">
-            <button class="btn-cancel" id="btnCloseAptModal">ຍົກເລີກ</button>
-            <button class="btn-submit" id="btnSaveAppointment">ບັນທຶກລົງ Local</button>
-        </div>
-    </div>
+<form id="patientForm" onsubmit="savePatient(event)">
+
+<div class="modal-body">
+
+<input type="hidden" id="editPatientId">
+
+<div class="form-grid">
+
+<div class="form-group">
+<label>Patient ID</label>
+<input id="patientId" readonly>
 </div>
 
-<!-- ================= MODAL ຫ້ອງກວດ (EXAMINATION) ================= -->
-<div class="modal-overlay" id="examinationModal">
-    <div class="modal-card large">
-        <h3>🩺 ຫ້ອງກວດ / ບັນທຶກການປິ່ນປົວ</h3>
-        <div class="form-group">
-            <label>ເລືອກຄົນເຈັບ:</label>
-            <select id="examPatientSelect">
-                <option value="">-- ເລືອກຄົນເຈັບ --</option>
-            </select>
-        </div>
-        <div class="form-group">
-            <label>ອາການເບື້ອງຕົ້ນ (Symptoms):</label>
-            <textarea id="examSymptoms" rows="3" placeholder="ອາການຂອງຄົນເຈັບ..."></textarea>
-        </div>
-        <div class="form-group">
-            <label>ຜົນການວິນິດໄສ (Diagnosis):</label>
-            <textarea id="examDiagnosis" rows="3" placeholder="ຜົນການວິນິດໄສຂອງທ່ານໝໍ..."></textarea>
-        </div>
-        <div class="form-group">
-            <label>ສັ່ງຢາ / ວິທີໃຊ້:</label>
-            <textarea id="examPrescription" rows="3" placeholder="ລາຍການຢາ ແລະ ຂະໜາດກິນ..."></textarea>
-        </div>
-        <div class="form-group">
-            <label>ຄ່າບໍລິການກວດ (₭):</label>
-            <input type="number" id="examFee" value="50000" placeholder="ຄ່າກວດ...">
-        </div>
-        <div class="modal-actions">
-            <button class="btn-cancel" id="btnCloseExamModal">ຍົກເລີກ</button>
-            <button class="btn-submit" id="btnSaveExamination">ບັນທຶກຜົນການກວດ & ສົ່ງ POS</button>
-        </div>
-    </div>
+<div class="form-group">
+<label>ເລກ HN</label>
+<input id="patientHN" placeholder="HN-000001">
 </div>
 
-<!-- ================= MODAL ຫ້ອງຈ່າຍຢາ (PHARMACY) ================= -->
-<div class="modal-overlay" id="pharmacyModal">
-    <div class="modal-card large">
-        <h3>💊 ຫ້ອງຈ່າຍຢາ & ຕັດ Stock</h3>
-        <div class="form-group">
-            <label>ເລືອກຄົນເຈັບທີ່ມາຮັບຢາ:</label>
-            <select id="pharmacyPatientSelect">
-                <option value="">-- ເລືອກຄົນເຈັບ --</option>
-            </select>
-        </div>
-        <div class="form-group">
-            <label>ລາຍການຢາໃນ Stock (ເລືອກເພີ່ມ):</label>
-            <div style="display: flex; gap: 10px; margin-bottom: 10px;">
-                <select id="medicineSelect" style="flex: 2;">
-                    <option value="">-- ເລືອກຢາ --</option>
-                    <option value="Paracetamol 500mg|5000">Paracetamol 500mg (ລາຄາ: 5,000 ₭)</option>
-                    <option value="Amoxicillin 500mg|15000">Amoxicillin 500mg (ລາຄາ: 15,000 ₭)</option>
-                    <option value="Omeprazole 20mg|10000">Omeprazole 20mg (ລາຄາ: 10,000 ₭)</option>
-                    <option value="Vitamin C 1000mg|8000">Vitamin C 1000mg (ລາຄາ: 8,000 ₭)</option>
-                </select>
-                <input type="number" id="medicineQty" value="1" min="1" style="flex: 1;" placeholder="ຈຳນວນ">
-                <button type="button" class="btn-submit" id="btnAddMedicine" style="flex: 1;">ເພີ່ມຢາ</button>
-            </div>
-        </div>
-        <div class="form-group">
-            <label>ລາຍການຢາທີ່ສັ່ງຈ່າຍ:</label>
-            <table style="margin-bottom: 15px;">
-                <thead>
-                    <tr>
-                        <th>ຊື່ຢາ</th>
-                        <th>ຈຳນວນ</th>
-                        <th>ລາຄາລວມ (₭)</th>
-                        <th>ຈັດການ</th>
-                    </tr>
-                </thead>
-                <tbody id="prescription-cart-body">
-                    <tr><td colspan="4" style="text-align:center; color:#7b8794;">ຍັງບໍ່ມີລາຍການຢາ</td></tr>
-                </tbody>
-            </table>
-        </div>
-        <div class="form-group">
-            <label><strong>ລວມເງິນຄ່າຢາທັງໝົດ:</strong> <span id="totalPharmacyFee" style="color: #1976d2; font-size: 20px;">0 ₭</span></label>
-        </div>
-        <div class="modal-actions">
-            <button class="btn-cancel" id="btnClosePharmacyModal">ຍົກເລີກ</button>
-            <button class="btn-submit" id="btnSavePharmacy">ຢືນຢັນຈ່າຍຢາ & ສົ່ງ POS</button>
-        </div>
-    </div>
+<div class="form-group">
+<label>ຊື່-ນາມສະກຸນ *</label>
+<input id="patientName" required placeholder="ປ້ອນຊື່-ນາມສະກຸນ">
 </div>
 
-<!-- ================= MODAL POS / ຮັບເງິນ ================= -->
-<div class="modal-overlay" id="posModal">
-    <div class="modal-card large">
-        <h3>💰 POS / ລະບົບຮັບເງິນ & ຊຳລະບິນ</h3>
-        <div class="form-group">
-            <label>ລາຍການບິນຄ້າງຊຳລະ / ທີ່ຕ້ອງຮັບເງິນ:</label>
-            <table style="margin-bottom: 15px;">
-                <thead>
-                    <tr>
-                        <th>ຊື່ຄົນເຈັບ</th>
-                        <th>ລາຍລະອຽດ</th>
-                        <th>ຈຳນວນເງິນ (₭)</th>
-                        <th>ຈັດການ</th>
-                    </tr>
-                </thead>
-                <tbody id="pos-table-body">
-                    <tr><td colspan="4" style="text-align:center; color:#7b8794;">ບໍ່ມີລາຍການຄ້າງຊຳລະ</td></tr>
-                </tbody>
-            </table>
-        </div>
-        <div class="modal-actions">
-            <button class="btn-cancel" id="btnClosePosModal">ປິດໜ້າຕ່າງ</button>
-        </div>
-    </div>
+<div class="form-group">
+<label>ເພດ *</label>
+<select id="patientGender" required>
+<option value="">-- ເລືອກ --</option>
+<option value="ຊາຍ">ຊາຍ</option>
+<option value="ຍິງ">ຍິງ</option>
+</select>
 </div>
 
-<!-- ================= CUSTOM SYSTEM NOTIFICATION MODAL ================= -->
-<div class="sys-modal-overlay" id="sysModal">
-    <div class="sys-modal-card">
-        <div class="sys-modal-icon" id="sysModalIcon">🔔</div>
-        <div class="sys-modal-title" id="sysModalTitle">ແຈ້ງເຕືອນລະບົບ</div>
-        <div class="sys-modal-message" id="sysModalMessage">ຂໍ້ຄວາມແຈ້ງເຕືອນ...</div>
-        <button class="sys-modal-btn" onclick="closeSysModal()">ຕົກລົງ</button>
-    </div>
+<div class="form-group">
+<label>ວັນເກີດ</label>
+<input id="patientDOB" type="date">
 </div>
 
-<!-- ================= JAVASCRIPT LOCALSTORAGE & UI ================= -->
+<div class="form-group">
+<label>ເບີໂທ</label>
+<input id="patientPhone" type="tel" placeholder="020 xxxx xxxx">
+</div>
+
+<div class="form-group">
+<label>ກຸ່ມເລືອດ</label>
+<select id="patientBlood">
+<option value="">-- ບໍ່ລະບຸ --</option>
+<option>A+</option>
+<option>A-</option>
+<option>B+</option>
+<option>B-</option>
+<option>AB+</option>
+<option>AB-</option>
+<option>O+</option>
+<option>O-</option>
+</select>
+</div>
+
+<div class="form-group">
+<label>ສະຖານະ</label>
+<select id="patientStatus">
+<option value="Active">Active</option>
+<option value="Inactive">Inactive</option>
+</select>
+</div>
+
+<div class="form-group full">
+<label>ທີ່ຢູ່</label>
+<textarea id="patientAddress" placeholder="ບ້ານ, ເມືອງ, ແຂວງ"></textarea>
+</div>
+
+<div class="form-group full">
+<label>ແພ້ຢາ / Allergy</label>
+<textarea id="patientAllergy" placeholder="ຕົວຢ່າງ: Penicillin"></textarea>
+</div>
+
+<div class="form-group full">
+<label>ປະຫວັດສຸຂະພາບ</label>
+<textarea id="patientHistory" placeholder="ຂໍ້ມູນປະຫວັດສຸຂະພາບ"></textarea>
+</div>
+
+</div>
+
+</div>
+
+<div class="modal-footer">
+<button type="button" class="secondary-btn" onclick="closePatientModal()">
+ຍົກເລີກ
+</button>
+
+<button type="submit" class="primary-btn">
+💾 ບັນທຶກ
+</button>
+</div>
+
+</form>
+
+</div>
+
+</div>
+
 <script>
-    // ຟັງຊັນສຳລັບເປີດ Custom System Modal ແທນ alert() ເກົ່າ
-    function showSysModal(title, message, icon = '🔔') {
-        document.getElementById('sysModalTitle').innerText = title;
-        document.getElementById('sysModalMessage').innerText = message;
-        document.getElementById('sysModalIcon').innerText = icon;
-        document.getElementById('sysModal').style.display = 'flex';
-    }
 
-    function closeSysModal() {
-        document.getElementById('sysModal').style.display = 'none';
-    }
+/* =========================================================
+   CLINIC SYSTEM — PHASE 1
+   PATIENT MANAGEMENT
+   ========================================================= */
 
-    document.addEventListener('DOMContentLoaded', () => {
-        // ເວລາປະຈຸບັນ
-        const timeDisplay = document.getElementById('current-time');
-        const updateTime = () => {
-            const now = new Date();
-            timeDisplay.innerText = now.toLocaleTimeString('lo-LA', { hour: '2-digit', minute: '2-digit' });
-        };
-        updateTime();
-        setInterval(updateTime, 60000);
+/* Local data for prototype.
+   Firebase will replace this storage in Phase 7.
+*/
 
-        // ເມນູ Sidebar
-        const menuItems = document.querySelectorAll('.menu-item');
-        const pageHeaderTitle = document.getElementById('page-header-title');
-        
-        menuItems.forEach(item => {
-            item.addEventListener('click', function() {
-                menuItems.forEach(m => m.classList.remove('active'));
-                this.classList.add('active');
-                const menuName = this.querySelector('span').innerText;
-                pageHeaderTitle.innerText = menuName;
-                
-                const target = this.getAttribute('data-target');
-                if (target === 'pos') {
-                    openPosHandler();
-                } else if (target === 'reports') {
-                    openReportsHandler();
-                } else if (target !== 'dashboard') {
-                    showSysModal('ເມນູລະບົບ', `ກຳລັງເປີດໜ້າຕ່າງ: ${menuName} ...`, '⚙️');
-                }
-            });
-        });
+let patients = JSON.parse(localStorage.getItem("clinic_patients") || "[]");
 
-        // ຄວບຄຸມ Modal ລົງທະບຽນຄົນເຈັບ
-        const modal = document.getElementById('patientModal');
-        const btnOpen = document.getElementById('btn-register-patient');
-        const btnClose = document.getElementById('btnCloseModal');
+let editingId = null;
 
-        btnOpen.addEventListener('click', () => { modal.style.display = 'flex'; });
-        btnClose.addEventListener('click', () => { modal.style.display = 'none'; });
 
-        // ຄວບຄຸມ Modal ເພີ່ມນັດໝາຍ
-        const aptModal = document.getElementById('appointmentModal');
-        const btnOpenApt = document.getElementById('btn-register-appointment');
-        const btnCloseApt = document.getElementById('btnCloseAptModal');
+/* ================= NAVIGATION ================= */
 
-        if(btnOpenApt) {
-            btnOpenApt.addEventListener('click', () => { aptModal.style.display = 'flex'; });
-        }
-        if(btnCloseApt) {
-            btnCloseApt.addEventListener('click', () => { aptModal.style.display = 'none'; });
-        }
+const menuItems = document.querySelectorAll(".menu-item");
 
-        // ຄວບຄຸມ Modal ຫ້ອງກວດ (Examination)
-        const examModal = document.getElementById('examinationModal');
-        const btnOpenExam = document.getElementById('btn-open-examination');
-        const btnCloseExam = document.getElementById('btnCloseExamModal');
-        const sidebarExamBtn = document.querySelector('.menu-item[data-target="examination"]');
+menuItems.forEach(item => {
 
-        const openExamHandler = () => {
-            loadPatientDropdown();
-            examModal.style.display = 'flex';
-        };
+    item.addEventListener("click", () => {
 
-        if(btnOpenExam) btnOpenExam.addEventListener('click', openExamHandler);
-        if(sidebarExamBtn) sidebarExamBtn.addEventListener('click', openExamHandler);
-        if(btnCloseExam) btnCloseExam.addEventListener('click', () => { examModal.style.display = 'none'; });
+        const view = item.dataset.view;
 
-        // ຄວບຄຸມ Modal ລາຍງານ (Reports)
-        const reportsModal = document.getElementById('reportsModal');
-        const btnOpenReportsQuick = document.getElementById('btn-open-reports-quick');
-        const sidebarReportsBtn = document.querySelector('.menu-item[data-target="reports"]');
-        const btnCloseReports = document.getElementById('btnCloseReportsModal');
+        if(!view) return;
 
-        const openReportsHandler = () => {
-            let patients = JSON.parse(localStorage.getItem('clinic_patients')) || [];
-            let appointments = JSON.parse(localStorage.getItem('clinic_appointments')) || [];
-            let payments = JSON.parse(localStorage.getItem('clinic_payments')) || [];
-            let pharmacyRecords = JSON.parse(localStorage.getItem('clinic_pharmacy_records')) || [];
+        menuItems.forEach(x => x.classList.remove("active"));
+        item.classList.add("active");
 
-            let totalRev = payments.reduce((sum, item) => sum + Number(item.amount || 0), 0);
-
-            document.getElementById('report-total-patients').innerText = patients.length;
-            document.getElementById('report-total-appointments').innerText = appointments.length;
-            document.getElementById('report-total-revenue').innerText = totalRev.toLocaleString() + ' ₭';
-            document.getElementById('report-total-pharmacy').innerText = pharmacyRecords.length;
-
-            reportsModal.style.display = 'flex';
-        };
-
-        window.openReportsHandler = openReportsHandler;
-
-        if(btnOpenReportsQuick) btnOpenReportsQuick.addEventListener('click', openReportsHandler);
-        if(sidebarReportsBtn) sidebarReportsBtn.addEventListener('click', openReportsHandler);
-        if(btnCloseReports) btnCloseReports.addEventListener('click', () => { reportsModal.style.display = 'none'; });
-
-        // ໂຫຼດຂໍ້ມູນສະແດງຜົນຈາກ LocalStorage ທັນທີ
-        loadDashboardData();
+        openView(view);
     });
 
-    // ຟັງຊັນໂຫຼດລາຍຊື່ຄົນເຈັບລົງໃນ Dropdown ຂອງຫ້ອງກວດ
-    function loadPatientDropdown() {
-        const select = document.getElementById('examPatientSelect');
-        select.innerHTML = '<option value="">-- ເລືອກຄົນເຈັບ --</option>';
-        let patients = JSON.parse(localStorage.getItem('clinic_patients')) || [];
-        patients.forEach((p) => {
-            const opt = document.createElement('option');
-            opt.value = p.fullname;
-            opt.textContent = `${p.fullname} (ລົງທະບຽນ: ${p.created_at})`;
-            select.appendChild(opt);
-        });
+});
+
+
+function openView(view){
+
+    document.querySelectorAll(".view")
+        .forEach(v => v.classList.remove("active"));
+
+    const target = document.getElementById(view + "View");
+
+    if(target){
+        target.classList.add("active");
     }
 
-// ຟັງຊັນໂຫຼດຂໍ້ມູນມາສະແດງຜົນ Dashboard ຈາກ Database
-    async function loadDashboardData() {
-        const tbody = document.getElementById('patient-table-body');
-        
-        try {
-            // ດຶງຂໍ້ມູນຈາກ Python API
-            const response = await fetch('http://127.0.0.1:5000/api/patients');
-            const result = await response.json();
-            
-            let patients = [];
-            if (response.ok && result.status === 'success') {
-                patients = result.data;
-            }
-
-            // ອັບເດດຕົວເລກຄົນເຈັບທັງໝົດ
-            document.getElementById('total-patients').innerText = patients.length;
-            document.getElementById('today-patients').innerText = patients.length; // ຊົ່ວຄາວ
-
-            // ອັບເດດຕາຕະລາງ
-            tbody.innerHTML = "";
-            if (patients.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="3" style="text-align:center; color:#7b8794;">ຍັງບໍ່ມີຂໍ້ມູນຄົນເຈັບໃນ Database</td></tr>`;
-            } else {
-                patients.forEach((p) => {
-                    const name = p.fullname || 'ບໍ່ລະບຸຊື່';
-                    const firstLetter = name.charAt(0);
-                    const docId = 'ID-' + (1000 + p.id); 
-                    
-                    const dateObj = new Date(p.created_at);
-                    const dateStr = dateObj.toLocaleString('lo-LA');
-
-                    const tr = document.createElement('tr');
-                    tr.innerHTML = `
-                        <td>
-                            <div class="patient">
-                                <div class="patient-avatar">${firstLetter}</div>
-                                <div>
-                                    <strong>${name}</strong><br>
-                                    <small>${docId}</small>
-                                </div>
-                            </div>
-                        </td>
-                        <td>${dateStr}</td>
-                        <td><span class="badge badge-green">Database</span></td>
-                    `;
-                    tbody.appendChild(tr);
-                });
-            }
-        } catch (error) {
-            console.error("Database connection error:", error);
-            tbody.innerHTML = `<tr><td colspan="3" style="text-align:center; color:#e53935;">🔴 ບໍ່ສາມາດເຊື່ອມຕໍ່ຫາເຊີບເວີ API ໄດ້</td></tr>`;
-        }
-
-        // ==========================================
-        // ຂໍ້ມູນອື່ນໆຍັງດຶງຈາກ LocalStorage ຄືເກົ່າໄປກ່ອນ
-        // ==========================================
-        let appointments = JSON.parse(localStorage.getItem('clinic_appointments')) || [];
-        document.getElementById('total-appointments').innerText = appointments.length;
-
-        let payments = JSON.parse(localStorage.getItem('clinic_payments')) || [];
-        let totalRevenue = payments.reduce((sum, item) => sum + Number(item.amount || 0), 0);
-        
-        const formattedRevenue = totalRevenue.toLocaleString() + ' ₭';
-        document.getElementById('total-revenue').innerText = formattedRevenue;
-        document.getElementById('revenue-box-display').innerText = formattedRevenue;
-
-        let inventory = JSON.parse(localStorage.getItem('clinic_inventory')) || [];
-        let labs = JSON.parse(localStorage.getItem('clinic_labs')) || [];
-
-        const alertExpired = document.getElementById('alert-expired');
-        const alertLowStock = document.getElementById('alert-low-stock');
-        const alertLab = document.getElementById('alert-lab');
-
-        if (alertExpired) alertExpired.innerText = inventory.filter(item => item.is_expired === true).length;
-        if (alertLowStock) alertLowStock.innerText = inventory.filter(item => item.qty > 0 && item.qty <= 5).length;
-        if (alertLab) alertLab.innerText = labs.filter(lab => lab.status === 'pending').length;
+    if(view === "dashboard"){
+        setHeader(
+            "Dashboard",
+            "ພາບລວມລະບົບຄລີນິກ"
+        );
     }
 
-// ບັນທຶກຄົນເຈັບໃໝ່ລົງ Database (MySQL) ຜ່ານ Python API
-    document.getElementById('btnSavePatient').addEventListener('click', async () => {
-        const fullnameInput = document.getElementById('patientFullName');
-        const fullname = fullnameInput.value.trim();
+    if(view === "patients"){
+        setHeader(
+            "Patient Management",
+            "ຈັດການຂໍ້ມູນຄົນເຈັບ"
+        );
+        renderPatients();
+    }
 
-        if (!fullname) {
-            showSysModal('ຜິດພາດ', 'ກະລຸນາປ້ອນຊື່ ແລະ ນາມສະກຸນຄົນເຈັບ!', '⚠️');
-            return;
+    if(view === "profile"){
+        setHeader(
+            "Patient Profile",
+            "ຂໍ້ມູນຄົນເຈັບ"
+        );
+    }
+
+    updateDashboardCount();
+}
+
+
+function setHeader(title,subtitle){
+
+    document.getElementById("pageTitle").textContent = title;
+    document.getElementById("pageSubtitle").textContent = subtitle;
+}
+
+
+/* ================= PATIENT ID ================= */
+
+function generatePatientId(){
+
+    let max = 0;
+
+    patients.forEach(p => {
+
+        const number = parseInt(
+            String(p.id).replace("PT-","")
+        );
+
+        if(!isNaN(number) && number > max){
+            max = number;
         }
 
-        try {
-            // ສົ່ງຂໍ້ມູນໄປຫາ Python API ທີ່ເຮົາລັນໄວ້
-            const response = await fetch('http://127.0.0.1:5000/api/patients', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ fullname: fullname })
-            });
-
-            const data = await response.json();
-
-            if (response.ok) {
-                showSysModal('ສຳເລັດ', data.message, '✅');
-                fullnameInput.value = '';
-                document.getElementById('patientModal').style.display = 'none';
-                loadDashboardData(); // ໂຫຼດຕາຕະລາງໃໝ່ທັນທີ
-            } else {
-                showSysModal('ຜິດພາດ', data.message, '⚠️');
-            }
-        } catch (error) {
-            console.error(error);
-            showSysModal('ຜິດພາດ', 'ບໍ່ສາມາດເຊື່ອມຕໍ່ຫາເຊີບເວີໄດ້!', '🔴');
-        }
     });
 
-    // ບັນທຶກນັດໝາຍໃໝ່ລົງ LocalStorage
-    document.getElementById('btnSaveAppointment').addEventListener('click', () => {
-        const patientNameInput = document.getElementById('aptPatientName');
-        const aptDateTimeInput = document.getElementById('aptDateTime');
-        
-        const patientName = patientNameInput.value.trim();
-        const aptDate = aptDateTimeInput.value;
+    return "PT-" + String(max + 1).padStart(6,"0");
+}
 
-        if (!patientName || !aptDate) {
-            showSysModal('ຜິດພາດ', 'ກະລຸນາປ້ອນຂໍ້ມູນໃຫ້ຄົບຖ້ວນ!', '⚠️');
-            return;
-        }
 
-        let appointments = JSON.parse(localStorage.getItem('clinic_appointments')) || [];
-        
-        appointments.push({
-            patient_name: patientName,
-            appointment_date: aptDate,
-            status: 'ລໍຖ້າກວດ',
-            created_at: new Date().toLocaleString('lo-LA')
-        });
+/* ================= MODAL ================= */
 
-        localStorage.setItem('clinic_appointments', JSON.stringify(appointments));
+function openPatientModal(patient = null){
 
-        showSysModal('ສຳເລັດ', 'ເພີ່ມນັດໝາຍສຳເລັດແລ້ວ!', '✅');
-        patientNameInput.value = '';
-        aptDateTimeInput.value = '';
-        document.getElementById('appointmentModal').style.display = 'none';
-        loadDashboardData();
-    });
+    const modal = document.getElementById("patientModal");
 
-    // ບັນທຶກຜົນການກວດ (Examination) ລົງ LocalStorage ແລະ ສ້າງລາຍຮັບເຂົ້າ POS
-    document.getElementById('btnSaveExamination').addEventListener('click', () => {
-        const patientName = document.getElementById('examPatientSelect').value;
-        const symptoms = document.getElementById('examSymptoms').value.trim();
-        const diagnosis = document.getElementById('examDiagnosis').value.trim();
-        const prescription = document.getElementById('examPrescription').value.trim();
-        const fee = Number(document.getElementById('examFee').value) || 0;
+    document.getElementById("patientForm").reset();
 
-        if (!patientName) {
-            showSysModal('ຜິດພາດ', 'ກະລຸນາເລືອກຄົນເຈັບ!', '⚠️');
-            return;
-        }
+    editingId = null;
 
-        let examinations = JSON.parse(localStorage.getItem('clinic_examinations')) || [];
-        examinations.push({
-            patient_name: patientName,
-            symptoms: symptoms,
-            diagnosis: diagnosis,
-            prescription: prescription,
-            fee: fee,
-            created_at: new Date().toLocaleString('lo-LA')
-        });
-        localStorage.setItem('clinic_examinations', JSON.stringify(examinations));
+    if(patient){
 
-        if (fee > 0) {
-            let payments = JSON.parse(localStorage.getItem('clinic_payments')) || [];
-            payments.push({
-                id: Date.now(),
-                patient_name: patientName,
-                amount: fee,
-                description: 'ຄ່າກວດສຸຂະພາບ: ' + (diagnosis || 'ກວດທົ່ວໄປ'),
-                created_at: new Date().toLocaleString('lo-LA')
-            });
-            localStorage.setItem('clinic_payments', JSON.stringify(payments));
-        }
+        editingId = patient.id;
 
-        showSysModal('ສຳເລັດ', 'ບັນທຶກຜົນການກວດ ແລະ ສ້າງລາຍການຄິດໄລ່ເງິນສຳເລັດ!', '✅');
-        
-        document.getElementById('examPatientSelect').value = '';
-        document.getElementById('examSymptoms').value = '';
-        document.getElementById('examDiagnosis').value = '';
-        document.getElementById('examPrescription').value = '';
-        document.getElementById('examFee').value = '50000';
-        document.getElementById('examinationModal').style.display = 'none';
+        document.getElementById("modalTitle").textContent =
+            "✏️ ແກ້ໄຂຂໍ້ມູນຄົນເຈັບ";
 
-        loadDashboardData();
-    });
+        document.getElementById("patientId").value = patient.id;
+        document.getElementById("patientHN").value = patient.hn || "";
+        document.getElementById("patientName").value = patient.name || "";
+        document.getElementById("patientGender").value = patient.gender || "";
+        document.getElementById("patientDOB").value = patient.dob || "";
+        document.getElementById("patientPhone").value = patient.phone || "";
+        document.getElementById("patientBlood").value = patient.blood || "";
+        document.getElementById("patientStatus").value = patient.status || "Active";
+        document.getElementById("patientAddress").value = patient.address || "";
+        document.getElementById("patientAllergy").value = patient.allergy || "";
+        document.getElementById("patientHistory").value = patient.history || "";
 
-    // ---------------------------------------------------------
-    // ລະບົບຫ້ອງຈ່າຍຢາ (Pharmacy Module)
-    // ---------------------------------------------------------
-    let pharmacyCart = [];
+    }else{
 
-    const pharmacyModal = document.getElementById('pharmacyModal');
-    const btnOpenPharmacy = document.getElementById('btn-open-pharmacy-quick');
-    const sidebarPharmacyBtn = document.querySelector('.menu-item[data-target="pharmacy"]');
-    const btnClosePharmacy = document.getElementById('btnClosePharmacyModal');
+        document.getElementById("modalTitle").textContent =
+            "＋ ເພີ່ມຄົນເຈັບ";
 
-    const openPharmacyHandler = () => {
-        loadPharmacyPatientDropdown();
-        pharmacyModal.style.display = 'flex';
+        document.getElementById("patientId").value =
+            generatePatientId();
+
+        document.getElementById("patientStatus").value =
+            "Active";
+    }
+
+    modal.classList.add("show");
+}
+
+
+function closePatientModal(){
+
+    document
+        .getElementById("patientModal")
+        .classList.remove("show");
+
+    editingId = null;
+}
+
+
+/* ================= SAVE PATIENT ================= */
+
+function savePatient(event){
+
+    event.preventDefault();
+
+    const data = {
+
+        id: document.getElementById("patientId").value,
+
+        hn: document.getElementById("patientHN").value.trim(),
+
+        name: document.getElementById("patientName").value.trim(),
+
+        gender: document.getElementById("patientGender").value,
+
+        dob: document.getElementById("patientDOB").value,
+
+        phone: document.getElementById("patientPhone").value.trim(),
+
+        blood: document.getElementById("patientBlood").value,
+
+        status: document.getElementById("patientStatus").value,
+
+        address: document.getElementById("patientAddress").value.trim(),
+
+        allergy: document.getElementById("patientAllergy").value.trim(),
+
+        history: document.getElementById("patientHistory").value.trim(),
+
+        updatedAt: new Date().toISOString()
+
     };
 
-    if(btnOpenPharmacy) btnOpenPharmacy.addEventListener('click', openPharmacyHandler);
-    if(sidebarPharmacyBtn) sidebarPharmacyBtn.addEventListener('click', openPharmacyHandler);
-    if(btnClosePharmacy) btnClosePharmacy.addEventListener('click', () => { pharmacyModal.style.display = 'none'; });
 
-    function loadPharmacyPatientDropdown() {
-        const select = document.getElementById('pharmacyPatientSelect');
-        select.innerHTML = '<option value="">-- ເລືອກຄົນເຈັບ --</option>';
-        let patients = JSON.parse(localStorage.getItem('clinic_patients')) || [];
-        patients.forEach((p) => {
-            const opt = document.createElement('option');
-            opt.value = p.fullname;
-            opt.textContent = `${p.fullname} (ລົງທະບຽນ: ${p.created_at})`;
-            select.appendChild(opt);
-        });
-    }
+    if(editingId){
 
-    document.getElementById('btnAddMedicine').addEventListener('click', () => {
-        const medSelectVal = document.getElementById('medicineSelect').value;
-        const qty = parseInt(document.getElementById('medicineQty').value) || 1;
+        const index = patients.findIndex(
+            p => p.id === editingId
+        );
 
-        if (!medSelectVal) {
-            showSysModal('ຜິດພາດ', 'ກະລຸນາເລືອກລາຍການຢາ!', '⚠️');
-            return;
+        if(index !== -1){
+
+            data.createdAt =
+                patients[index].createdAt || data.updatedAt;
+
+            data.visits =
+                patients[index].visits || [];
+
+            patients[index] = data;
+
         }
 
-        const [medName, medPrice] = medSelectVal.split('|');
-        const totalPrice = parseInt(medPrice) * qty;
+    }else{
 
-        pharmacyCart.push({
-            name: medName,
-            price: parseInt(medPrice),
-            qty: qty,
-            total: totalPrice
-        });
+        data.createdAt = new Date().toISOString();
 
-        renderPharmacyCart();
+        data.visits = [];
+
+        patients.push(data);
+    }
+
+
+    localStorage.setItem(
+        "clinic_patients",
+        JSON.stringify(patients)
+    );
+
+
+    closePatientModal();
+
+    renderPatients();
+
+    updateDashboardCount();
+
+
+    alert(
+        editingId
+        ? "ອັບເດດຂໍ້ມູນສຳເລັດ"
+        : "ລົງທະບຽນຄົນເຈັບສຳເລັດ\nPatient ID: " + data.id
+    );
+}
+
+
+/* ================= RENDER PATIENTS ================= */
+
+function renderPatients(){
+
+    const body =
+        document.getElementById("patientTableBody");
+
+    if(!body) return;
+
+    const search =
+        (document.getElementById("patientSearch")?.value || "")
+        .toLowerCase()
+        .trim();
+
+    const gender =
+        document.getElementById("genderFilter")?.value || "";
+
+
+    const filtered = patients.filter(p => {
+
+        const text = [
+            p.id,
+            p.hn,
+            p.name,
+            p.phone
+        ]
+        .join(" ")
+        .toLowerCase();
+
+        return (
+            text.includes(search) &&
+            (!gender || p.gender === gender)
+        );
+
     });
 
-    function renderPharmacyCart() {
-        const tbody = document.getElementById('prescription-cart-body');
-        tbody.innerHTML = '';
-        let grandTotal = 0;
 
-        if (pharmacyCart.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:#7b8794;">ຍັງບໍ່ມີລາຍການຢາ</td></tr>`;
-            document.getElementById('totalPharmacyFee').innerText = '0 ₭';
-            return;
-        }
+    if(filtered.length === 0){
 
-        pharmacyCart.forEach((item, index) => {
-            grandTotal += item.total;
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td>${item.name}</td>
-                <td>${item.qty}</td>
-                <td>${item.total.toLocaleString()} ₭</td>
-                <td><button type="button" onclick="removePharmacyItem(${index})" style="background:#e53935; color:white; border:none; padding:4px 8px; border-radius:4px; cursor:pointer;">ລຶບ</button></td>
-            `;
-            tbody.appendChild(tr);
-        });
+        body.innerHTML = `
+        <tr>
+            <td colspan="7" class="empty">
+                👥<br><br>
+                ຍັງບໍ່ມີຂໍ້ມູນຄົນເຈັບ
+                <br><br>
+                <button class="primary-btn"
+                    onclick="openPatientModal()">
+                    ＋ ເພີ່ມຄົນເຈັບ
+                </button>
+            </td>
+        </tr>
+        `;
 
-        document.getElementById('totalPharmacyFee').innerText = grandTotal.toLocaleString() + ' ₭';
+        return;
     }
 
-    function removePharmacyItem(index) {
-        pharmacyCart.splice(index, 1);
-        renderPharmacyCart();
+
+    body.innerHTML = filtered.map(p => {
+
+        const initial =
+            p.name ? p.name.charAt(0) : "?";
+
+        return `
+        <tr>
+
+            <td>
+                <strong>${escapeHTML(p.id)}</strong>
+                ${p.hn
+                    ? `<br><small>${escapeHTML(p.hn)}</small>`
+                    : ""}
+            </td>
+
+            <td>
+                <div class="patient">
+                    <div class="patient-avatar">
+                        ${escapeHTML(initial)}
+                    </div>
+
+                    <div>
+                        <strong>
+                            ${escapeHTML(p.name)}
+                        </strong>
+                    </div>
+                </div>
+            </td>
+
+            <td>${escapeHTML(p.gender || "-")}</td>
+
+            <td>${formatDate(p.dob)}</td>
+
+            <td>${escapeHTML(p.phone || "-")}</td>
+
+            <td>
+                <span class="badge ${
+                    p.status === "Active"
+                    ? "green"
+                    : "yellow"
+                }">
+                    ${escapeHTML(p.status || "Active")}
+                </span>
+            </td>
+
+            <td>
+
+                <button
+                    class="action-btn"
+                    onclick="showProfile('${p.id}')">
+                    👁️
+                </button>
+
+                <button
+                    class="action-btn"
+                    onclick="editPatient('${p.id}')">
+                    ✏️
+                </button>
+
+                <button
+                    class="action-btn"
+                    onclick="deletePatient('${p.id}')">
+                    🗑️
+                </button>
+
+            </td>
+
+        </tr>
+        `;
+
+    }).join("");
+}
+
+
+/* ================= EDIT ================= */
+
+function editPatient(id){
+
+    const patient =
+        patients.find(p => p.id === id);
+
+    if(patient){
+        openPatientModal(patient);
+    }
+}
+
+
+/* ================= DELETE ================= */
+
+function deletePatient(id){
+
+    const patient =
+        patients.find(p => p.id === id);
+
+    if(!patient) return;
+
+
+    const confirmDelete =
+        confirm(
+            `ຕ້ອງການລຶບ/Archive ຄົນເຈັບ ${patient.name} ຫຼືບໍ່?\n\n` +
+            `Patient ID: ${patient.id}`
+        );
+
+
+    if(!confirmDelete) return;
+
+
+    /* Professional design:
+       Do not hard-delete medical records.
+       Change status to Inactive.
+    */
+
+    patient.status = "Inactive";
+    patient.updatedAt = new Date().toISOString();
+
+
+    localStorage.setItem(
+        "clinic_patients",
+        JSON.stringify(patients)
+    );
+
+
+    renderPatients();
+    updateDashboardCount();
+
+    alert(
+        "Patient ຖືກ Archive ແລ້ວ\n" +
+        "ຂໍ້ມູນປະຫວັດຍັງຖືກຮັກສາ."
+    );
+}
+
+
+/* ================= PROFILE ================= */
+
+function showProfile(id){
+
+    const p =
+        patients.find(x => x.id === id);
+
+    if(!p) return;
+
+
+    const initial =
+        p.name ? p.name.charAt(0) : "?";
+
+
+    document.getElementById("profileContent").innerHTML = `
+
+        <div class="profile-head">
+
+            <div class="profile-avatar">
+                ${escapeHTML(initial)}
+            </div>
+
+            <div>
+                <h2>${escapeHTML(p.name)}</h2>
+
+                <p>
+                    ${escapeHTML(p.id)}
+                    ${p.hn ? " • " + escapeHTML(p.hn) : ""}
+                </p>
+            </div>
+
+        </div>
+
+
+        <div class="profile-grid">
+
+            <div class="info-box">
+                <label>ເພດ</label>
+                <strong>${escapeHTML(p.gender || "-")}</strong>
+            </div>
+
+            <div class="info-box">
+                <label>ວັນເກີດ</label>
+                <strong>${formatDate(p.dob)}</strong>
+            </div>
+
+            <div class="info-box">
+                <label>ເບີໂທ</label>
+                <strong>${escapeHTML(p.phone || "-")}</strong>
+            </div>
+
+            <div class="info-box">
+                <label>ກຸ່ມເລືອດ</label>
+                <strong>${escapeHTML(p.blood || "-")}</strong>
+            </div>
+
+            <div class="info-box">
+                <label>ສະຖານະ</label>
+                <strong>${escapeHTML(p.status || "-")}</strong>
+            </div>
+
+            <div class="info-box">
+                <label>Patient ID</label>
+                <strong>${escapeHTML(p.id)}</strong>
+            </div>
+
+            <div class="info-box" style="grid-column:1/-1">
+                <label>ທີ່ຢູ່</label>
+                <strong>${escapeHTML(p.address || "-")}</strong>
+            </div>
+
+            <div class="info-box" style="grid-column:1/-1">
+                <label>⚠️ ແພ້ຢາ / Allergy</label>
+                <strong>${escapeHTML(p.allergy || "ບໍ່ລະບຸ")}</strong>
+            </div>
+
+            <div class="info-box" style="grid-column:1/-1">
+                <label>Medical History</label>
+                <strong>${escapeHTML(p.history || "ບໍ່ມີຂໍ້ມູນ")}</strong>
+            </div>
+
+        </div>
+
+
+        <h3 class="section-title">
+            🩺 ປະຫວັດການກວດ
+        </h3>
+
+        <div>
+
+            ${
+                p.visits && p.visits.length
+                ?
+                p.visits.map(v => `
+                    <div class="history-item">
+                        <strong>${escapeHTML(v.date)}</strong>
+                        <p>${escapeHTML(v.diagnosis || "-")}</p>
+                    </div>
+                `).join("")
+                :
+                `
+                    <div class="history-item">
+                        <strong>ຍັງບໍ່ມີ Visit</strong>
+                        <p>
+                            ປະຫວັດການກວດຈະປາກົດຢູ່ບ່ອນນີ້
+                            ເມື່ອເຮົາສ້າງ Doctor Module.
+                        </p>
+                    </div>
+                `
+            }
+
+        </div>
+
+
+        <div style="margin-top:18px">
+
+            <button class="primary-btn"
+                onclick="editPatient('${p.id}')">
+                ✏️ ແກ້ໄຂຂໍ້ມູນ
+            </button>
+
+        </div>
+    `;
+
+
+    openView("profile");
+}
+
+
+/* ================= DASHBOARD COUNT ================= */
+
+function updateDashboardCount(){
+
+    const active =
+        patients.filter(p => p.status !== "Inactive").length;
+
+    const element =
+        document.getElementById("totalPatients");
+
+    if(element){
+        element.textContent = active.toLocaleString();
+    }
+}
+
+
+/* ================= UTILITIES ================= */
+
+function formatDate(value){
+
+    if(!value) return "-";
+
+    const d = new Date(value);
+
+    if(isNaN(d.getTime())) return value;
+
+    return d.toLocaleDateString("lo-LA");
+}
+
+
+function escapeHTML(value){
+
+    return String(value ?? "")
+        .replace(/&/g,"&amp;")
+        .replace(/</g,"&lt;")
+        .replace(/>/g,"&gt;")
+        .replace(/"/g,"&quot;")
+        .replace(/'/g,"&#039;");
+}
+
+
+/* ================= INIT ================= */
+
+updateDashboardCount();
+renderPatients();
+
+
+/* Close modal by clicking outside */
+
+document.getElementById("patientModal")
+.addEventListener("click", function(e){
+
+    if(e.target === this){
+        closePatientModal();
     }
 
-    document.getElementById('btnSavePharmacy').addEventListener('click', () => {
-        const patientName = document.getElementById('pharmacyPatientSelect').value;
+});
 
-        if (!patientName) {
-            showSysModal('ຜິດພາດ', 'ກະລຸນາເລືອກຄົນເຈັບ!', '⚠️');
-            return;
+<!-- =========================================================
+     PHASE 2 — DOCTOR + QUEUE + CHECK-IN + VITAL SIGNS
+     + VISIT + DIAGNOSIS + TREATMENT + PRESCRIPTION
+     ========================================================= -->
+
+<!-- ================= ADD THESE MENU ITEMS ================= -->
+
+<script>
+
+/* =========================================================
+   PHASE 2 DATA
+   ========================================================= */
+
+let clinicVisits =
+    JSON.parse(localStorage.getItem("clinic_visits") || "[]");
+
+let clinicQueue =
+    JSON.parse(localStorage.getItem("clinic_queue") || "[]");
+
+let clinicPrescriptions =
+    JSON.parse(
+        localStorage.getItem("clinic_prescriptions") || "[]"
+    );
+
+
+/* =========================================================
+   CREATE PHASE 2 VIEWS
+   ========================================================= */
+
+const phase2HTML = `
+
+<!-- ================= QUEUE VIEW ================= -->
+
+<div id="queueView" class="view">
+
+<div class="page-toolbar">
+
+<div>
+<h2>🎫 Queue Management</h2>
+<p>ຈັດການຄິວຄົນເຈັບ</p>
+</div>
+
+<button class="primary-btn"
+onclick="openCheckinModal()">
+＋ Check-in
+</button>
+
+</div>
+
+
+<div class="stats">
+
+<div class="card stat-card">
+<div>
+<div class="stat-label">ລໍຖ້າ</div>
+<div class="stat-number"
+id="waitingCount">0</div>
+</div>
+<div class="stat-icon"
+style="background:#fff5dc">⏳</div>
+</div>
+
+<div class="card stat-card">
+<div>
+<div class="stat-label">ກຳລັງກວດ</div>
+<div class="stat-number"
+id="doctorCount">0</div>
+</div>
+<div class="stat-icon"
+style="background:#e8f3ff">🩺</div>
+</div>
+
+<div class="card stat-card">
+<div>
+<div class="stat-label">ສຳເລັດ</div>
+<div class="stat-number"
+id="completedCount">0</div>
+</div>
+<div class="stat-icon"
+style="background:#e9f8ef">✅</div>
+</div>
+
+<div class="card stat-card">
+<div>
+<div class="stat-label">ທັງໝົດມື້ນີ້</div>
+<div class="stat-number"
+id="todayQueueCount">0</div>
+</div>
+<div class="stat-icon"
+style="background:#f1eaff">🎫</div>
+</div>
+
+</div>
+
+
+<div class="card" style="margin-top:18px">
+
+<div class="card-header">
+<h3>🎫 ຄິວມື້ນີ້</h3>
+
+<button class="secondary-btn"
+onclick="refreshQueue()">
+↻ Refresh
+</button>
+</div>
+
+<table>
+
+<thead>
+<tr>
+<th>Queue</th>
+<th>Patient</th>
+<th>HN</th>
+<th>ປະເພດ</th>
+<th>ເວລາ</th>
+<th>Doctor</th>
+<th>Status</th>
+<th>Action</th>
+</tr>
+</thead>
+
+<tbody id="queueTableBody"></tbody>
+
+</table>
+
+</div>
+
+</div>
+
+
+<!-- ================= DOCTOR VIEW ================= -->
+
+<div id="doctorView" class="view">
+
+<div class="page-toolbar">
+
+<div>
+<h2>🩺 Doctor / Consultation</h2>
+<p>ຫ້ອງກວດ ແລະ ບັນທຶກການກວດ</p>
+</div>
+
+<button class="secondary-btn"
+onclick="openView('queue')">
+← Queue
+</button>
+
+</div>
+
+
+<div class="card">
+
+<div class="card-header">
+<h3>👥 ຄົນເຈັບທີ່ລໍຖ້າກວດ</h3>
+</div>
+
+<table>
+
+<thead>
+<tr>
+<th>Queue</th>
+<th>Patient</th>
+<th>Vital Signs</th>
+<th>Doctor</th>
+<th>Status</th>
+<th>Action</th>
+</tr>
+</thead>
+
+<tbody id="doctorQueueBody"></tbody>
+
+</table>
+
+</div>
+
+</div>
+
+
+<!-- ================= VISIT VIEW ================= -->
+
+<div id="visitView" class="view">
+
+<div class="page-toolbar">
+
+<div>
+<h2>🩺 Patient Visit</h2>
+<p>ບັນທຶກການກວດຄົນເຈັບ</p>
+</div>
+
+<button class="secondary-btn"
+onclick="openView('doctor')">
+← Doctor
+</button>
+
+</div>
+
+<div id="visitContent"></div>
+
+</div>
+
+
+<!-- ================= CHECK-IN MODAL ================= -->
+
+<div id="checkinModal" class="modal">
+
+<div class="modal-box">
+
+<div class="modal-header">
+
+<h3>🎫 Patient Check-in</h3>
+
+<button class="close"
+onclick="closeCheckinModal()">×</button>
+
+</div>
+
+<form onsubmit="saveCheckin(event)">
+
+<div class="modal-body">
+
+<div class="form-grid">
+
+<div class="form-group full">
+
+<label>ຄົ້ນຫາຄົນເຈັບ *</label>
+
+<select id="checkinPatient"
+required>
+
+<option value="">
+-- ເລືອກຄົນເຈັບ --
+</option>
+
+</select>
+
+</div>
+
+
+<div class="form-group">
+
+<label>ປະເພດການມາ</label>
+
+<select id="visitType">
+
+<option value="ກວດທົ່ວໄປ">
+ກວດທົ່ວໄປ
+</option>
+
+<option value="ສຸກເສີນ">
+ສຸກເສີນ
+</option>
+
+<option value="ນັດຕິດຕາມ">
+ນັດຕິດຕາມ
+</option>
+
+<option value="ສົ່ງຕໍ່">
+ສົ່ງຕໍ່
+</option>
+
+</select>
+
+</div>
+
+
+<div class="form-group">
+
+<label>Doctor</label>
+
+<select id="checkinDoctor">
+
+<option value="ນພ. ສົມພອນ">
+ນພ. ສົມພອນ
+</option>
+
+<option value="ພຍ. ນິດາ">
+ພຍ. ນິດາ
+</option>
+
+<option value="ນພ. ວິໄລ">
+ນພ. ວິໄລ
+</option>
+
+</select>
+
+</div>
+
+
+<div class="form-group full">
+
+<label>ໝາຍເຫດ</label>
+
+<textarea
+id="checkinNote"
+placeholder="ໝາຍເຫດສຳລັບ Check-in">
+</textarea>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="modal-footer">
+
+<button
+type="button"
+class="secondary-btn"
+onclick="closeCheckinModal()">
+ຍົກເລີກ </button>
+
+<button
+type="submit"
+class="primary-btn">
+🎫 ອອກຄິວ </button>
+
+</div>
+
+</form>
+
+</div>
+
+</div>
+
+<!-- ================= VITAL MODAL ================= -->
+
+<div id="vitalModal" class="modal">
+
+<div class="modal-box">
+
+<div class="modal-header">
+
+<h3>❤️ Vital Signs</h3>
+
+<button class="close"
+onclick="closeVitalModal()">×</button>
+
+</div>
+
+<form onsubmit="saveVital(event)">
+
+<div class="modal-body">
+
+<input
+type="hidden"
+id="vitalQueueId">
+
+<div class="form-grid">
+
+<div class="form-group">
+
+<label>Temperature °C</label>
+
+<input
+id="temperature"
+type="number"
+step="0.1"
+placeholder="36.5">
+
+</div>
+
+<div class="form-group">
+
+<label>Blood Pressure</label>
+
+<input
+id="bloodPressure"
+placeholder="120/80">
+
+</div>
+
+<div class="form-group">
+
+<label>Heart Rate / bpm</label>
+
+<input
+id="heartRate"
+type="number"
+placeholder="72">
+
+</div>
+
+<div class="form-group">
+
+<label>Respiratory Rate</label>
+
+<input
+id="respiratoryRate"
+type="number"
+placeholder="18">
+
+</div>
+
+<div class="form-group">
+
+<label>SpO₂ %</label>
+
+<input
+id="spo2"
+type="number"
+placeholder="98">
+
+</div>
+
+<div class="form-group">
+
+<label>Weight kg</label>
+
+<input
+id="weight"
+type="number"
+step="0.1"
+placeholder="65">
+
+</div>
+
+<div class="form-group">
+
+<label>Height cm</label>
+
+<input
+id="height"
+type="number"
+step="0.1"
+placeholder="165">
+
+</div>
+
+<div class="form-group">
+
+<label>Pain Score 0–10</label>
+
+<input
+id="painScore"
+type="number"
+min="0"
+max="10"
+placeholder="0">
+
+</div>
+
+<div class="form-group full">
+
+<label>ອາການເບື້ອງຕົ້ນ</label>
+
+<textarea
+id="vitalNote"
+placeholder="ອາການຂອງຄົນເຈັບ">
+</textarea>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="modal-footer">
+
+<button
+type="button"
+class="secondary-btn"
+onclick="closeVitalModal()">
+ຍົກເລີກ </button>
+
+<button
+type="submit"
+class="primary-btn">
+💾 ບັນທຶກ Vital Signs </button>
+
+</div>
+
+</form>
+
+</div>
+
+</div>
+
+<!-- ================= PRESCRIPTION MODAL ================= -->
+
+<div id="prescriptionModal" class="modal">
+
+<div class="modal-box">
+
+<div class="modal-header">
+
+<h3>💊 Prescription</h3>
+
+<button
+class="close"
+onclick="closePrescriptionModal()">
+× </button>
+
+</div>
+
+<form onsubmit="savePrescription(event)">
+
+<div class="modal-body">
+
+<input
+type="hidden"
+id="prescriptionVisitId">
+
+<div class="form-grid">
+
+<div class="form-group">
+
+<label>ຊື່ຢາ *</label>
+
+<input
+id="medicineName"
+required
+placeholder="ຕົວຢ່າງ: Paracetamol 500mg">
+
+</div>
+
+<div class="form-group">
+
+<label>ຈຳນວນ *</label>
+
+<input
+id="medicineQty"
+type="number"
+min="1"
+required
+placeholder="10">
+
+</div>
+
+<div class="form-group">
+
+<label>ວິທີໃຊ້ *</label>
+
+<input
+id="medicineDose"
+required
+placeholder="1 ເມັດ">
+
+</div>
+
+<div class="form-group">
+
+<label>ຄວາມຖີ່</label>
+
+<select id="medicineFrequency">
+
+<option>1 ເທື່ອ/ມື້</option>
+<option>2 ເທື່ອ/ມື້</option>
+<option>3 ເທື່ອ/ມື້</option>
+<option>4 ເທື່ອ/ມື້</option>
+<option>ເມື່ອມີອາການ</option>
+
+</select>
+
+</div>
+
+<div class="form-group">
+
+<label>ໄລຍະເວລາ</label>
+
+<input
+id="medicineDuration"
+placeholder="5 ມື້">
+
+</div>
+
+<div class="form-group">
+
+<label>ເວລາກິນ</label>
+
+<select id="medicineTiming">
+
+<option>ຫຼັງອາຫານ</option>
+<option>ກ່ອນອາຫານ</option>
+<option>ກ່ອນນອນ</option>
+<option>ຕາມອາການ</option>
+
+</select>
+
+</div>
+
+<div class="form-group full">
+
+<label>ຄຳແນະນຳ</label>
+
+<textarea
+id="medicineInstruction"
+placeholder="ຄຳແນະນຳເພີ່ມເຕີມ">
+</textarea>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="modal-footer">
+
+<button
+type="button"
+class="secondary-btn"
+onclick="closePrescriptionModal()">
+ຍົກເລີກ </button>
+
+<button
+type="submit"
+class="primary-btn">
+💊 ບັນທຶກຢາ </button>
+
+</div>
+
+</form>
+
+</div>
+
+</div>
+
+`;
+
+/* Insert Phase 2 before closing main content */
+
+document
+.querySelector(".content")
+.insertAdjacentHTML("beforeend", phase2HTML);
+
+/* =========================================================
+ADD MENU ITEMS TO SIDEBAR
+========================================================= */
+
+const sidebar =
+document.querySelector(".sidebar");
+
+const menuTitle =
+document.createElement("div");
+
+menuTitle.className = "menu-title";
+menuTitle.textContent = "CLINICAL";
+
+sidebar.appendChild(menuTitle);
+
+function createMenuItem(icon,text,view){
+
+```
+const item =
+document.createElement("div");
+
+item.className = "menu-item";
+item.dataset.view = view;
+
+item.innerHTML = `
+    <div class="menu-icon">${icon}</div>
+    <span>${text}</span>
+`;
+
+item.addEventListener("click",function(){
+
+    document
+    .querySelectorAll(".menu-item")
+    .forEach(x =>
+        x.classList.remove("active")
+    );
+
+    item.classList.add("active");
+
+    openView(view);
+
+});
+
+sidebar.appendChild(item);
+```
+
+}
+
+createMenuItem("🎫","Queue / Check-in","queue");
+createMenuItem("🩺","Doctor","doctor");
+
+/* =========================================================
+EXTEND openView
+========================================================= */
+
+const originalOpenView = window.openView;
+
+window.openView = function(view){
+
+```
+originalOpenView(view);
+
+if(view === "queue"){
+
+    setHeader(
+        "Queue Management",
+        "ຈັດການຄິວ ແລະ Check-in"
+    );
+
+    renderQueue();
+
+}
+
+if(view === "doctor"){
+
+    setHeader(
+        "Doctor",
+        "ຫ້ອງກວດ ແລະ Clinical Consultation"
+    );
+
+    renderDoctorQueue();
+
+}
+
+if(view === "visit"){
+
+    setHeader(
+        "Patient Visit",
+        "ບັນທຶກການກວດ"
+    );
+
+}
+```
+
+};
+
+/* =========================================================
+CHECK-IN
+========================================================= */
+
+function openCheckinModal(){
+
+```
+const select =
+document.getElementById("checkinPatient");
+
+select.innerHTML = `
+    <option value="">
+    -- ເລືອກຄົນເຈັບ --
+    </option>
+`;
+
+patients
+.filter(p => p.status !== "Inactive")
+.forEach(p => {
+
+    const option =
+    document.createElement("option");
+
+    option.value = p.id;
+
+    option.textContent =
+        `${p.id} — ${p.name}` +
+        (p.hn ? ` (${p.hn})` : "");
+
+    select.appendChild(option);
+
+});
+
+document
+.getElementById("checkinModal")
+.classList.add("show");
+```
+
+}
+
+function closeCheckinModal(){
+
+```
+document
+.getElementById("checkinModal")
+.classList.remove("show");
+```
+
+}
+
+/* =========================================================
+QUEUE NUMBER
+========================================================= */
+
+function generateQueueNumber(){
+
+```
+const today =
+    new Date().toISOString().slice(0,10);
+
+const todayQueues =
+    clinicQueue.filter(q => q.date === today);
+
+let max = 0;
+
+todayQueues.forEach(q => {
+
+    const n =
+    parseInt(
+        String(q.queueNumber)
+        .replace("Q","")
+    );
+
+    if(!isNaN(n) && n > max){
+        max = n;
+    }
+
+});
+
+return "Q" +
+    String(max + 1).padStart(3,"0");
+```
+
+}
+
+/* =========================================================
+SAVE CHECK-IN
+========================================================= */
+
+function saveCheckin(event){
+
+```
+event.preventDefault();
+
+const patientId =
+    document.getElementById("checkinPatient").value;
+
+const patient =
+    patients.find(
+        p => p.id === patientId
+    );
+
+if(!patient){
+
+    alert("ກະລຸນາເລືອກຄົນເຈັບ");
+    return;
+}
+
+
+const now = new Date();
+
+const queue = {
+
+    id:
+        "QUEUE-" +
+        Date.now(),
+
+    queueNumber:
+        generateQueueNumber(),
+
+    patientId:
+        patient.id,
+
+    patientName:
+        patient.name,
+
+    hn:
+        patient.hn || "",
+
+    type:
+        document.getElementById("visitType").value,
+
+    doctor:
+        document.getElementById("checkinDoctor").value,
+
+    note:
+        document.getElementById("checkinNote").value,
+
+    date:
+        now.toISOString().slice(0,10),
+
+    checkInTime:
+        now.toLocaleTimeString("lo-LA",{
+            hour:"2-digit",
+            minute:"2-digit"
+        }),
+
+    status:
+        "WAITING",
+
+    vitalSigns:
+        null,
+
+    visitId:
+        null,
+
+    createdAt:
+        now.toISOString()
+
+};
+
+
+clinicQueue.push(queue);
+
+
+localStorage.setItem(
+    "clinic_queue",
+    JSON.stringify(clinicQueue)
+);
+
+
+closeCheckinModal();
+
+renderQueue();
+
+updateQueueStats();
+
+
+alert(
+    "Check-in ສຳເລັດ\n\n" +
+    "ຄິວ: " +
+    queue.queueNumber +
+    "\n" +
+    "Patient: " +
+    queue.patientName
+);
+```
+
+}
+
+/* =========================================================
+RENDER QUEUE
+========================================================= */
+
+function renderQueue(){
+
+```
+const body =
+document.getElementById("queueTableBody");
+
+if(!body) return;
+
+
+const today =
+new Date().toISOString().slice(0,10);
+
+
+const list =
+clinicQueue
+.filter(q => q.date === today);
+
+
+if(!list.length){
+
+    body.innerHTML = `
+    <tr>
+        <td colspan="8" class="empty">
+            🎫<br><br>
+            ມື້ນີ້ຍັງບໍ່ມີຄິວ
+        </td>
+    </tr>
+    `;
+
+    updateQueueStats();
+    return;
+}
+
+
+body.innerHTML =
+list.map(q => {
+
+    let badge = "blue";
+    let text = "ລໍຖ້າ";
+
+    if(q.status === "IN_PROGRESS"){
+        badge = "yellow";
+        text = "ກຳລັງກວດ";
+    }
+
+    if(q.status === "COMPLETED"){
+        badge = "green";
+        text = "ສຳເລັດ";
+    }
+
+    if(q.status === "CANCELLED"){
+        badge = "red";
+        text = "ຍົກເລີກ";
+    }
+
+
+    return `
+
+    <tr>
+
+    <td>
+        <strong style="font-size:16px">
+            ${escapeHTML(q.queueNumber)}
+        </strong>
+    </td>
+
+    <td>
+        <div class="patient">
+
+            <div class="patient-avatar">
+                ${escapeHTML(
+                    q.patientName.charAt(0)
+                )}
+            </div>
+
+            <div>
+                <strong>
+                    ${escapeHTML(q.patientName)}
+                </strong>
+            </div>
+
+        </div>
+    </td>
+
+    <td>
+        ${escapeHTML(q.hn || "-")}
+    </td>
+
+    <td>
+        ${escapeHTML(q.type)}
+    </td>
+
+    <td>
+        ${escapeHTML(q.checkInTime)}
+    </td>
+
+    <td>
+        ${escapeHTML(q.doctor)}
+    </td>
+
+    <td>
+        <span class="badge ${badge}">
+            ${text}
+        </span>
+    </td>
+
+    <td>
+
+    ${
+        q.status === "WAITING"
+        ?
+        `<button
+            class="action-btn"
+            onclick="startDoctor('${q.id}')">
+            🩺 ເອີ້ນ
+        </button>`
+        :
+        ""
+    }
+
+    ${
+        q.status !== "COMPLETED" &&
+        q.status !== "CANCELLED"
+        ?
+        `<button
+            class="action-btn"
+            onclick="openVisit('${q.id}')">
+            👁️ ກວດ
+        </button>`
+        :
+        ""
+    }
+
+    </td>
+
+    </tr>
+    `;
+
+}).join("");
+
+
+updateQueueStats();
+```
+
+}
+
+/* =========================================================
+QUEUE STATS
+========================================================= */
+
+function updateQueueStats(){
+
+```
+const today =
+new Date().toISOString().slice(0,10);
+
+const list =
+clinicQueue.filter(q => q.date === today);
+
+
+const waiting =
+list.filter(
+    q => q.status === "WAITING"
+).length;
+
+
+const doctor =
+list.filter(
+    q => q.status === "IN_PROGRESS"
+).length;
+
+
+const completed =
+list.filter(
+    q => q.status === "COMPLETED"
+).length;
+
+
+const waitingElement =
+document.getElementById("waitingCount");
+
+const doctorElement =
+document.getElementById("doctorCount");
+
+const completedElement =
+document.getElementById("completedCount");
+
+const totalElement =
+document.getElementById("todayQueueCount");
+
+
+if(waitingElement)
+    waitingElement.textContent = waiting;
+
+if(doctorElement)
+    doctorElement.textContent = doctor;
+
+if(completedElement)
+    completedElement.textContent = completed;
+
+if(totalElement)
+    totalElement.textContent = list.length;
+```
+
+}
+
+function refreshQueue(){
+
+```
+renderQueue();
+
+renderDoctorQueue();
+
+alert("Queue Refresh ສຳເລັດ");
+```
+
+}
+
+/* =========================================================
+START DOCTOR
+========================================================= */
+
+function startDoctor(queueId){
+
+```
+const queue =
+clinicQueue.find(
+    q => q.id === queueId
+);
+
+if(!queue) return;
+
+
+queue.status = "IN_PROGRESS";
+
+queue.calledAt =
+    new Date().toISOString();
+
+
+localStorage.setItem(
+    "clinic_queue",
+    JSON.stringify(clinicQueue)
+);
+
+
+renderQueue();
+
+renderDoctorQueue();
+
+updateQueueStats();
+
+openVisit(queueId);
+```
+
+}
+
+/* =========================================================
+DOCTOR QUEUE
+========================================================= */
+
+function renderDoctorQueue(){
+
+```
+const body =
+document.getElementById("doctorQueueBody");
+
+if(!body) return;
+
+
+const list =
+clinicQueue.filter(
+    q =>
+        q.status === "WAITING" ||
+        q.status === "IN_PROGRESS"
+);
+
+
+if(!list.length){
+
+    body.innerHTML = `
+    <tr>
+        <td colspan="6" class="empty">
+            🩺<br><br>
+            ບໍ່ມີຄົນເຈັບລໍຖ້າກວດ
+        </td>
+    </tr>
+    `;
+
+    return;
+}
+
+
+body.innerHTML =
+list.map(q => `
+
+    <tr>
+
+    <td>
+        <strong style="font-size:18px">
+            ${escapeHTML(q.queueNumber)}
+        </strong>
+    </td>
+
+    <td>
+        <strong>
+            ${escapeHTML(q.patientName)}
+        </strong>
+        <br>
+        <small>
+            ${escapeHTML(q.patientId)}
+        </small>
+    </td>
+
+    <td>
+
+        ${
+            q.vitalSigns
+            ?
+            `<span class="badge green">
+                ✓ ບັນທຶກແລ້ວ
+            </span>`
+            :
+            `<span class="badge yellow">
+                ຍັງບໍ່ມີ
+            </span>`
         }
 
-        if (pharmacyCart.length === 0) {
-            showSysModal('ຜິດພາດ', 'ກະລຸນາເພີ່ມລາຍການຢາຢ່າງໜ້ອຍ 1 ລາຍການ!', '⚠️');
-            return;
+    </td>
+
+    <td>
+        ${escapeHTML(q.doctor)}
+    </td>
+
+    <td>
+
+        ${
+            q.status === "WAITING"
+            ?
+            `<span class="badge blue">
+                ລໍຖ້າ
+            </span>`
+            :
+            `<span class="badge yellow">
+                ກຳລັງກວດ
+            </span>`
         }
 
-        let grandTotal = pharmacyCart.reduce((sum, item) => sum + item.total, 0);
+    </td>
 
-        let pharmacyRecords = JSON.parse(localStorage.getItem('clinic_pharmacy_records')) || [];
-        pharmacyRecords.push({
-            patient_name: patientName,
-            items: pharmacyCart,
-            total_amount: grandTotal,
-            created_at: new Date().toLocaleString('lo-LA')
-        });
-        localStorage.setItem('clinic_pharmacy_records', JSON.stringify(pharmacyRecords));
+    <td>
 
-        let payments = JSON.parse(localStorage.getItem('clinic_payments')) || [];
-        payments.push({
-            id: Date.now(),
-            patient_name: patientName,
-            amount: grandTotal,
-            description: 'ຄ່າຈ່າຍຢາ (' + pharmacyCart.map(i => i.name + ' x' + i.qty).join(', ') + ')',
-            created_at: new Date().toLocaleString('lo-LA')
-        });
-        localStorage.setItem('clinic_payments', JSON.stringify(payments));
+        <button
+            class="action-btn"
+            onclick="openVitalModal('${q.id}')">
+            ❤️ Vital
+        </button>
 
-        showSysModal('ສຳເລັດ', 'ຈ່າຍຢາ ແລະ ບັນທຶກເຂົ້າ POS ສຳເລັດ!', '✅');
+        <button
+            class="action-btn"
+            onclick="openVisit('${q.id}')">
+            🩺 ກວດ
+        </button>
 
-        pharmacyCart = [];
-        renderPharmacyCart();
-        document.getElementById('pharmacyPatientSelect').value = '';
-        pharmacyModal.style.display = 'none';
+    </td>
 
-        loadDashboardData();
-    });
+    </tr>
 
-    // ---------------------------------------------------------
-    // ລະບົບ POS / ຮັບເງິນ Module
-    // ---------------------------------------------------------
-    const posModal = document.getElementById('posModal');
-    const btnOpenPosQuick = document.getElementById('btn-open-pos-quick');
-    const btnClosePos = document.getElementById('btnClosePosModal');
+`).join("");
+```
 
-    const openPosHandler = () => {
-        loadPosTable();
-        posModal.style.display = 'flex';
+}
+
+/* =========================================================
+VITAL SIGNS
+========================================================= */
+
+function openVitalModal(queueId){
+
+```
+const q =
+clinicQueue.find(
+    x => x.id === queueId
+);
+
+if(!q) return;
+
+
+document.getElementById(
+    "vitalQueueId"
+).value = queueId;
+
+
+const v = q.vitalSigns || {};
+
+
+document.getElementById(
+    "temperature"
+).value = v.temperature || "";
+
+document.getElementById(
+    "bloodPressure"
+).value = v.bloodPressure || "";
+
+document.getElementById(
+    "heartRate"
+).value = v.heartRate || "";
+
+document.getElementById(
+    "respiratoryRate"
+).value = v.respiratoryRate || "";
+
+document.getElementById(
+    "spo2"
+).value = v.spo2 || "";
+
+document.getElementById(
+    "weight"
+).value = v.weight || "";
+
+document.getElementById(
+    "height"
+).value = v.height || "";
+
+document.getElementById(
+    "painScore"
+).value = v.painScore || "";
+
+document.getElementById(
+    "vitalNote"
+).value = v.note || "";
+
+
+document
+.getElementById("vitalModal")
+.classList.add("show");
+```
+
+}
+
+function closeVitalModal(){
+
+```
+document
+.getElementById("vitalModal")
+.classList.remove("show");
+```
+
+}
+
+function saveVital(event){
+
+```
+event.preventDefault();
+
+
+const queueId =
+document.getElementById(
+    "vitalQueueId"
+).value;
+
+
+const q =
+clinicQueue.find(
+    x => x.id === queueId
+);
+
+
+if(!q) return;
+
+
+q.vitalSigns = {
+
+    temperature:
+    document.getElementById(
+        "temperature"
+    ).value,
+
+    bloodPressure:
+    document.getElementById(
+        "bloodPressure"
+    ).value,
+
+    heartRate:
+    document.getElementById(
+        "heartRate"
+    ).value,
+
+    respiratoryRate:
+    document.getElementById(
+        "respiratoryRate"
+    ).value,
+
+    spo2:
+    document.getElementById(
+        "spo2"
+    ).value,
+
+    weight:
+    document.getElementById(
+        "weight"
+    ).value,
+
+    height:
+    document.getElementById(
+        "height"
+    ).value,
+
+    painScore:
+    document.getElementById(
+        "painScore"
+    ).value,
+
+    note:
+    document.getElementById(
+        "vitalNote"
+    ).value,
+
+    recordedAt:
+    new Date().toISOString()
+
+};
+
+
+localStorage.setItem(
+    "clinic_queue",
+    JSON.stringify(clinicQueue)
+);
+
+
+closeVitalModal();
+
+renderDoctorQueue();
+
+renderQueue();
+
+alert(
+    "Vital Signs ບັນທຶກສຳເລັດ"
+);
+```
+
+}
+
+/* =========================================================
+VISIT
+========================================================= */
+
+function openVisit(queueId){
+
+```
+const q =
+clinicQueue.find(
+    x => x.id === queueId
+);
+
+if(!q) return;
+
+
+let visit =
+clinicVisits.find(
+    v => v.queueId === queueId
+);
+
+
+if(!visit){
+
+    visit = {
+
+        id:
+            "VISIT-" +
+            Date.now(),
+
+        queueId:
+            q.id,
+
+        patientId:
+            q.patientId,
+
+        patientName:
+            q.patientName,
+
+        hn:
+            q.hn,
+
+        doctor:
+            q.doctor,
+
+        date:
+            new Date()
+            .toISOString()
+            .slice(0,10),
+
+        chiefComplaint:"",
+        symptoms:"",
+        diagnosis:"",
+        treatment:"",
+        advice:"",
+        followUp:"",
+        status:"IN_PROGRESS",
+
+        createdAt:
+            new Date().toISOString()
+
     };
 
-    if(btnOpenPosQuick) btnOpenPosQuick.addEventListener('click', openPosHandler);
-    if(btnClosePos) btnClosePos.addEventListener('click', () => { posModal.style.display = 'none'; });
 
-    function loadPosTable() {
-        const tbody = document.getElementById('pos-table-body');
-        tbody.innerHTML = '';
-        let payments = JSON.parse(localStorage.getItem('clinic_payments')) || [];
+    clinicVisits.push(visit);
 
-        if (payments.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:#7b8794;">ບໍ່ມີລາຍການຮັບເງິນ</td></tr>`;
-            return;
-        }
+    q.visitId = visit.id;
 
-        payments.forEach((item, index) => {
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td><strong>${item.patient_name}</strong><br><small>${item.created_at}</small></td>
-                <td>${item.description || 'ຄ່າບໍລິການຄລີນິກ'}</td>
-                <td style="color: #1976d2; font-weight: bold;">${Number(item.amount).toLocaleString()} ₭</td>
-                <td><button type="button" onclick="checkoutPayment(${item.id || index})" style="background:#159957; color:white; border:none; padding:6px 12px; border-radius:4px; cursor:pointer; font-weight:bold;">ຮັບເງິນແລ້ວ</button></td>
-            `;
-            tbody.appendChild(tr);
-        });
+
+    localStorage.setItem(
+        "clinic_visits",
+        JSON.stringify(clinicVisits)
+    );
+
+    localStorage.setItem(
+        "clinic_queue",
+        JSON.stringify(clinicQueue)
+    );
+
+}
+
+
+renderVisit(visit,q);
+
+openView("visit");
+```
+
+}
+
+/* =========================================================
+RENDER VISIT
+========================================================= */
+
+function renderVisit(visit,q){
+
+```
+const content =
+document.getElementById(
+    "visitContent"
+);
+
+
+const v =
+q.vitalSigns || {};
+
+
+const prescriptionList =
+clinicPrescriptions.filter(
+    p => p.visitId === visit.id
+);
+
+
+content.innerHTML = `
+
+<div class="card">
+
+    <div class="profile-head">
+
+        <div class="profile-avatar">
+            ${escapeHTML(
+                q.patientName.charAt(0)
+            )}
+        </div>
+
+        <div>
+
+            <h2>
+                ${escapeHTML(q.patientName)}
+            </h2>
+
+            <p>
+                ${escapeHTML(q.patientId)}
+                ${q.hn
+                    ? " • " +
+                      escapeHTML(q.hn)
+                    : ""}
+                • Queue:
+                ${escapeHTML(q.queueNumber)}
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <!-- VITAL SIGNS -->
+
+    <h3 class="section-title">
+        ❤️ Vital Signs
+    </h3>
+
+
+    <div class="profile-grid">
+
+        <div class="info-box">
+            <label>Temperature</label>
+            <strong>
+                ${escapeHTML(
+                    v.temperature || "-"
+                )} °C
+            </strong>
+        </div>
+
+        <div class="info-box">
+            <label>Blood Pressure</label>
+            <strong>
+                ${escapeHTML(
+                    v.bloodPressure || "-"
+                )}
+            </strong>
+        </div>
+
+        <div class="info-box">
+            <label>Heart Rate</label>
+            <strong>
+                ${escapeHTML(
+                    v.heartRate || "-"
+                )} bpm
+            </strong>
+        </div>
+
+        <div class="info-box">
+            <label>SpO₂</label>
+            <strong>
+                ${escapeHTML(
+                    v.spo2 || "-"
+                )} %
+            </strong>
+        </div>
+
+        <div class="info-box">
+            <label>Weight</label>
+            <strong>
+                ${escapeHTML(
+                    v.weight || "-"
+                )} kg
+            </strong>
+        </div>
+
+        <div class="info-box">
+            <label>Height</label>
+            <strong>
+                ${escapeHTML(
+                    v.height || "-"
+                )} cm
+            </strong>
+        </div>
+
+    </div>
+
+
+    <div style="margin-top:10px">
+
+        <button
+            class="secondary-btn"
+            onclick="openVitalModal('${q.id}')">
+            ❤️ ແກ້ Vital Signs
+        </button>
+
+    </div>
+
+
+    <!-- CLINICAL -->
+
+    <h3 class="section-title">
+        🩺 Clinical Assessment
+    </h3>
+
+
+    <div class="form-grid">
+
+        <div class="form-group full">
+
+            <label>
+                Chief Complaint / ອາການຫຼັກ
+            </label>
+
+            <textarea
+                id="visitComplaint"
+                placeholder="ອາການຫຼັກທີ່ຄົນເຈັບມາພົບໝໍ">${escapeHTML(
+                    visit.chiefComplaint
+                )}</textarea>
+
+        </div>
+
+
+        <div class="form-group full">
+
+            <label>
+                Symptoms / ອາການ
+            </label>
+
+            <textarea
+                id="visitSymptoms"
+                placeholder="ລາຍລະອຽດອາການ">${escapeHTML(
+                    visit.symptoms
+                )}</textarea>
+
+        </div>
+
+
+        <div class="form-group full">
+
+            <label>
+                Diagnosis / ການວິນິດໄສ *
+            </label>
+
+            <textarea
+                id="visitDiagnosis"
+                placeholder="ການວິນິດໄສ">${escapeHTML(
+                    visit.diagnosis
+                )}</textarea>
+
+        </div>
+
+
+        <div class="form-group full">
+
+            <label>
+                Treatment / ການປິ່ນປົວ
+            </label>
+
+            <textarea
+                id="visitTreatment"
+                placeholder="ລາຍລະອຽດການປິ່ນປົວ">${escapeHTML(
+                    visit.treatment
+                )}</textarea>
+
+        </div>
+
+
+        <div class="form-group">
+
+            <label>
+                Follow-up
+            </label>
+
+            <input
+                id="visitFollowUp"
+                value="${escapeHTML(
+                    visit.followUp
+                )}"
+                placeholder="ຕົວຢ່າງ: 7 ມື້">
+
+        </div>
+
+
+        <div class="form-group">
+
+            <label>
+                Doctor
+            </label>
+
+            <input
+                value="${escapeHTML(q.doctor)}"
+                readonly>
+
+        </div>
+
+
+        <div class="form-group full">
+
+            <label>
+                ຄຳແນະນຳ
+            </label>
+
+            <textarea
+                id="visitAdvice"
+                placeholder="ຄຳແນະນຳຄົນເຈັບ">${escapeHTML(
+                    visit.advice
+                )}</textarea>
+
+        </div>
+
+    </div>
+
+
+    <div style="
+        display:flex;
+        gap:8px;
+        margin-top:15px;
+        flex-wrap:wrap;
+    ">
+
+        <button
+            class="primary-btn"
+            onclick="saveVisit('${visit.id}')">
+            💾 ບັນທຶກ Visit
+        </button>
+
+        <button
+            class="secondary-btn"
+            onclick="openPrescriptionModal('${visit.id}')">
+            💊 ເພີ່ມ Prescription
+        </button>
+
+        <button
+            class="secondary-btn"
+            onclick="completeVisit('${visit.id}')">
+            ✅ ຈົບການກວດ
+        </button>
+
+    </div>
+
+
+    <!-- PRESCRIPTIONS -->
+
+    <h3 class="section-title">
+        💊 Prescription
+    </h3>
+
+
+    ${
+        prescriptionList.length
+        ?
+
+        prescriptionList.map((p,index) => `
+
+            <div class="history-item">
+
+                <strong>
+                    ${index + 1}.
+                    ${escapeHTML(
+                        p.medicineName
+                    )}
+                </strong>
+
+                <p>
+                    ${escapeHTML(
+                        p.quantity
+                    )} ໜ່ວຍ —
+                    ${escapeHTML(
+                        p.dose
+                    )} —
+                    ${escapeHTML(
+                        p.frequency
+                    )} —
+                    ${escapeHTML(
+                        p.duration
+                    )}
+                </p>
+
+                <p>
+                    ${escapeHTML(
+                        p.timing
+                    )}
+                </p>
+
+            </div>
+
+        `).join("")
+
+        :
+
+        `
+        <div class="history-item">
+
+            <strong>
+                ຍັງບໍ່ມີ Prescription
+            </strong>
+
+            <p>
+                ກົດ "ເພີ່ມ Prescription"
+                ເພື່ອສັ່ງຢາ.
+            </p>
+
+        </div>
+        `
     }
 
-    function checkoutPayment(id) {
-        let payments = JSON.parse(localStorage.getItem('clinic_payments')) || [];
-        payments = payments.filter(p => p.id !== id && p.id != null);
-        if (typeof id === 'number' && payments.length === 0) {
-            let allPay = JSON.parse(localStorage.getItem('clinic_payments')) || [];
-            allPay.splice(id, 1);
-            payments = allPay;
+</div>
+
+`;
+```
+
+}
+
+/* =========================================================
+SAVE VISIT
+========================================================= */
+
+function saveVisit(visitId){
+
+```
+const visit =
+clinicVisits.find(
+    v => v.id === visitId
+);
+
+if(!visit) return;
+
+
+visit.chiefComplaint =
+    document.getElementById(
+        "visitComplaint"
+    ).value.trim();
+
+
+visit.symptoms =
+    document.getElementById(
+        "visitSymptoms"
+    ).value.trim();
+
+
+visit.diagnosis =
+    document.getElementById(
+        "visitDiagnosis"
+    ).value.trim();
+
+
+visit.treatment =
+    document.getElementById(
+        "visitTreatment"
+    ).value.trim();
+
+
+visit.followUp =
+    document.getElementById(
+        "visitFollowUp"
+    ).value.trim();
+
+
+visit.advice =
+    document.getElementById(
+        "visitAdvice"
+    ).value.trim();
+
+
+visit.updatedAt =
+    new Date().toISOString();
+
+
+localStorage.setItem(
+    "clinic_visits",
+    JSON.stringify(clinicVisits)
+);
+
+
+alert(
+    "Visit ບັນທຶກສຳເລັດ"
+);
+```
+
+}
+
+/* =========================================================
+COMPLETE VISIT
+========================================================= */
+
+function completeVisit(visitId){
+
+```
+const visit =
+clinicVisits.find(
+    v => v.id === visitId
+);
+
+if(!visit) return;
+
+
+const diagnosis =
+document.getElementById(
+    "visitDiagnosis"
+).value.trim();
+
+
+if(!diagnosis){
+
+    alert(
+        "ກະລຸນາບັນທຶກ Diagnosis ກ່ອນ"
+    );
+
+    return;
+}
+
+
+saveVisit(visitId);
+
+
+visit.status =
+    "COMPLETED";
+
+
+visit.completedAt =
+    new Date().toISOString();
+
+
+const q =
+clinicQueue.find(
+    x => x.id === visit.queueId
+);
+
+
+if(q){
+
+    q.status =
+        "COMPLETED";
+
+}
+
+
+localStorage.setItem(
+    "clinic_visits",
+    JSON.stringify(clinicVisits)
+);
+
+
+localStorage.setItem(
+    "clinic_queue",
+    JSON.stringify(clinicQueue)
+);
+
+
+alert(
+    "ການກວດສຳເລັດ\n" +
+    "Patient: " +
+    visit.patientName
+);
+
+
+renderQueue();
+
+renderDoctorQueue();
+
+updateQueueStats();
+
+openView("queue");
+```
+
+}
+
+/* =========================================================
+PRESCRIPTION
+========================================================= */
+
+function openPrescriptionModal(visitId){
+
+```
+document.getElementById(
+    "prescriptionVisitId"
+).value = visitId;
+
+
+document.getElementById(
+    "medicineName"
+).value = "";
+
+document.getElementById(
+    "medicineQty"
+).value = "";
+
+document.getElementById(
+    "medicineDose"
+).value = "";
+
+document.getElementById(
+    "medicineDuration"
+).value = "";
+
+document.getElementById(
+    "medicineInstruction"
+).value = "";
+
+
+document
+.getElementById(
+    "prescriptionModal"
+)
+.classList.add("show");
+```
+
+}
+
+function closePrescriptionModal(){
+
+```
+document
+.getElementById(
+    "prescriptionModal"
+)
+.classList.remove("show");
+```
+
+}
+
+function savePrescription(event){
+
+```
+event.preventDefault();
+
+
+const visitId =
+document.getElementById(
+    "prescriptionVisitId"
+).value;
+
+
+const visit =
+clinicVisits.find(
+    v => v.id === visitId
+);
+
+
+if(!visit) return;
+
+
+const prescription = {
+
+    id:
+        "RX-" +
+        Date.now(),
+
+    visitId:
+        visit.id,
+
+    patientId:
+        visit.patientId,
+
+    patientName:
+        visit.patientName,
+
+    doctor:
+        visit.doctor,
+
+    medicineName:
+        document.getElementById(
+            "medicineName"
+        ).value.trim(),
+
+    quantity:
+        document.getElementById(
+            "medicineQty"
+        ).value,
+
+    dose:
+        document.getElementById(
+            "medicineDose"
+        ).value.trim(),
+
+    frequency:
+        document.getElementById(
+            "medicineFrequency"
+        ).value,
+
+    duration:
+        document.getElementById(
+            "medicineDuration"
+        ).value.trim(),
+
+    timing:
+        document.getElementById(
+            "medicineTiming"
+        ).value,
+
+    instruction:
+        document.getElementById(
+            "medicineInstruction"
+        ).value.trim(),
+
+    status:
+        "PENDING_PHARMACY",
+
+    createdAt:
+        new Date().toISOString()
+
+};
+
+
+clinicPrescriptions.push(
+    prescription
+);
+
+
+localStorage.setItem(
+    "clinic_prescriptions",
+    JSON.stringify(
+        clinicPrescriptions
+    )
+);
+
+
+closePrescriptionModal();
+
+
+const q =
+clinicQueue.find(
+    x => x.visitId === visit.id
+);
+
+
+renderVisit(
+    visit,
+    q
+);
+
+
+alert(
+    "Prescription ບັນທຶກສຳເລັດ\n" +
+    "ສົ່ງໄປ Pharmacy ແລ້ວ"
+);
+```
+
+}
+
+/* =========================================================
+CLOSE MODALS WHEN CLICK OUTSIDE
+========================================================= */
+
+[
+"checkinModal",
+"vitalModal",
+"prescriptionModal"
+].forEach(id => {
+
+```
+const modal =
+document.getElementById(id);
+
+if(modal){
+
+    modal.addEventListener(
+        "click",
+        function(e){
+
+            if(e.target === this){
+
+                this.classList.remove(
+                    "show"
+                );
+
+            }
+
         }
-        localStorage.setItem('clinic_payments', JSON.stringify(payments));
-        showSysModal('ສຳເລັດ', 'ບັນທຶກການຮັບເງິນສຳເລັດແລ້ວ!', '💰');
-        loadPosTable();
-        loadDashboardData();
-    }
+    );
+
+}
+```
+
+});
+
+/* =========================================================
+INIT PHASE 2
+========================================================= */
+
+updateQueueStats();
+
+renderQueue();
+
+renderDoctorQueue();
+
 </script>
+
+</script>
+
 </body>
 </html>
