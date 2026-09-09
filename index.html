@@ -3935,6 +3935,3753 @@ renderQueue();
 
 renderDoctorQueue();
 
+```javascript
+/* =========================================================
+   PHASE 3
+   APPOINTMENT + PHARMACY + INVENTORY + PAYMENT
+   CASH + TRANSFER + AUTO STOCK DEDUCTION
+   ========================================================= */
+
+
+/* =========================================================
+   LOCAL DATE / TIME
+   ========================================================= */
+
+function clinicToday(){
+
+    const d = new Date();
+
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2,"0");
+    const day = String(d.getDate()).padStart(2,"0");
+
+    return `${y}-${m}-${day}`;
+}
+
+function clinicNowTime(){
+
+    return new Date().toLocaleTimeString("lo-LA",{
+        hour:"2-digit",
+        minute:"2-digit"
+    });
+
+}
+
+
+/* =========================================================
+   PHASE 3 DATA
+   ========================================================= */
+
+let clinicAppointments =
+    JSON.parse(
+        localStorage.getItem("clinic_appointments") || "[]"
+    );
+
+let clinicMedicines =
+    JSON.parse(
+        localStorage.getItem("clinic_medicines") || "null"
+    );
+
+let clinicPayments =
+    JSON.parse(
+        localStorage.getItem("clinic_payments") || "[]"
+    );
+
+
+/* =========================================================
+   DEFAULT MEDICINE STOCK
+   ========================================================= */
+
+if(!Array.isArray(clinicMedicines)){
+
+    clinicMedicines = [
+
+        {
+            id:"MED-000001",
+            name:"Paracetamol 500mg",
+            unit:"ເມັດ",
+            price:1000,
+            stock:500,
+            reorderLevel:50,
+            status:"ACTIVE",
+            createdAt:new Date().toISOString()
+        },
+
+        {
+            id:"MED-000002",
+            name:"Amoxicillin 500mg",
+            unit:"ແຄັບຊູນ",
+            price:2500,
+            stock:300,
+            reorderLevel:30,
+            status:"ACTIVE",
+            createdAt:new Date().toISOString()
+        },
+
+        {
+            id:"MED-000003",
+            name:"Cetirizine 10mg",
+            unit:"ເມັດ",
+            price:1500,
+            stock:250,
+            reorderLevel:30,
+            status:"ACTIVE",
+            createdAt:new Date().toISOString()
+        },
+
+        {
+            id:"MED-000004",
+            name:"ORS",
+            unit:"ຊອງ",
+            price:3000,
+            stock:100,
+            reorderLevel:20,
+            status:"ACTIVE",
+            createdAt:new Date().toISOString()
+        },
+
+        {
+            id:"MED-000005",
+            name:"Ibuprofen 400mg",
+            unit:"ເມັດ",
+            price:2000,
+            stock:200,
+            reorderLevel:30,
+            status:"ACTIVE",
+            createdAt:new Date().toISOString()
+        }
+
+    ];
+
+    localStorage.setItem(
+        "clinic_medicines",
+        JSON.stringify(clinicMedicines)
+    );
+
+}
+
+
+/* =========================================================
+   SAVE HELPERS
+   ========================================================= */
+
+function saveAppointments(){
+
+    localStorage.setItem(
+        "clinic_appointments",
+        JSON.stringify(clinicAppointments)
+    );
+
+}
+
+function saveMedicines(){
+
+    localStorage.setItem(
+        "clinic_medicines",
+        JSON.stringify(clinicMedicines)
+    );
+
+}
+
+function savePayments(){
+
+    localStorage.setItem(
+        "clinic_payments",
+        JSON.stringify(clinicPayments)
+    );
+
+}
+
+
+/* =========================================================
+   ID GENERATORS
+   ========================================================= */
+
+function generateAppointmentId(){
+
+    let max = 0;
+
+    clinicAppointments.forEach(a => {
+
+        const n =
+            parseInt(
+                String(a.id || "")
+                .replace("APT-","")
+            );
+
+        if(!isNaN(n) && n > max){
+            max = n;
+        }
+
+    });
+
+    return "APT-" +
+        String(max + 1).padStart(6,"0");
+
+}
+
+
+function generateMedicineId(){
+
+    let max = 0;
+
+    clinicMedicines.forEach(m => {
+
+        const n =
+            parseInt(
+                String(m.id || "")
+                .replace("MED-","")
+            );
+
+        if(!isNaN(n) && n > max){
+            max = n;
+        }
+
+    });
+
+    return "MED-" +
+        String(max + 1).padStart(6,"0");
+
+}
+
+
+function generatePaymentId(){
+
+    let max = 0;
+
+    clinicPayments.forEach(p => {
+
+        const n =
+            parseInt(
+                String(p.id || "")
+                .replace("PAY-","")
+            );
+
+        if(!isNaN(n) && n > max){
+            max = n;
+        }
+
+    });
+
+    return "PAY-" +
+        String(max + 1).padStart(6,"0");
+
+}
+
+
+/* =========================================================
+   CREATE APPOINTMENT VIEW
+   ========================================================= */
+
+if(!document.getElementById("appointmentsView")){
+
+    const div =
+        document.createElement("div");
+
+    div.id = "appointmentsView";
+    div.className = "view";
+
+    div.innerHTML = `
+
+        <div class="page-toolbar">
+
+            <div>
+                <h2>📅 ຈັດການນັດໝາຍ</h2>
+                <p>Appointment Management</p>
+            </div>
+
+            <button
+                class="primary-btn"
+                onclick="openAppointmentModal()">
+                ＋ ເພີ່ມນັດໝາຍ
+            </button>
+
+        </div>
+
+
+        <div class="card">
+
+            <div class="patient-toolbar">
+
+                <div class="search-box">
+
+                    <input
+                        id="appointmentSearch"
+                        placeholder="🔍 ຄົ້ນຫາ Appointment ID, ຊື່ຄົນເຈັບ..."
+                        oninput="renderAppointments()">
+
+                </div>
+
+                <select
+                    id="appointmentStatusFilter"
+                    class="filter-select"
+                    onchange="renderAppointments()">
+
+                    <option value="">ທຸກສະຖານະ</option>
+                    <option value="SCHEDULED">ລໍຖ້າ</option>
+                    <option value="CHECKED_IN">Check-in ແລ້ວ</option>
+                    <option value="COMPLETED">ສຳເລັດ</option>
+                    <option value="CANCELLED">ຍົກເລີກ</option>
+                    <option value="NO_SHOW">ບໍ່ມາ</option>
+
+                </select>
+
+            </div>
+
+
+            <div style="overflow-x:auto">
+
+                <table>
+
+                    <thead>
+
+                        <tr>
+                            <th>Appointment</th>
+                            <th>ວັນທີ</th>
+                            <th>ເວລາ</th>
+                            <th>ຄົນເຈັບ</th>
+                            <th>Doctor</th>
+                            <th>ປະເພດ</th>
+                            <th>ສະຖານະ</th>
+                            <th>ຈັດການ</th>
+                        </tr>
+
+                    </thead>
+
+                    <tbody id="appointmentTableBody"></tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    `;
+
+    document.querySelector(".content").appendChild(div);
+
+}
+
+
+/* =========================================================
+   APPOINTMENT MODAL
+   ========================================================= */
+
+if(!document.getElementById("appointmentModal")){
+
+    const modal =
+        document.createElement("div");
+
+    modal.id = "appointmentModal";
+    modal.className = "modal";
+
+    modal.innerHTML = `
+
+        <div class="modal-box">
+
+            <div class="modal-header">
+
+                <h3 id="appointmentModalTitle">
+                    📅 ເພີ່ມນັດໝາຍ
+                </h3>
+
+                <button
+                    class="close"
+                    onclick="closeAppointmentModal()">
+                    ×
+                </button>
+
+            </div>
+
+
+            <form onsubmit="saveAppointment(event)">
+
+                <div class="modal-body">
+
+                    <input
+                        type="hidden"
+                        id="editAppointmentId">
+
+
+                    <div class="form-grid">
+
+
+                        <div class="form-group">
+
+                            <label>Appointment ID</label>
+
+                            <input
+                                id="appointmentId"
+                                readonly>
+
+                        </div>
+
+
+                        <div class="form-group">
+
+                            <label>ຄົນເຈັບ *</label>
+
+                            <select
+                                id="appointmentPatient"
+                                required>
+
+                            </select>
+
+                        </div>
+
+
+                        <div class="form-group">
+
+                            <label>ວັນທີ *</label>
+
+                            <input
+                                id="appointmentDate"
+                                type="date"
+                                required>
+
+                        </div>
+
+
+                        <div class="form-group">
+
+                            <label>ເວລາ *</label>
+
+                            <input
+                                id="appointmentTime"
+                                type="time"
+                                required>
+
+                        </div>
+
+
+                        <div class="form-group">
+
+                            <label>Doctor *</label>
+
+                            <select
+                                id="appointmentDoctor"
+                                required>
+
+                                <option>
+                                    ນພ. ສົມພອນ
+                                </option>
+
+                                <option>
+                                    ພຍ. ນິດາ
+                                </option>
+
+                                <option>
+                                    ນພ. ວິໄລ
+                                </option>
+
+                            </select>
+
+                        </div>
+
+
+                        <div class="form-group">
+
+                            <label>ປະເພດນັດ</label>
+
+                            <select
+                                id="appointmentType">
+
+                                <option>
+                                    ກວດທົ່ວໄປ
+                                </option>
+
+                                <option>
+                                    ນັດຕິດຕາມ
+                                </option>
+
+                                <option>
+                                    ກວດສະເພາະທາງ
+                                </option>
+
+                                <option>
+                                    ສົ່ງຕໍ່
+                                </option>
+
+                            </select>
+
+                        </div>
+
+
+                        <div class="form-group full">
+
+                            <label>ໝາຍເຫດ</label>
+
+                            <textarea
+                                id="appointmentNote"
+                                placeholder="ໝາຍເຫດ...">
+                            </textarea>
+
+                        </div>
+
+
+                    </div>
+
+                </div>
+
+
+                <div class="modal-footer">
+
+                    <button
+                        type="button"
+                        class="secondary-btn"
+                        onclick="closeAppointmentModal()">
+
+                        ຍົກເລີກ
+
+                    </button>
+
+
+                    <button
+                        type="submit"
+                        class="primary-btn">
+
+                        💾 ບັນທຶກນັດ
+
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    `;
+
+    document.body.appendChild(modal);
+
+}
+
+
+/* =========================================================
+   APPOINTMENT FUNCTIONS
+   ========================================================= */
+
+function openAppointmentModal(appointment = null){
+
+    const modal =
+        document.getElementById("appointmentModal");
+
+    const select =
+        document.getElementById("appointmentPatient");
+
+    select.innerHTML =
+        `<option value="">-- ເລືອກຄົນເຈັບ --</option>`;
+
+    patients
+        .filter(p => p.status !== "Inactive")
+        .forEach(p => {
+
+            const option =
+                document.createElement("option");
+
+            option.value = p.id;
+
+            option.textContent =
+                `${p.id} — ${p.name}` +
+                (p.hn ? ` (${p.hn})` : "");
+
+            select.appendChild(option);
+
+        });
+
+
+    document.querySelector(
+        "#appointmentModal form"
+    ).reset();
+
+
+    document.getElementById(
+        "editAppointmentId"
+    ).value = "";
+
+
+    document.getElementById(
+        "appointmentId"
+    ).value = generateAppointmentId();
+
+
+    document.getElementById(
+        "appointmentDate"
+    ).value = clinicToday();
+
+
+    document.getElementById(
+        "appointmentTime"
+    ).value = "09:00";
+
+
+    document.getElementById(
+        "appointmentModalTitle"
+    ).textContent =
+        "📅 ເພີ່ມນັດໝາຍ";
+
+
+    if(appointment){
+
+        document.getElementById(
+            "editAppointmentId"
+        ).value = appointment.id;
+
+        document.getElementById(
+            "appointmentId"
+        ).value = appointment.id;
+
+        select.value =
+            appointment.patientId;
+
+        document.getElementById(
+            "appointmentDate"
+        ).value =
+            appointment.date;
+
+        document.getElementById(
+            "appointmentTime"
+        ).value =
+            appointment.time;
+
+        document.getElementById(
+            "appointmentDoctor"
+        ).value =
+            appointment.doctor;
+
+        document.getElementById(
+            "appointmentType"
+        ).value =
+            appointment.type;
+
+        document.getElementById(
+            "appointmentNote"
+        ).value =
+            appointment.note || "";
+
+        document.getElementById(
+            "appointmentModalTitle"
+        ).textContent =
+            "✏️ ແກ້ໄຂນັດໝາຍ";
+
+    }
+
+
+    modal.classList.add("show");
+
+}
+
+
+function closeAppointmentModal(){
+
+    document
+        .getElementById("appointmentModal")
+        .classList.remove("show");
+
+}
+
+
+function saveAppointment(event){
+
+    event.preventDefault();
+
+
+    const patientId =
+        document.getElementById(
+            "appointmentPatient"
+        ).value;
+
+
+    const patient =
+        patients.find(
+            p => p.id === patientId
+        );
+
+
+    if(!patient){
+
+        alert("ກະລຸນາເລືອກຄົນເຈັບ");
+        return;
+
+    }
+
+
+    const editId =
+        document.getElementById(
+            "editAppointmentId"
+        ).value;
+
+
+    const now =
+        new Date().toISOString();
+
+
+    const data = {
+
+        id:
+            document.getElementById(
+                "appointmentId"
+            ).value,
+
+        patientId:
+            patient.id,
+
+        patientName:
+            patient.name,
+
+        hn:
+            patient.hn || "",
+
+        doctor:
+            document.getElementById(
+                "appointmentDoctor"
+            ).value,
+
+        date:
+            document.getElementById(
+                "appointmentDate"
+            ).value,
+
+        time:
+            document.getElementById(
+                "appointmentTime"
+            ).value,
+
+        type:
+            document.getElementById(
+                "appointmentType"
+            ).value,
+
+        note:
+            document.getElementById(
+                "appointmentNote"
+            ).value.trim(),
+
+        status:
+            "SCHEDULED",
+
+        createdAt:
+            now,
+
+        updatedAt:
+            now
+
+    };
+
+
+    if(editId){
+
+        const index =
+            clinicAppointments.findIndex(
+                a => a.id === editId
+            );
+
+
+        if(index !== -1){
+
+            data.createdAt =
+                clinicAppointments[index].createdAt ||
+                now;
+
+            data.status =
+                clinicAppointments[index].status ||
+                "SCHEDULED";
+
+            clinicAppointments[index] =
+                data;
+
+        }
+
+    }else{
+
+        clinicAppointments.push(data);
+
+    }
+
+
+    saveAppointments();
+
+    closeAppointmentModal();
+
+    renderAppointments();
+
+    updateClinicDashboard();
+
+
+    alert(
+        "ບັນທຶກນັດໝາຍສຳເລັດ\n\n" +
+        "Appointment ID: " +
+        data.id
+    );
+
+}
+
+
+/* =========================================================
+   RENDER APPOINTMENTS
+   ========================================================= */
+
+function renderAppointments(){
+
+    const body =
+        document.getElementById(
+            "appointmentTableBody"
+        );
+
+    if(!body) return;
+
+
+    const search =
+        (
+            document.getElementById(
+                "appointmentSearch"
+            )?.value || ""
+        )
+        .toLowerCase()
+        .trim();
+
+
+    const status =
+        document.getElementById(
+            "appointmentStatusFilter"
+        )?.value || "";
+
+
+    const list =
+        clinicAppointments
+        .filter(a => {
+
+            const text = [
+
+                a.id,
+                a.patientName,
+                a.hn,
+                a.doctor
+
+            ]
+            .join(" ")
+            .toLowerCase();
+
+
+            return (
+                text.includes(search) &&
+                (!status || a.status === status)
+            );
+
+        })
+        .sort((a,b) => {
+
+            const x =
+                `${a.date} ${a.time}`;
+
+            const y =
+                `${b.date} ${b.time}`;
+
+            return x.localeCompare(y);
+
+        });
+
+
+    if(!list.length){
+
+        body.innerHTML = `
+
+            <tr>
+
+                <td
+                    colspan="8"
+                    class="empty">
+
+                    📅<br><br>
+                    ຍັງບໍ່ມີນັດໝາຍ
+
+                </td>
+
+            </tr>
+
+        `;
+
+        return;
+
+    }
+
+
+    body.innerHTML =
+        list.map(a => {
+
+            let badge = "blue";
+            let statusText = "ລໍຖ້າ";
+
+
+            if(a.status === "CHECKED_IN"){
+
+                badge = "yellow";
+                statusText = "Check-in ແລ້ວ";
+
+            }
+
+            if(a.status === "COMPLETED"){
+
+                badge = "green";
+                statusText = "ສຳເລັດ";
+
+            }
+
+            if(a.status === "CANCELLED"){
+
+                badge = "red";
+                statusText = "ຍົກເລີກ";
+
+            }
+
+            if(a.status === "NO_SHOW"){
+
+                badge = "yellow";
+                statusText = "ບໍ່ມາ";
+
+            }
+
+
+            return `
+
+                <tr>
+
+                    <td>
+                        <strong>
+                            ${escapeHTML(a.id)}
+                        </strong>
+                    </td>
+
+                    <td>
+                        ${escapeHTML(a.date)}
+                    </td>
+
+                    <td>
+                        <strong>
+                            ${escapeHTML(a.time)}
+                        </strong>
+                    </td>
+
+                    <td>
+
+                        <strong>
+                            ${escapeHTML(a.patientName)}
+                        </strong>
+
+                        <br>
+
+                        <small>
+                            ${escapeHTML(a.hn || a.patientId)}
+                        </small>
+
+                    </td>
+
+                    <td>
+                        ${escapeHTML(a.doctor)}
+                    </td>
+
+                    <td>
+                        ${escapeHTML(a.type)}
+                    </td>
+
+                    <td>
+
+                        <span class="badge ${badge}">
+                            ${statusText}
+                        </span>
+
+                    </td>
+
+                    <td>
+
+                        ${
+                            a.status === "SCHEDULED"
+                            ?
+                            `
+                            <button
+                                class="action-btn"
+                                onclick="appointmentCheckIn('${a.id}')">
+                                🎫 Check-in
+                            </button>
+                            `
+                            :
+                            ""
+                        }
+
+
+                        ${
+                            a.status === "SCHEDULED"
+                            ?
+                            `
+                            <button
+                                class="action-btn"
+                                onclick="editAppointment('${a.id}')">
+                                ✏️
+                            </button>
+                            `
+                            :
+                            ""
+                        }
+
+
+                        ${
+                            a.status === "SCHEDULED"
+                            ?
+                            `
+                            <button
+                                class="action-btn"
+                                onclick="cancelAppointment('${a.id}')">
+                                ❌
+                            </button>
+                            `
+                            :
+                            ""
+                        }
+
+
+                        ${
+                            a.status === "CHECKED_IN"
+                            ?
+                            `
+                            <button
+                                class="action-btn"
+                                onclick="openView('doctor')">
+                                🩺 ເປີດການກວດ
+                            </button>
+                            `
+                            :
+                            ""
+                        }
+
+                    </td>
+
+                </tr>
+
+            `;
+
+        }).join("");
+
+}
+
+
+/* =========================================================
+   EDIT / CANCEL APPOINTMENT
+   ========================================================= */
+
+function editAppointment(id){
+
+    const a =
+        clinicAppointments.find(
+            x => x.id === id
+        );
+
+    if(a){
+        openAppointmentModal(a);
+    }
+
+}
+
+
+function cancelAppointment(id){
+
+    const a =
+        clinicAppointments.find(
+            x => x.id === id
+        );
+
+    if(!a) return;
+
+
+    if(!confirm(
+        "ຕ້ອງການຍົກເລີກນັດໝາຍນີ້ບໍ?\n\n" +
+        a.patientName +
+        "\n" +
+        a.date +
+        " " +
+        a.time
+    )){
+        return;
+    }
+
+
+    a.status = "CANCELLED";
+    a.updatedAt = new Date().toISOString();
+
+    saveAppointments();
+
+    renderAppointments();
+
+    updateClinicDashboard();
+
+}
+
+
+/* =========================================================
+   APPOINTMENT → CHECK-IN → QUEUE
+   ========================================================= */
+
+function appointmentCheckIn(id){
+
+    const a =
+        clinicAppointments.find(
+            x => x.id === id
+        );
+
+    if(!a) return;
+
+
+    if(a.status !== "SCHEDULED"){
+
+        alert(
+            "ນັດໝາຍນີ້ບໍ່ສາມາດ Check-in ໄດ້"
+        );
+
+        return;
+
+    }
+
+
+    const patient =
+        patients.find(
+            p => p.id === a.patientId
+        );
+
+
+    if(!patient){
+
+        alert(
+            "ບໍ່ພົບຂໍ້ມູນຄົນເຈັບ"
+        );
+
+        return;
+
+    }
+
+
+    const today =
+        clinicToday();
+
+
+    const existing =
+        clinicQueue.find(
+            q =>
+                q.appointmentId === a.id
+        );
+
+
+    if(existing){
+
+        alert(
+            "Appointment ນີ້ Check-in ແລ້ວ\n" +
+            "Queue: " +
+            existing.queueNumber
+        );
+
+        return;
+
+    }
+
+
+    const todayQueues =
+        clinicQueue.filter(
+            q => q.date === today
+        );
+
+
+    let max = 0;
+
+
+    todayQueues.forEach(q => {
+
+        const n =
+            parseInt(
+                String(q.queueNumber || "")
+                .replace("Q","")
+            );
+
+        if(!isNaN(n) && n > max){
+            max = n;
+        }
+
+    });
+
+
+    const queue = {
+
+        id:
+            "QUEUE-" +
+            Date.now(),
+
+        queueNumber:
+            "Q" +
+            String(max + 1).padStart(3,"0"),
+
+        appointmentId:
+            a.id,
+
+        patientId:
+            patient.id,
+
+        patientName:
+            patient.name,
+
+        hn:
+            patient.hn || "",
+
+        type:
+            a.type,
+
+        doctor:
+            a.doctor,
+
+        note:
+            a.note || "",
+
+        date:
+            today,
+
+        checkInTime:
+            clinicNowTime(),
+
+        status:
+            "WAITING",
+
+        vitalSigns:
+            null,
+
+        visitId:
+            null,
+
+        createdAt:
+            new Date().toISOString()
+
+    };
+
+
+    clinicQueue.push(queue);
+
+
+    a.status = "CHECKED_IN";
+    a.checkedInAt = new Date().toISOString();
+
+
+    localStorage.setItem(
+        "clinic_queue",
+        JSON.stringify(clinicQueue)
+    );
+
+
+    saveAppointments();
+
+
+    renderAppointments();
+    renderQueue();
+    renderDoctorQueue();
+    updateQueueStats();
+    updateClinicDashboard();
+
+
+    alert(
+        "Check-in ແລະອອກຄິວສຳເລັດ\n\n" +
+        "Queue: " +
+        queue.queueNumber +
+        "\n" +
+        "Patient: " +
+        queue.patientName
+    );
+
+
+    openView("queue");
+
+}
+
+
+/* =========================================================
+   PHARMACY VIEW
+   ========================================================= */
+
+if(!document.getElementById("pharmacyView")){
+
+    const div =
+        document.createElement("div");
+
+    div.id = "pharmacyView";
+    div.className = "view";
+
+    div.innerHTML = `
+
+        <div class="page-toolbar">
+
+            <div>
+
+                <h2>💊 Pharmacy</h2>
+
+                <p>
+                    ຈ່າຍຢາ ແລະ ຕັດ Stock ອັດຕະໂນມັດ
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <div class="stats">
+
+            <div class="card stat-card">
+
+                <div>
+                    <div class="stat-label">
+                        ໃບຢາລໍຖ້າຈ່າຍ
+                    </div>
+
+                    <div
+                        class="stat-number"
+                        id="pharmacyPendingCount">
+                        0
+                    </div>
+                </div>
+
+                <div
+                    class="stat-icon"
+                    style="background:#fff5dc">
+                    💊
+                </div>
+
+            </div>
+
+
+            <div class="card stat-card">
+
+                <div>
+                    <div class="stat-label">
+                        ຈ່າຍແລ້ວມື້ນີ້
+                    </div>
+
+                    <div
+                        class="stat-number"
+                        id="pharmacyDispensedCount">
+                        0
+                    </div>
+                </div>
+
+                <div
+                    class="stat-icon"
+                    style="background:#e9f8ef">
+                    ✅
+                </div>
+
+            </div>
+
+
+            <div class="card stat-card">
+
+                <div>
+                    <div class="stat-label">
+                        ລາຍຮັບຄ່າຢາມື້ນີ້
+                    </div>
+
+                    <div
+                        class="stat-number"
+                        id="pharmacyRevenue">
+                        0
+                    </div>
+
+                </div>
+
+                <div
+                    class="stat-icon"
+                    style="background:#f1eaff">
+                    💰
+                </div>
+
+            </div>
+
+
+            <div class="card stat-card">
+
+                <div>
+
+                    <div class="stat-label">
+                        Stock ຕ່ຳ
+                    </div>
+
+                    <div
+                        class="stat-number"
+                        id="pharmacyLowStock">
+                        0
+                    </div>
+
+                </div>
+
+                <div
+                    class="stat-icon"
+                    style="background:#fff0f0">
+                    ⚠️
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="card" style="margin-top:18px">
+
+            <div class="card-header">
+
+                <h3>
+                    💊 Prescription ລໍຖ້າຈ່າຍ
+                </h3>
+
+                <button
+                    class="secondary-btn"
+                    onclick="renderPharmacy()">
+                    ↻ Refresh
+                </button>
+
+            </div>
+
+
+            <div class="patient-toolbar">
+
+                <div class="search-box">
+
+                    <input
+                        id="pharmacySearch"
+                        placeholder="🔍 ຄົ້ນຫາ RX, ຄົນເຈັບ, ຊື່ຢາ..."
+                        oninput="renderPharmacy()">
+
+                </div>
+
+            </div>
+
+
+            <div style="overflow-x:auto">
+
+                <table>
+
+                    <thead>
+
+                        <tr>
+                            <th>RX</th>
+                            <th>Patient</th>
+                            <th>Medicine</th>
+                            <th>Qty</th>
+                            <th>Unit Price</th>
+                            <th>Total</th>
+                            <th>Stock</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+
+                    </thead>
+
+                    <tbody id="pharmacyTableBody"></tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    `;
+
+    document.querySelector(".content").appendChild(div);
+
+}
+
+
+/* =========================================================
+   PHARMACY PAYMENT MODAL
+   ========================================================= */
+
+if(!document.getElementById("pharmacyPaymentModal")){
+
+    const modal =
+        document.createElement("div");
+
+    modal.id = "pharmacyPaymentModal";
+    modal.className = "modal";
+
+    modal.innerHTML = `
+
+        <div class="modal-box">
+
+            <div class="modal-header">
+
+                <h3>
+                    💊 ຈ່າຍຢາ / Pharmacy Payment
+                </h3>
+
+                <button
+                    class="close"
+                    onclick="closePharmacyPayment()">
+                    ×
+                </button>
+
+            </div>
+
+
+            <form onsubmit="completePharmacyPayment(event)">
+
+                <div class="modal-body">
+
+                    <input
+                        type="hidden"
+                        id="payPrescriptionId">
+
+
+                    <div
+                        id="paymentMedicineInfo"
+                        class="alert alert-blue">
+                    </div>
+
+
+                    <div class="form-grid">
+
+
+                        <div class="form-group">
+
+                            <label>ລາຄາຕໍ່ໜ່ວຍ</label>
+
+                            <input
+                                id="payUnitPrice"
+                                readonly>
+
+                        </div>
+
+
+                        <div class="form-group">
+
+                            <label>ຈຳນວນ</label>
+
+                            <input
+                                id="payQuantity"
+                                readonly>
+
+                        </div>
+
+
+                        <div class="form-group full">
+
+                            <label>
+                                ລາຄາລວມ
+                            </label>
+
+                            <input
+                                id="payTotal"
+                                readonly
+                                style="
+                                    font-size:20px;
+                                    font-weight:800;
+                                ">
+
+                        </div>
+
+
+                        <div class="form-group">
+
+                            <label>
+                                ວິທີຮັບເງິນ
+                            </label>
+
+                            <select
+                                id="paymentMethod"
+                                onchange="updatePaymentFields()">
+
+                                <option value="CASH">
+                                    💵 ເງິນສົດ
+                                </option>
+
+                                <option value="TRANSFER">
+                                    🏦 ໂອນ
+                                </option>
+
+                                <option value="CASH_TRANSFER">
+                                    💵 + 🏦 ສົດ + ໂອນ
+                                </option>
+
+                            </select>
+
+                        </div>
+
+
+                        <div
+                            class="form-group"
+                            id="cashReceivedGroup">
+
+                            <label>
+                                ເງິນສົດທີ່ຮັບ
+                            </label>
+
+                            <input
+                                id="cashReceived"
+                                type="number"
+                                min="0"
+                                value="0"
+                                oninput="calculatePayment()">
+
+                        </div>
+
+
+                        <div
+                            class="form-group"
+                            id="transferAmountGroup"
+                            style="display:none">
+
+                            <label>
+                                ຈຳນວນເງິນໂອນ
+                            </label>
+
+                            <input
+                                id="transferAmount"
+                                type="number"
+                                min="0"
+                                value="0"
+                                oninput="calculatePayment()">
+
+                        </div>
+
+
+                        <div class="form-group">
+
+                            <label>
+                                ເງິນທີ່ຮັບລວມ
+                            </label>
+
+                            <input
+                                id="paymentReceived"
+                                readonly>
+
+                        </div>
+
+
+                        <div class="form-group">
+
+                            <label>
+                                ເງິນທອນ
+                            </label>
+
+                            <input
+                                id="paymentChange"
+                                readonly
+                                style="
+                                    font-weight:800;
+                                ">
+
+                        </div>
+
+
+                    </div>
+
+                </div>
+
+
+                <div class="modal-footer">
+
+                    <button
+                        type="button"
+                        class="secondary-btn"
+                        onclick="closePharmacyPayment()">
+
+                        ຍົກເລີກ
+
+                    </button>
+
+
+                    <button
+                        type="submit"
+                        class="primary-btn">
+
+                        💰 ຢືນຢັນຈ່າຍຢາ
+
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    `;
+
+    document.body.appendChild(modal);
+
+}
+
+
+/* =========================================================
+   PHARMACY RENDER
+   ========================================================= */
+
+function renderPharmacy(){
+
+    const body =
+        document.getElementById(
+            "pharmacyTableBody"
+        );
+
+    if(!body) return;
+
+
+    const search =
+        (
+            document.getElementById(
+                "pharmacySearch"
+            )?.value || ""
+        )
+        .toLowerCase()
+        .trim();
+
+
+    const list =
+        clinicPrescriptions.filter(p => {
+
+            if(p.status === "DISPENSED"){
+                return false;
+            }
+
+            const text = [
+
+                p.id,
+                p.patientName,
+                p.medicineName
+
+            ]
+            .join(" ")
+            .toLowerCase();
+
+
+            return text.includes(search);
+
+        });
+
+
+    const pendingElement =
+        document.getElementById(
+            "pharmacyPendingCount"
+        );
+
+
+    if(pendingElement){
+        pendingElement.textContent = list.length;
+    }
+
+
+    const today =
+        clinicToday();
+
+
+    const dispensedToday =
+        clinicPrescriptions.filter(
+            p =>
+                p.status === "DISPENSED" &&
+                String(p.dispensedAt || "")
+                    .slice(0,10) === today
+        ).length;
+
+
+    const dispensedElement =
+        document.getElementById(
+            "pharmacyDispensedCount"
+        );
+
+
+    if(dispensedElement){
+        dispensedElement.textContent =
+            dispensedToday;
+    }
+
+
+    const revenue =
+        clinicPayments
+        .filter(
+            p =>
+                String(p.createdAt || "")
+                    .slice(0,10) === today
+        )
+        .reduce(
+            (sum,p) =>
+                sum + Number(p.total || 0),
+            0
+        );
+
+
+    const revenueElement =
+        document.getElementById(
+            "pharmacyRevenue"
+        );
+
+
+    if(revenueElement){
+
+        revenueElement.textContent =
+            formatMoney(revenue);
+
+    }
+
+
+    const lowStock =
+        clinicMedicines.filter(
+            m =>
+                m.status !== "INACTIVE" &&
+                Number(m.stock) <=
+                Number(m.reorderLevel || 0)
+        ).length;
+
+
+    const lowElement =
+        document.getElementById(
+            "pharmacyLowStock"
+        );
+
+
+    if(lowElement){
+        lowElement.textContent = lowStock;
+    }
+
+
+    if(!list.length){
+
+        body.innerHTML = `
+
+            <tr>
+
+                <td
+                    colspan="9"
+                    class="empty">
+
+                    💊<br><br>
+
+                    ບໍ່ມີ Prescription
+                    ລໍຖ້າຈ່າຍ
+
+                </td>
+
+            </tr>
+
+        `;
+
+        return;
+
+    }
+
+
+    body.innerHTML =
+        list.map(p => {
+
+            const medicine =
+                clinicMedicines.find(
+                    m =>
+                        m.name.toLowerCase() ===
+                        String(
+                            p.medicineName
+                        ).toLowerCase()
+                );
+
+
+            const quantity =
+                Number(p.quantity || 0);
+
+
+            const price =
+                medicine
+                ? Number(medicine.price || 0)
+                : Number(p.unitPrice || 0);
+
+
+            const total =
+                quantity * price;
+
+
+            const stock =
+                medicine
+                ? Number(medicine.stock || 0)
+                : null;
+
+
+            let stockText = "ບໍ່ພົບຢາ";
+            let stockBadge = "yellow";
+
+
+            if(medicine){
+
+                stockText =
+                    `${stock} ${medicine.unit}`;
+
+                if(stock >= quantity){
+
+                    stockBadge = "green";
+
+                }else{
+
+                    stockBadge = "yellow";
+
+                }
+
+            }
+
+
+            return `
+
+                <tr>
+
+                    <td>
+                        <strong>
+                            ${escapeHTML(p.id)}
+                        </strong>
+                    </td>
+
+                    <td>
+
+                        <strong>
+                            ${escapeHTML(p.patientName)}
+                        </strong>
+
+                        <br>
+
+                        <small>
+                            ${escapeHTML(p.patientId)}
+                        </small>
+
+                    </td>
+
+                    <td>
+
+                        <strong>
+                            ${escapeHTML(p.medicineName)}
+                        </strong>
+
+                        <br>
+
+                        <small>
+                            ${escapeHTML(
+                                p.dose || ""
+                            )}
+                        </small>
+
+                    </td>
+
+                    <td>
+                        ${quantity}
+                    </td>
+
+                    <td>
+                        ${formatMoney(price)}
+                    </td>
+
+                    <td>
+                        <strong>
+                            ${formatMoney(total)}
+                        </strong>
+                    </td>
+
+                    <td>
+
+                        <span class="badge ${stockBadge}">
+                            ${escapeHTML(stockText)}
+                        </span>
+
+                    </td>
+
+                    <td>
+
+                        <span class="badge yellow">
+                            ລໍຖ້າຈ່າຍ
+                        </span>
+
+                    </td>
+
+                    <td>
+
+                        ${
+                            medicine &&
+                            stock >= quantity
+                            ?
+                            `
+                            <button
+                                class="action-btn"
+                                onclick="openPharmacyPayment('${p.id}')">
+
+                                💰 ຈ່າຍຢາ
+
+                            </button>
+                            `
+                            :
+                            `
+                            <button
+                                class="action-btn"
+                                disabled
+                                title="Stock ບໍ່ພໍ ຫຼື ບໍ່ພົບຢາ">
+
+                                ⚠️ Stock ບໍ່ພໍ
+
+                            </button>
+                            `
+                        }
+
+                    </td>
+
+                </tr>
+
+            `;
+
+        }).join("");
+
+}
+
+
+/* =========================================================
+   OPEN PHARMACY PAYMENT
+   ========================================================= */
+
+function openPharmacyPayment(prescriptionId){
+
+    const prescription =
+        clinicPrescriptions.find(
+            p => p.id === prescriptionId
+        );
+
+
+    if(!prescription) return;
+
+
+    if(prescription.status === "DISPENSED"){
+
+        alert(
+            "Prescription ນີ້ຈ່າຍແລ້ວ"
+        );
+
+        return;
+
+    }
+
+
+    const medicine =
+        clinicMedicines.find(
+            m =>
+                m.name.toLowerCase() ===
+                String(
+                    prescription.medicineName
+                ).toLowerCase()
+        );
+
+
+    if(!medicine){
+
+        alert(
+            "ບໍ່ພົບຢາໃນ Inventory\n\n" +
+            "ຢາ: " +
+            prescription.medicineName
+        );
+
+        return;
+
+    }
+
+
+    const quantity =
+        Number(prescription.quantity || 0);
+
+
+    const stock =
+        Number(medicine.stock || 0);
+
+
+    if(stock < quantity){
+
+        alert(
+            "Stock ບໍ່ພຽງພໍ\n\n" +
+            "ຢາ: " +
+            medicine.name +
+            "\n" +
+            "ຕ້ອງການ: " +
+            quantity +
+            "\n" +
+            "Stock ປັດຈຸບັນ: " +
+            stock
+        );
+
+        return;
+
+    }
+
+
+    const total =
+        quantity *
+        Number(medicine.price || 0);
+
+
+    document.getElementById(
+        "payPrescriptionId"
+    ).value =
+        prescription.id;
+
+
+    document.getElementById(
+        "paymentMedicineInfo"
+    ).innerHTML =
+
+        `<strong>ຄົນເຈັບ:</strong>
+        ${escapeHTML(prescription.patientName)}
+        <br>
+
+        <strong>ຢາ:</strong>
+        ${escapeHTML(medicine.name)}
+        <br>
+
+        <strong>Stock:</strong>
+        ${stock} ${escapeHTML(medicine.unit)}`;
+
+
+    document.getElementById(
+        "payUnitPrice"
+    ).value =
+        formatMoney(medicine.price);
+
+
+    document.getElementById(
+        "payQuantity"
+    ).value =
+        quantity;
+
+
+    document.getElementById(
+        "payTotal"
+    ).value =
+        formatMoney(total);
+
+
+    document.getElementById(
+        "paymentMethod"
+    ).value =
+        "CASH";
+
+
+    document.getElementById(
+        "cashReceived"
+    ).value =
+        total;
+
+
+    document.getElementById(
+        "transferAmount"
+    ).value =
+        0;
+
+
+    updatePaymentFields();
+
+
+    document
+        .getElementById(
+            "pharmacyPaymentModal"
+        )
+        .classList.add("show");
+
+}
+
+
+/* =========================================================
+   PAYMENT FIELDS
+   ========================================================= */
+
+function updatePaymentFields(){
+
+    const method =
+        document.getElementById(
+            "paymentMethod"
+        ).value;
+
+
+    const cashGroup =
+        document.getElementById(
+            "cashReceivedGroup"
+        );
+
+
+    const transferGroup =
+        document.getElementById(
+            "transferAmountGroup"
+        );
+
+
+    const cash =
+        document.getElementById(
+            "cashReceived"
+        );
+
+
+    const transfer =
+        document.getElementById(
+            "transferAmount"
+        );
+
+
+    if(method === "CASH"){
+
+        cashGroup.style.display = "";
+        transferGroup.style.display = "none";
+
+        transfer.value = 0;
+
+        const total =
+            getPaymentTotal();
+
+        cash.value = total;
+
+    }
+
+
+    if(method === "TRANSFER"){
+
+        cashGroup.style.display = "none";
+        transferGroup.style.display = "";
+
+        cash.value = 0;
+
+        const total =
+            getPaymentTotal();
+
+        transfer.value = total;
+
+    }
+
+
+    if(method === "CASH_TRANSFER"){
+
+        cashGroup.style.display = "";
+        transferGroup.style.display = "";
+
+        cash.value = 0;
+        transfer.value = 0;
+
+    }
+
+
+    calculatePayment();
+
+}
+
+
+function getPaymentTotal(){
+
+    const value =
+        document.getElementById(
+            "payTotal"
+        )?.value || "0";
+
+
+    return Number(
+        String(value)
+        .replace(/,/g,"")
+        .replace(/[^\d.-]/g,"")
+    ) || 0;
+
+}
+
+
+function calculatePayment(){
+
+    const total =
+        getPaymentTotal();
+
+
+    const cash =
+        Number(
+            document.getElementById(
+                "cashReceived"
+            ).value
+        ) || 0;
+
+
+    const transfer =
+        Number(
+            document.getElementById(
+                "transferAmount"
+            ).value
+        ) || 0;
+
+
+    const received =
+        cash + transfer;
+
+
+    const change =
+        Math.max(
+            received - total,
+            0
+        );
+
+
+    document.getElementById(
+        "paymentReceived"
+    ).value =
+        formatMoney(received);
+
+
+    document.getElementById(
+        "paymentChange"
+    ).value =
+        formatMoney(change);
+
+}
+
+
+/* =========================================================
+   COMPLETE PHARMACY PAYMENT
+   ========================================================= */
+
+function completePharmacyPayment(event){
+
+    event.preventDefault();
+
+
+    const prescriptionId =
+        document.getElementById(
+            "payPrescriptionId"
+        ).value;
+
+
+    const prescription =
+        clinicPrescriptions.find(
+            p =>
+                p.id === prescriptionId
+        );
+
+
+    if(!prescription){
+
+        alert(
+            "ບໍ່ພົບ Prescription"
+        );
+
+        return;
+
+    }
+
+
+    if(prescription.status === "DISPENSED"){
+
+        alert(
+            "Prescription ນີ້ຈ່າຍແລ້ວ"
+        );
+
+        closePharmacyPayment();
+
+        return;
+
+    }
+
+
+    const medicine =
+        clinicMedicines.find(
+            m =>
+                m.name.toLowerCase() ===
+                String(
+                    prescription.medicineName
+                ).toLowerCase()
+        );
+
+
+    if(!medicine){
+
+        alert(
+            "ບໍ່ພົບຢາໃນ Inventory"
+        );
+
+        return;
+
+    }
+
+
+    const quantity =
+        Number(prescription.quantity || 0);
+
+
+    const stock =
+        Number(medicine.stock || 0);
+
+
+    if(stock < quantity){
+
+        alert(
+            "Stock ບໍ່ພຽງພໍ\n\n" +
+            "Stock ປັດຈຸບັນ: " +
+            stock
+        );
+
+        return;
+
+    }
+
+
+    const unitPrice =
+        Number(medicine.price || 0);
+
+
+    const total =
+        quantity * unitPrice;
+
+
+    const method =
+        document.getElementById(
+            "paymentMethod"
+        ).value;
+
+
+    const cash =
+        Number(
+            document.getElementById(
+                "cashReceived"
+            ).value
+        ) || 0;
+
+
+    const transfer =
+        Number(
+            document.getElementById(
+                "transferAmount"
+            ).value
+        ) || 0;
+
+
+    const received =
+        cash + transfer;
+
+
+    if(received < total){
+
+        alert(
+            "ເງິນທີ່ຮັບຍັງບໍ່ຄົບ\n\n" +
+            "ລາຄາລວມ: " +
+            formatMoney(total) +
+            "\n" +
+            "ຮັບແລ້ວ: " +
+            formatMoney(received) +
+            "\n" +
+            "ຂາດ: " +
+            formatMoney(total - received)
+        );
+
+        return;
+
+    }
+
+
+    /* ============================================
+       IMPORTANT:
+       STOCK IS DEDUCTED ONLY AFTER PAYMENT
+       VALIDATION IS PASSED
+       ============================================ */
+
+    const oldStock =
+        stock;
+
+
+    medicine.stock =
+        stock - quantity;
+
+
+    medicine.updatedAt =
+        new Date().toISOString();
+
+
+    /* ============================================
+       PAYMENT RECORD
+       ============================================ */
+
+    const payment = {
+
+        id:
+            generatePaymentId(),
+
+        prescriptionId:
+            prescription.id,
+
+        visitId:
+            prescription.visitId,
+
+        patientId:
+            prescription.patientId,
+
+        patientName:
+            prescription.patientName,
+
+        medicineId:
+            medicine.id,
+
+        medicineName:
+            medicine.name,
+
+        quantity:
+            quantity,
+
+        unit:
+            medicine.unit,
+
+        unitPrice:
+            unitPrice,
+
+        total:
+            total,
+
+        paymentMethod:
+            method,
+
+        cashAmount:
+            cash,
+
+        transferAmount:
+            transfer,
+
+        received:
+            received,
+
+        change:
+            received - total,
+
+        stockBefore:
+            oldStock,
+
+        stockAfter:
+            medicine.stock,
+
+        createdAt:
+            new Date().toISOString()
+
+    };
+
+
+    clinicPayments.push(payment);
+
+
+    /* ============================================
+       UPDATE PRESCRIPTION
+       ============================================ */
+
+    prescription.status =
+        "DISPENSED";
+
+    prescription.unitPrice =
+        unitPrice;
+
+    prescription.total =
+        total;
+
+    prescription.paymentId =
+        payment.id;
+
+    prescription.dispensedAt =
+        new Date().toISOString();
+
+
+    saveMedicines();
+    savePayments();
+
+
+    localStorage.setItem(
+        "clinic_prescriptions",
+        JSON.stringify(
+            clinicPrescriptions
+        )
+    );
+
+
+    closePharmacyPayment();
+
+
+    renderPharmacy();
+
+    updateClinicDashboard();
+
+
+    alert(
+
+        "✅ ຈ່າຍຢາສຳເລັດ\n\n" +
+
+        "Payment ID: " +
+        payment.id +
+
+        "\nຄົນເຈັບ: " +
+        payment.patientName +
+
+        "\nຢາ: " +
+        payment.medicineName +
+
+        "\nຈຳນວນ: " +
+        payment.quantity +
+
+        " " +
+        payment.unit +
+
+        "\nລາຄາລວມ: " +
+        formatMoney(payment.total) +
+
+        "\nສົດ: " +
+        formatMoney(payment.cashAmount) +
+
+        "\nໂອນ: " +
+        formatMoney(payment.transferAmount) +
+
+        "\nເງິນທອນ: " +
+        formatMoney(payment.change) +
+
+        "\n\nStock: " +
+        oldStock +
+        " → " +
+        medicine.stock
+
+    );
+
+}
+
+
+/* =========================================================
+   CLOSE PAYMENT
+   ========================================================= */
+
+function closePharmacyPayment(){
+
+    document
+        .getElementById(
+            "pharmacyPaymentModal"
+        )
+        .classList.remove("show");
+
+}
+
+
+/* =========================================================
+   INVENTORY VIEW
+   ========================================================= */
+
+if(!document.getElementById("inventoryView")){
+
+    const div =
+        document.createElement("div");
+
+    div.id = "inventoryView";
+    div.className = "view";
+
+    div.innerHTML = `
+
+        <div class="page-toolbar">
+
+            <div>
+
+                <h2>📦 Inventory</h2>
+
+                <p>
+                    ຈັດການຢາ ແລະ Stock
+                </p>
+
+            </div>
+
+            <button
+                class="primary-btn"
+                onclick="openMedicineModal()">
+
+                ＋ ເພີ່ມຢາ
+
+            </button>
+
+        </div>
+
+
+        <div class="card">
+
+            <div class="patient-toolbar">
+
+                <div class="search-box">
+
+                    <input
+                        id="inventorySearch"
+                        placeholder="🔍 ຄົ້ນຫາຊື່ຢາ..."
+                        oninput="renderInventory()">
+
+                </div>
+
+            </div>
+
+
+            <div style="overflow-x:auto">
+
+                <table>
+
+                    <thead>
+
+                        <tr>
+                            <th>Medicine ID</th>
+                            <th>ຊື່ຢາ</th>
+                            <th>ໜ່ວຍ</th>
+                            <th>ລາຄາ</th>
+                            <th>Stock</th>
+                            <th>Minimum</th>
+                            <th>ສະຖານະ</th>
+                        </tr>
+
+                    </thead>
+
+                    <tbody id="inventoryTableBody"></tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    `;
+
+    document.querySelector(".content").appendChild(div);
+
+}
+
+
+/* =========================================================
+   MEDICINE MODAL
+   ========================================================= */
+
+if(!document.getElementById("medicineModal")){
+
+    const modal =
+        document.createElement("div");
+
+    modal.id = "medicineModal";
+    modal.className = "modal";
+
+    modal.innerHTML = `
+
+        <div class="modal-box">
+
+            <div class="modal-header">
+
+                <h3>
+                    💊 ເພີ່ມຢາເຂົ້າ Inventory
+                </h3>
+
+                <button
+                    class="close"
+                    onclick="closeMedicineModal()">
+                    ×
+                </button>
+
+            </div>
+
+
+            <form onsubmit="saveMedicine(event)">
+
+                <div class="modal-body">
+
+                    <div class="form-grid">
+
+                        <div class="form-group">
+
+                            <label>
+                                Medicine ID
+                            </label>
+
+                            <input
+                                id="newMedicineId"
+                                readonly>
+
+                        </div>
+
+
+                        <div class="form-group">
+
+                            <label>
+                                ຊື່ຢາ *
+                            </label>
+
+                            <input
+                                id="newMedicineName"
+                                required
+                                placeholder="Paracetamol 500mg">
+
+                        </div>
+
+
+                        <div class="form-group">
+
+                            <label>
+                                ໜ່ວຍ *
+                            </label>
+
+                            <input
+                                id="newMedicineUnit"
+                                required
+                                placeholder="ເມັດ">
+
+                        </div>
+
+
+                        <div class="form-group">
+
+                            <label>
+                                ລາຄາຂາຍ *
+                            </label>
+
+                            <input
+                                id="newMedicinePrice"
+                                type="number"
+                                min="0"
+                                required
+                                placeholder="1000">
+
+                        </div>
+
+
+                        <div class="form-group">
+
+                            <label>
+                                Stock *
+                            </label>
+
+                            <input
+                                id="newMedicineStock"
+                                type="number"
+                                min="0"
+                                required
+                                placeholder="100">
+
+                        </div>
+
+
+                        <div class="form-group">
+
+                            <label>
+                                Stock ຂັ້ນຕ່ຳ
+                            </label>
+
+                            <input
+                                id="newMedicineReorder"
+                                type="number"
+                                min="0"
+                                value="20">
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="modal-footer">
+
+                    <button
+                        type="button"
+                        class="secondary-btn"
+                        onclick="closeMedicineModal()">
+
+                        ຍົກເລີກ
+
+                    </button>
+
+
+                    <button
+                        type="submit"
+                        class="primary-btn">
+
+                        💾 ບັນທຶກຢາ
+
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    `;
+
+    document.body.appendChild(modal);
+
+}
+
+
+/* =========================================================
+   INVENTORY FUNCTIONS
+   ========================================================= */
+
+function openMedicineModal(){
+
+    document.querySelector(
+        "#medicineModal form"
+    ).reset();
+
+
+    document.getElementById(
+        "newMedicineId"
+    ).value =
+        generateMedicineId();
+
+
+    document.getElementById(
+        "newMedicineReorder"
+    ).value = 20;
+
+
+    document
+        .getElementById(
+            "medicineModal"
+        )
+        .classList.add("show");
+
+}
+
+
+function closeMedicineModal(){
+
+    document
+        .getElementById(
+            "medicineModal"
+        )
+        .classList.remove("show");
+
+}
+
+
+function saveMedicine(event){
+
+    event.preventDefault();
+
+
+    const name =
+        document.getElementById(
+            "newMedicineName"
+        ).value.trim();
+
+
+    const unit =
+        document.getElementById(
+            "newMedicineUnit"
+        ).value.trim();
+
+
+    const price =
+        Number(
+            document.getElementById(
+                "newMedicinePrice"
+            ).value
+        );
+
+
+    const stock =
+        Number(
+            document.getElementById(
+                "newMedicineStock"
+            ).value
+        );
+
+
+    const reorderLevel =
+        Number(
+            document.getElementById(
+                "newMedicineReorder"
+            ).value
+        ) || 0;
+
+
+    const duplicate =
+        clinicMedicines.find(
+            m =>
+                m.name.toLowerCase() ===
+                name.toLowerCase()
+        );
+
+
+    if(duplicate){
+
+        alert(
+            "ຢາຊື່ນີ້ມີຢູ່ໃນ Inventory ແລ້ວ"
+        );
+
+        return;
+
+    }
+
+
+    clinicMedicines.push({
+
+        id:
+            document.getElementById(
+                "newMedicineId"
+            ).value,
+
+        name:
+            name,
+
+        unit:
+            unit,
+
+        price:
+            price,
+
+        stock:
+            stock,
+
+        reorderLevel:
+            reorderLevel,
+
+        status:
+            "ACTIVE",
+
+        createdAt:
+            new Date().toISOString()
+
+    });
+
+
+    saveMedicines();
+
+    closeMedicineModal();
+
+    renderInventory();
+
+    renderPharmacy();
+
+    alert(
+        "ເພີ່ມຢາເຂົ້າ Inventory ສຳເລັດ"
+    );
+
+}
+
+
+function renderInventory(){
+
+    const body =
+        document.getElementById(
+            "inventoryTableBody"
+        );
+
+    if(!body) return;
+
+
+    const search =
+        (
+            document.getElementById(
+                "inventorySearch"
+            )?.value || ""
+        )
+        .toLowerCase()
+        .trim();
+
+
+    const list =
+        clinicMedicines.filter(
+            m =>
+                m.status !== "INACTIVE" &&
+                (
+                    m.name +
+                    " " +
+                    m.id
+                )
+                .toLowerCase()
+                .includes(search)
+        );
+
+
+    if(!list.length){
+
+        body.innerHTML = `
+
+            <tr>
+
+                <td
+                    colspan="7"
+                    class="empty">
+
+                    📦<br><br>
+                    ບໍ່ມີຂໍ້ມູນຢາ
+
+                </td>
+
+            </tr>
+
+        `;
+
+        return;
+
+    }
+
+
+    body.innerHTML =
+        list.map(m => {
+
+            const low =
+                Number(m.stock) <=
+                Number(m.reorderLevel || 0);
+
+
+            return `
+
+                <tr>
+
+                    <td>
+                        ${escapeHTML(m.id)}
+                    </td>
+
+                    <td>
+                        <strong>
+                            ${escapeHTML(m.name)}
+                        </strong>
+                    </td>
+
+                    <td>
+                        ${escapeHTML(m.unit)}
+                    </td>
+
+                    <td>
+                        ${formatMoney(m.price)}
+                    </td>
+
+                    <td>
+
+                        <span class="badge ${
+                            low
+                            ? "yellow"
+                            : "green"
+                        }">
+
+                            ${m.stock}
+
+                        </span>
+
+                    </td>
+
+                    <td>
+                        ${m.reorderLevel || 0}
+                    </td>
+
+                    <td>
+
+                        ${
+                            low
+                            ?
+                            `<span class="badge yellow">
+                                ⚠️ Stock ຕ່ຳ
+                            </span>`
+                            :
+                            `<span class="badge green">
+                                ✓ ປົກກະຕິ
+                            </span>`
+                        }
+
+                    </td>
+
+                </tr>
+
+            `;
+
+        }).join("");
+
+}
+
+
+/* =========================================================
+   MONEY FORMAT
+   ========================================================= */
+
+function formatMoney(value){
+
+    return Number(value || 0)
+        .toLocaleString("lo-LA") +
+        " ₭";
+
+}
+
+
+/* =========================================================
+   DASHBOARD QUICK ACTIONS
+   ========================================================= */
+
+function clinicOpenConsultation(){
+
+    openView("doctor");
+
+    renderDoctorQueue();
+
+
+    const waiting =
+        clinicQueue.filter(
+            q =>
+                q.date === clinicToday() &&
+                q.status === "WAITING"
+        );
+
+
+    if(!waiting.length){
+
+        alert(
+            "🩺 ບໍ່ມີຄົນເຈັບລໍຖ້າກວດໃນຂະນະນີ້"
+        );
+
+        return;
+
+    }
+
+
+    alert(
+        "🩺 ເຂົ້າຫ້ອງກວດແລ້ວ\n\n" +
+        "ມີ " +
+        waiting.length +
+        " ຄົນລໍຖ້າກວດ"
+    );
+
+}
+
+
+function clinicOpenPharmacy(){
+
+    openView("pharmacy");
+
+    renderPharmacy();
+
+}
+
+
+function clinicOpenAppointment(){
+
+    openView("appointments");
+
+    openAppointmentModal();
+
+}
+
+
+/* =========================================================
+   DASHBOARD QUICK BUTTON BINDING
+   ========================================================= */
+
+document
+    .querySelectorAll(".quick-btn")
+    .forEach(btn => {
+
+        const text =
+            btn
+            .querySelector("span")
+            ?.textContent
+            .trim();
+
+
+        if(text === "ເພີ່ມນັດໝາຍ"){
+
+            btn.onclick =
+                clinicOpenAppointment;
+
+        }
+
+
+        if(text === "ເປີດການກວດ"){
+
+            btn.onclick =
+                clinicOpenConsultation;
+
+        }
+
+
+        if(text === "ຈ່າຍຢາ"){
+
+            btn.onclick =
+                clinicOpenPharmacy;
+
+        }
+
+    });
+
+
+/* =========================================================
+   SIDEBAR STATIC MENU BINDING
+   ========================================================= */
+
+document
+    .querySelectorAll(".sidebar .menu-item")
+    .forEach(item => {
+
+        const text =
+            item
+            .querySelector("span")
+            ?.textContent
+            .trim();
+
+
+        if(text === "ນັດໝາຍ"){
+
+            item.dataset.view =
+                "appointments";
+
+
+            item.addEventListener(
+                "click",
+                function(){
+
+                    document
+                        .querySelectorAll(".menu-item")
+                        .forEach(
+                            x =>
+                            x.classList.remove("active")
+                        );
+
+                    item.classList.add("active");
+
+                    openView("appointments");
+
+                }
+            );
+
+        }
+
+
+        if(text === "ຫ້ອງກວດ"){
+
+            item.dataset.view =
+                "doctor";
+
+
+            item.addEventListener(
+                "click",
+                function(){
+
+                    document
+                        .querySelectorAll(".menu-item")
+                        .forEach(
+                            x =>
+                            x.classList.remove("active")
+                        );
+
+                    item.classList.add("active");
+
+                    clinicOpenConsultation();
+
+                }
+            );
+
+        }
+
+
+        if(text === "Pharmacy"){
+
+            item.dataset.view =
+                "pharmacy";
+
+
+            item.addEventListener(
+                "click",
+                function(){
+
+                    document
+                        .querySelectorAll(".menu-item")
+                        .forEach(
+                            x =>
+                            x.classList.remove("active")
+                        );
+
+                    item.classList.add("active");
+
+                    clinicOpenPharmacy();
+
+                }
+            );
+
+        }
+
+
+        if(text === "Inventory"){
+
+            item.dataset.view =
+                "inventory";
+
+
+            item.addEventListener(
+                "click",
+                function(){
+
+                    document
+                        .querySelectorAll(".menu-item")
+                        .forEach(
+                            x =>
+                            x.classList.remove("active")
+                        );
+
+                    item.classList.add("active");
+
+                    openView("inventory");
+
+                }
+            );
+
+        }
+
+    });
+
+
+/* =========================================================
+   EXTEND OPEN VIEW
+   ========================================================= */
+
+const phase3OriginalOpenView =
+    window.openView;
+
+
+window.openView = function(view){
+
+    phase3OriginalOpenView(view);
+
+
+    if(view === "appointments"){
+
+        setHeader(
+            "Appointment Management",
+            "ຈັດການນັດໝາຍ"
+        );
+
+        renderAppointments();
+
+    }
+
+
+    if(view === "pharmacy"){
+
+        setHeader(
+            "Pharmacy",
+            "ຈ່າຍຢາ ແລະ ຈັດການຢາ"
+        );
+
+        renderPharmacy();
+
+    }
+
+
+    if(view === "inventory"){
+
+        setHeader(
+            "Inventory",
+            "ຈັດການ Stock ຢາ"
+        );
+
+        renderInventory();
+
+    }
+
+
+    if(view === "doctor"){
+
+        setHeader(
+            "Doctor / Consultation",
+            "ຫ້ອງກວດ"
+        );
+
+        renderDoctorQueue();
+
+    }
+
+
+    updateClinicDashboard();
+
+};
+
+
+/* =========================================================
+   UPDATE DASHBOARD
+   ========================================================= */
+
+function updateClinicDashboard(){
+
+    const today =
+        clinicToday();
+
+
+    /* Appointment count */
+
+    const appointmentsToday =
+        clinicAppointments.filter(
+            a =>
+                a.date === today &&
+                a.status !== "CANCELLED"
+        ).length;
+
+
+    const statNumbers =
+        document.querySelectorAll(
+            "#dashboardView .stat-number"
+        );
+
+
+    if(statNumbers[2]){
+
+        statNumbers[2].textContent =
+            appointmentsToday;
+
+    }
+
+
+    /* Revenue */
+
+    const revenue =
+        clinicPayments
+        .filter(
+            p =>
+                String(
+                    p.createdAt || ""
+                ).slice(0,10) === today
+        )
+        .reduce(
+            (sum,p) =>
+                sum + Number(p.total || 0),
+            0
+        );
+
+
+    if(statNumbers[3]){
+
+        statNumbers[3].textContent =
+            revenue >= 1000000
+            ?
+            (
+                (revenue / 1000000)
+                .toFixed(2)
+                .replace(/\.00$/,"")
+                +
+                "M"
+            )
+            :
+            formatMoney(revenue)
+                .replace(" ₭","");
+
+    }
+
+
+    const revenueBox =
+        document.querySelector(
+            "#dashboardView .bottom-grid .card:last-child div[style*='font-size:28px']"
+        );
+
+
+    if(revenueBox){
+
+        revenueBox.textContent =
+            formatMoney(revenue);
+
+    }
+
+}
+
+
+/* =========================================================
+   WHEN VISIT IS COMPLETED
+   → UPDATE APPOINTMENT
+   ========================================================= */
+
+const phase3OriginalCompleteVisit =
+    window.completeVisit;
+
+
+window.completeVisit = function(visitId){
+
+    phase3OriginalCompleteVisit(visitId);
+
+
+    const visit =
+        clinicVisits.find(
+            v => v.id === visitId
+        );
+
+
+    if(!visit) return;
+
+
+    const queue =
+        clinicQueue.find(
+            q =>
+                q.id === visit.queueId
+        );
+
+
+    if(
+        queue &&
+        queue.appointmentId
+    ){
+
+        const appointment =
+            clinicAppointments.find(
+                a =>
+                    a.id ===
+                    queue.appointmentId
+            );
+
+
+        if(appointment){
+
+            appointment.status =
+                "COMPLETED";
+
+            appointment.completedAt =
+                new Date().toISOString();
+
+            saveAppointments();
+
+        }
+
+    }
+
+
+    updateClinicDashboard();
+
+};
+
+
+/* =========================================================
+   SAVE PRESCRIPTION → ADD PRICE FROM INVENTORY
+   ========================================================= */
+
+const phase3OriginalSavePrescription =
+    window.savePrescription;
+
+
+window.savePrescription = function(event){
+
+    const beforeCount =
+        clinicPrescriptions.length;
+
+
+    phase3OriginalSavePrescription(event);
+
+
+    if(
+        clinicPrescriptions.length >
+        beforeCount
+    ){
+
+        const prescription =
+            clinicPrescriptions[
+                clinicPrescriptions.length - 1
+            ];
+
+
+        const medicine =
+            clinicMedicines.find(
+                m =>
+                    m.name.toLowerCase() ===
+                    String(
+                        prescription.medicineName
+                    ).toLowerCase()
+            );
+
+
+        if(medicine){
+
+            prescription.medicineId =
+                medicine.id;
+
+            prescription.unitPrice =
+                Number(medicine.price || 0);
+
+            prescription.stockAtPrescription =
+                Number(medicine.stock || 0);
+
+        }
+
+
+        localStorage.setItem(
+            "clinic_prescriptions",
+            JSON.stringify(
+                clinicPrescriptions
+            )
+        );
+
+    }
+
+};
+
+
+/* =========================================================
+   CLOSE PHASE 3 MODALS OUTSIDE CLICK
+   ========================================================= */
+
+[
+    "appointmentModal",
+    "pharmacyPaymentModal",
+    "medicineModal"
+]
+.forEach(id => {
+
+    const modal =
+        document.getElementById(id);
+
+
+    if(modal){
+
+        modal.addEventListener(
+            "click",
+            function(e){
+
+                if(e.target === this){
+
+                    this.classList.remove(
+                        "show"
+                    );
+
+                }
+
+            }
+        );
+
+    }
+
+});
+
+
+/* =========================================================
+   FIX RED BADGE
+   ========================================================= */
+
+if(!document.getElementById("clinicPhase3Style")){
+
+    const style =
+        document.createElement("style");
+
+    style.id =
+        "clinicPhase3Style";
+
+    style.textContent = `
+
+        .red{
+            background:#ffe9e9;
+            color:#b42318;
+        }
+
+        .action-btn:disabled{
+            opacity:.5;
+            cursor:not-allowed;
+        }
+
+        #pharmacyPaymentModal .modal-box{
+            width:min(760px,100%);
+        }
+
+        #appointmentModal .modal-box{
+            width:min(760px,100%);
+        }
+
+        #medicineModal .modal-box{
+            width:min(650px,100%);
+        }
+
+    `;
+
+    document.head.appendChild(style);
+
+}
+
+
+/* =========================================================
+   INITIALIZE PHASE 3
+   ========================================================= */
+
+renderAppointments();
+renderPharmacy();
+renderInventory();
+updateClinicDashboard();
 
 </script>
 </body>
