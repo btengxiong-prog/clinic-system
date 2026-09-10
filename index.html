@@ -239,15 +239,21 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
         </div>
 
         <div class="bottom-grid">
-            <div class="card">
-                <div class="card-header">
-                    <h3>🔔 ການແຈ້ງເຕືອນ</h3><button onclick="alert('ເປີດໜ້າຈັດການການແຈ້ງເຕືອນ')">ເບິ່ງທັງໝົດ</button>
+                <div class="card">
+                    <div class="card-header">
+                        <h3>🔔 ການແຈ້ງເຕືອນ</h3><button onclick="alert('ເປີດໜ້າຈັດການການແຈ້ງເຕືອນ')">ເບິ່ງທັງໝົດ</button>
+                    </div>
+                    
+                    <!-- ເພີ່ມ id="alert-..." ແລະ <span> ກວມຕົວເລກໄວ້ -->
+                    <div class="alert alert-red" id="alert-expired">🔴 <strong>ຢາໝົດອາຍຸ:</strong>&nbsp; <span id="count-expired">5</span> ລາຍການ</div>
+                    <div class="alert alert-yellow" id="alert-stock">🟡 <strong>Stock ຕ່ຳ:</strong>&nbsp; <span id="count-stock">12</span> ລາຍການ</div>
+                    <div class="alert alert-blue" id="alert-lab">🔵 <strong>Lab:</strong>&nbsp; ມີ <span id="count-lab">4</span> ຜົນກວດລໍຖ້າ</div>
+
+                    <!-- ໂຄດເພີ່ມໃໝ່: ຂໍ້ຄວາມທີ່ຈະສະແດງເມື່ອບໍ່ມີການແຈ້ງເຕືອນຫຍັງເລີຍ (ເປັນທາງເລືອກເສີມ) -->
+                    <div id="no-notification" style="display: none; text-align: center; color: #7b8794; padding: 20px;">
+                        🎉 ບໍ່ມີການແຈ້ງເຕືອນໃໝ່ໃນຂະນະນີ້
+                    </div>
                 </div>
-                <div class="alert alert-red">🔴 <strong>ຢາໝົດອາຍຸ:</strong>&nbsp; 5 ລາຍການ</div>
-                <div class="alert alert-yellow">🟡 <strong>Stock ຕ່ຳ:</strong>&nbsp; 12 ລາຍການ</div>
-                <div class="alert alert-blue">🔵 <strong>Lab:</strong>&nbsp; ມີ 4 ຜົນກວດລໍຖ້າ</div>
-            </div>
-            <div class="card">
                 <div class="card-header">
                     <h3>💵 ລາຍຮັບມື້ນີ້</h3><button onclick="alert('ເປີດໜ້າລາຍງານການເງິນ')">ເບິ່ງລາຍລະອຽດ</button>
                 </div>
@@ -615,6 +621,15 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
         document.getElementById('revenue-box-display').innerText = totalRevenue.toLocaleString() + ' ₭';
         
         renderAppointmentsPage();
+
+        // ----------------------------------------------------------------
+        // ສ່ວນທີ່ເພີ່ມໃໝ່: ກວດສອບ ແລະ ສະແດງການແຈ້ງເຕືອນ
+        // ----------------------------------------------------------------
+        let mockExpired = 0; // ສົມມຸດວ່າບໍ່ມີຢາໝົດອາຍຸ (ຈະຖືກເຊື່ອງ)
+        let mockStock = 2;   // ສົມມຸດວ່າມີຢາໃກ້ໝົດ 2 ລາຍການ (ຈະສະແດງ)
+        let mockLab = 0;     // ສົມມຸດວ່າບໍ່ມີຜົນ Lab ລໍຖ້າ (ຈະຖືກເຊື່ອງ)
+
+        updateNotifications(mockExpired, mockStock, mockLab);
     }
 
     document.getElementById('btnSavePatient').addEventListener('click', async () => {
@@ -771,6 +786,33 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
             renderAppointmentsPage();
         }
     };
+
+    // ----------------------------------------------------------------
+    // ຟັງຊັນຈັດການການສະແດງຜົນແຈ້ງເຕືອນ (ເອົາໄວ້ຕໍ່ຈາກ loadDashboardData ເລີຍ)
+    // ----------------------------------------------------------------
+    function updateNotifications(expiredCount, stockCount, labCount) {
+        const alertExpired = document.getElementById('alert-expired');
+        const alertStock = document.getElementById('alert-stock');
+        const alertLab = document.getElementById('alert-lab');
+        const noNotif = document.getElementById('no-notification');
+        
+        // 1. ອັບເດດຕົວເລກເຂົ້າໃນ <span> (ຖ້າມີການໃສ່ id ໄວ້ໃນ HTML ແລ້ວ)
+        if (document.getElementById('count-expired')) document.getElementById('count-expired').innerText = expiredCount;
+        if (document.getElementById('count-stock')) document.getElementById('count-stock').innerText = stockCount;
+        if (document.getElementById('count-lab')) document.getElementById('count-lab').innerText = labCount;
+        
+        // 2. ເງື່ອນໄຂການສະແດງຜົນ (ຖ້າ > 0 ໃຫ້ສະແດງ, ຖ້າ = 0 ໃຫ້ເຊື່ອງ)
+        if (alertExpired) alertExpired.style.display = (expiredCount > 0) ? 'flex' : 'none';
+        if (alertStock) alertStock.style.display = (stockCount > 0) ? 'flex' : 'none';
+        if (alertLab) alertLab.style.display = (labCount > 0) ? 'flex' : 'none';
+        
+        // 3. ຖ້າບໍ່ມີແຈ້ງເຕືອນຫຍັງເລີຍທັງ 3 ຢ່າງ ໃຫ້ສະແດງຂໍ້ຄວາມ "ບໍ່ມີການແຈ້ງເຕືອນ" (ຖ້າມີແທັກນີ້ໃນ HTML)
+        if (expiredCount === 0 && stockCount === 0 && labCount === 0) {
+            if (noNotif) noNotif.style.display = 'block';
+        } else {
+            if (noNotif) noNotif.style.display = 'none';
+        }
+    }
 </script>
 </body>
 </html>
