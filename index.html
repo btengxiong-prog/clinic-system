@@ -691,10 +691,22 @@ td {
         <div class="dashboard-grid">
             <!-- TODAY PATIENTS -->
             <div class="card">
-                <div class="card-header">
-                    <h3>👥 ລາຍຊື່ຄົນເຈັບ / ການນັດໝາຍ (Local)</h3>
-                    <button onclick="alert('ເປີດໜ້າລາຍຊື່ຄົນເຈັບທັງໝົດ')">ເບິ່ງທັງໝົດ →</button>
-                </div>
+                <table style="min-width: 1000px;"> <!-- ກຳນົດຄວາມກວ້າງຂັ້ນຕ່ຳເພື່ອບໍ່ໃຫ້ຂໍ້ມູນບຽດກັນ -->
+                    <thead>
+                        <tr>
+                            <th>ລະຫັດ (ID/HN)</th>
+                            <th>ຊື່ ແລະ ນາມສະກຸນ</th>
+                            <th>ເພດ / ວັນເກີດ</th>
+                            <th>ເບີໂທ / ກຸ່ມເລືອດ</th>
+                            <th>ທີ່ຢູ່ປັດຈຸບັນ</th>
+                            <th>ແພ້ຢາ / ປະຫວັດ</th>
+                            <th>ສະຖານະ</th>
+                        </tr>
+                    </thead>
+                    <tbody id="patient-table-body">
+                        <!-- ຂໍ້ມູນຈະຖືກດຶງມາຈາກ Database -->
+                    </tbody>
+                </table>
                 <table>
                     <thead>
                         <tr>
@@ -940,27 +952,62 @@ td {
         if (patients.length === 0) {
             tbody.innerHTML = `<tr><td colspan="3" style="text-align:center; color:#7b8794;">ຍັງບໍ່มีຂໍ້ມູນຄົນເຈັບในระบบ</td></tr>`;
         } else {
-            patients.forEach((p, index) => {
-                const name = p.fullname || 'ບໍ່ລະບຸຊື່';
-                const firstLetter = name.charAt(0);
-                const docId = 'ID-' + (1000 + index);
+                patients.forEach((p) => {
+                    const name = p.fullname || 'ບໍ່ລະບຸຊື່';
+                    const firstLetter = name.charAt(0);
+                    
+                    // ຈັດການຂໍ້ມູນແຕ່ລະຫ້ອງ (ຖ້າບໍ່ມີຂໍ້ມູນໃຫ້ຂີດ - )
+                    const ptId = p.patient_code || ('ID-' + (1000 + p.id));
+                    const hn = p.hn_number ? `HN: ${p.hn_number}` : '-';
+                    const gender = p.gender || '-';
+                    const dob = p.dob || '-';
+                    const phone = p.phone || '-';
+                    const blood = p.blood_group || '-';
+                    const address = p.address || '-';
+                    const allergy = p.allergy || 'ບໍ່ລະບຸ';
+                    const history = p.health_history || 'ບໍ່ລະບຸ';
+                    
+                    // ຈັດການສີຂອງສະຖານະ
+                    let statusBadge = '';
+                    if(p.status === 'Active' || p.status === 'Active/ເຄື່ອນໄຫວ') {
+                        statusBadge = '<span class="badge badge-green">Active</span>';
+                    } else {
+                        statusBadge = '<span class="badge" style="background:#f1f3f5; color:#495057;">Inactive</span>';
+                    }
 
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td>
-                        <div class="patient">
-                            <div class="patient-avatar">${firstLetter}</div>
-                            <div>
-                                <strong>${name}</strong><br>
-                                <small>${docId}</small>
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>
+                            <strong>${ptId}</strong><br>
+                            <small style="color: #7b8794;">${hn}</small>
+                        </td>
+                        <td>
+                            <div class="patient">
+                                <div class="patient-avatar">${firstLetter}</div>
+                                <div>
+                                    <strong>${name}</strong>
+                                </div>
                             </div>
-                        </div>
-                    </td>
-                    <td>${p.created_at}</td>
-                    <td><span class="badge badge-green">ມີປະຫວັດໃນລະບົບ</span></td>
-                `;
-                tbody.appendChild(tr);
-            });
+                        </td>
+                        <td>
+                            ${gender}<br>
+                            <small style="color: #7b8794;">${dob}</small>
+                        </td>
+                        <td>
+                            ${phone}<br>
+                            <small style="color: #e53935; font-weight: bold;">ເລືອດ: ${blood}</small>
+                        </td>
+                        <td>
+                            <span style="font-size: 14px;">${address}</span>
+                        </td>
+                        <td>
+                            <small><strong>ແພ້:</strong> ${allergy}</small><br>
+                            <small style="color: #7b8794;"><strong>ພະຍາດ:</strong> ${history}</small>
+                        </td>
+                        <td>${statusBadge}</td>
+                    `;
+                    tbody.appendChild(tr);
+                });
         }
 
         // 2. ດຶງຂໍ້ມູນນັດໝາຍ
