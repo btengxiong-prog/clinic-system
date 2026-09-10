@@ -969,6 +969,17 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
 
     // Helper ຟັງຊັນສຳລັບການກົດປຸ່ມທີ່ຢູ່ໃນຕາຕະລາງ
     window.viewPatientQuick = function(name) { window.showCustomAlert(`ເບິ່ງຂໍ້ມູນຄົນເຈັບ: ${name}`, 'ຂໍ້ມູນຄົນເຈັບ', '👁️'); };
+    
+    // ຟັງຊັນແກ້ໄຂ ແລະ ລຶບ ທີ່ເພີ່ມກັບຄືນມາໃໝ່
+    window.editPatientQuick = function(id) { 
+        window.showCustomAlert(`ແກ້ໄຂຂໍ້ມູນຄົນເຈັບລະຫັດ: ${id}`, 'ແກ້ໄຂຄົນເຈັບ', '✏️'); 
+    };
+    window.deletePatientQuick = function(id) { 
+        window.showCustomConfirm(`ທ່ານຕ້ອງການລຶບຄົນເຈັບລະຫັດ ${id} ແທ້ຫຼືບໍ່?`, 'ຢືນຢັນການລຶບ', function() {
+            window.showCustomAlert(`ລຶບຂໍ້ມູນຄົນເຈັບ ${id} ສຳເລັດແລ້ວ`, 'ສຳເລັດ', '✅');
+        });
+    };
+
     window.printRxQuick = function(rx_no) { window.showCustomAlert(`ພິມໃບຢາ ${rx_no}`, 'ພິມ', '🖨️'); };
 
     let globalPatientsList = [];
@@ -1093,8 +1104,8 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
                     let statusBadge = (p.status === 'Active' || p.status === 'Active/ເຄື່ອນໄຫວ') ? '<span class="badge badge-green">Active</span>' : '<span class="badge badge-gray">Inactive</span>';
                     
                     const tr = document.createElement('tr');
-                    // ໝາຍເຫດ: ຕັດປຸ່ມແກ້ໄຂ ແລະ ລຶບ ອອກໝົດ 100% ແລ້ວ ຕາມຄຳສັ່ງ
-                    tr.innerHTML = `<td><strong>${ptId}</strong><br><small style="color: #7b8794;">${hn}</small></td><td><div class="patient"><div class="patient-avatar">${firstLetter}</div><div><strong>${name}</strong></div></div></td><td>${gender}<br><small style="color: #7b8794;">${dobDisplay}</small></td><td>${phone}<br><small style="color: #e53935; font-weight: bold;">ເລືອດ: ${blood}</small></td><td><span style="font-size: 13px;">${address}</span></td><td><small><strong>ແພ້:</strong> ${allergy}</small><br><small style="color: #7b8794;"><strong>ພະຍາດ:</strong> ${history}</small></td><td>${statusBadge}</td><td style="text-align: center;"><span class="action-icon" title="ເບິ່ງຂໍ້ມູນ" onclick="viewPatientQuick('${name}')">👁️</span></td>`;
+                    // ເພີ່ມປຸ່ມແກ້ໄຂ ແລະ ລຶບ ກັບຄືນມາແລ້ວ
+                    tr.innerHTML = `<td><strong>${ptId}</strong><br><small style="color: #7b8794;">${hn}</small></td><td><div class="patient"><div class="patient-avatar">${firstLetter}</div><div><strong>${name}</strong></div></div></td><td>${gender}<br><small style="color: #7b8794;">${dobDisplay}</small></td><td>${phone}<br><small style="color: #e53935; font-weight: bold;">ເລືອດ: ${blood}</small></td><td><span style="font-size: 13px;">${address}</span></td><td><small><strong>ແພ້:</strong> ${allergy}</small><br><small style="color: #7b8794;"><strong>ພະຍາດ:</strong> ${history}</small></td><td>${statusBadge}</td><td style="text-align: center;"><span class="action-icon" title="ເບິ່ງຂໍ້ມູນ" onclick="viewPatientQuick('${name}')">👁️</span><span class="action-icon" title="ແກ້ໄຂ" onclick="editPatientQuick('${ptId}')">✏️</span><span class="action-icon" title="ລຶບ" onclick="deletePatientQuick('${ptId}')">🗑️</span></td>`;
                     tbody.appendChild(tr);
                 });
             }
@@ -1359,7 +1370,7 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
             let statusBadge = (p.status === 'Active' || p.status === 'Active/ເຄື່ອນໄຫວ') ? '<span class="badge badge-green">Active</span>' : '<span class="badge badge-gray">Inactive</span>';
             
             const tr = document.createElement('tr');
-            // ໝາຍເຫດ: ຕັດປຸ່ມແກ້ໄຂ ແລະ ລຶບ ອອກໝົດ 100% ແລ້ວ ຕາມຄຳສັ່ງ
+            // ເພີ່ມປຸ່ມແກ້ໄຂ ແລະ ລຶບ ກັບຄືນມາແລ້ວ
             tr.innerHTML = `
                 <td><strong>${ptId}</strong><br><small style="color: #7b8794;">${hn}</small></td>
                 <td><div class="patient"><div class="patient-avatar">${firstLetter}</div><div><strong>${name}</strong></div></div></td>
@@ -1370,6 +1381,8 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
                 <td>${statusBadge}</td>
                 <td style="text-align: center;">
                     <span class="action-icon" title="ເບິ່ງຂໍ້ມູນ" onclick="viewPatientQuick('${name}')">👁️</span>
+                    <span class="action-icon" title="ແກ້ໄຂ" onclick="editPatientQuick('${ptId}')">✏️</span>
+                    <span class="action-icon" title="ລຶບ" onclick="deletePatientQuick('${ptId}')">🗑️</span>
                 </td>`;
             tbody.appendChild(tr);
         });
