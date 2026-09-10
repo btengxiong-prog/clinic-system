@@ -242,13 +242,18 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
         <div class="bottom-grid">
             <div class="card">
                 <div class="card-header">
-                    <h3>🔔 ການແຈ້ງເຕືອນ</h3><button onclick="alert('ເປີດໜ້າຈັດການການແຈ້ງເຕືອນ')">ເບິ່ງທັງໝົດ</button>
+                    <h3>🔔 ການແຈ້ງເຕືອນ</h3>
+                    <div>
+                        <!-- ເພີ່ມປຸ່ມທົດສອບສະຫຼັບການແຈ້ງເຕືອນໄປມາ -->
+                        <button onclick="toggleTestNotifications()" style="background: #e5f1ff; border: 1px solid #1976d2; color: #1769aa; padding: 4px 10px; border-radius: 6px; cursor: pointer; margin-right: 10px; font-family: inherit;">🔄 ທົດສອບ (Test)</button>
+                        <button onclick="alert('ເປີດໜ້າຈັດການການແຈ້ງເຕືອນ')">ເບິ່ງທັງໝົດ</button>
+                    </div>
                 </div>
-                <!-- ປັບປຸງ: ຕັ້ງຄ່າເລີ່ມຕົ້ນໃນ HTML ເປັນ 0 ໄວ້ເລີຍ -->
+                
                 <div class="alert alert-red" id="alert-expired" style="display: none;">🔴 <strong>ຢາໝົດອາຍຸ:</strong>&nbsp; <span id="num-expired">0</span> ລາຍການ</div>
                 <div class="alert alert-yellow" id="alert-stock" style="display: none;">🟡 <strong>Stock ຕ່ຳ:</strong>&nbsp; <span id="num-stock">0</span> ລາຍການ</div>
                 <div class="alert alert-blue" id="alert-lab" style="display: none;">🔵 <strong>Lab:</strong>&nbsp; ມີ <span id="num-lab">0</span> ຜົນກວດລໍຖ້າ</div>
-                <!-- ຂໍ້ຄວາມສະແດງກໍລະນີທີ່ບໍ່ມີການແຈ້ງເຕືອນ -->
+                
                 <div class="alert-none" id="alert-empty" style="display: block;">🎉 ບໍ່ມີການແຈ້ງເຕືອນໃໝ່ໃນຕອນນີ້</div>
             </div>
             
@@ -457,19 +462,28 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
 <!-- ================= JAVASCRIPT ================= -->
 <script>
     let globalPatientsList = [];
+    
+    // ຕົວແປສຳລັບການທົດສອບສະຫຼັບການແຈ້ງເຕືອນ
+    let isTestingAlerts = false;
 
     const districtsByProvince = {
         "ນະຄອນຫຼວງວຽງຈັນ": ["ຈັນທະບູລີ", "ສີໂຄດຕະບອງ", "ໄຊເສດຖາ", "ສີສັດຕະນາກ", "ນາຊາຍທອງ", "ໄຊທານີ", "ຫາດຊາຍຟອງ", "ສັງທອງ", "ປາກງື່ມ"],
         "ໄຊຍະບູລີ": ["ໄຊຍະບູລີ", "ຄອບ", "ຊຽງຮ່ອນ", "ເງິນ", "ຫົງສາ", "ພຽງ", "ປາກລາຍ", "ແກ່ນທ້າວ", "ບໍ່ແຕນ", "ທົ່ງມີໄຊ", "ໄຊສະຖານ"]
     };
 
-    // ຟັງຊັນໃໝ່: ໂຫຼດ ແລະ ກວດສອບການແຈ້ງເຕືອນ
+    // ຟັງຊັນສຳລັບປຸ່ມທົດສອບສະຫຼັບການແຈ້ງເຕືອນ
+    function toggleTestNotifications() {
+        isTestingAlerts = !isTestingAlerts; // ສະຫຼັບຄ່າ ໄປ-ມາ
+        loadNotifications();
+    }
+
     function loadNotifications() {
-        // ປັບປຸງ: ກຳນົດຄ່າເລີ່ມຕົ້ນເປັນ 0 ທັງໝົດເນື່ອງຈາກຕອນນີ້ຍັງບໍ່ມີຂໍ້ມູນ
+        // ຖ້າກົດທົດສອບ ຈະດຶງຄ່າ 5, 12, 4 ມາສະແດງ (ຄືກັນກັບຮູບ image_fa1945.png)
+        // ຖ້າບໍ່ໄດ້ກົດ ຈະເປັນ 0 ທັງໝົດ (ຄືກັນກັບຮູບ image_fa188a.png)
         let mockData = {
-            expiredMeds: 0,  
-            lowStock: 0,    
-            labPending: 0    
+            expiredMeds: isTestingAlerts ? 5 : 0,  
+            lowStock: isTestingAlerts ? 12 : 0,    
+            labPending: isTestingAlerts ? 4 : 0    
         };
 
         const alertExpired = document.getElementById('alert-expired');
@@ -479,7 +493,6 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
 
         let hasAlert = false;
 
-        // ຈັດການແຈ້ງເຕືອນຢາໝົດອາຍຸ
         if (mockData.expiredMeds > 0) {
             document.getElementById('num-expired').innerText = mockData.expiredMeds;
             alertExpired.style.display = 'flex';
@@ -488,7 +501,6 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
             alertExpired.style.display = 'none';
         }
 
-        // ຈັດການແຈ້ງເຕືອນ Stock ຕ່ຳ
         if (mockData.lowStock > 0) {
             document.getElementById('num-stock').innerText = mockData.lowStock;
             alertStock.style.display = 'flex';
@@ -497,7 +509,6 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
             alertStock.style.display = 'none';
         }
 
-        // ຈັດການແຈ້ງເຕືອນ Lab
         if (mockData.labPending > 0) {
             document.getElementById('num-lab').innerText = mockData.labPending;
             alertLab.style.display = 'flex';
@@ -506,7 +517,6 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
             alertLab.style.display = 'none';
         }
 
-        // ຖ້າບໍ່ມີຫຍັງແຈ້ງເຕືອນເລີຍ ໃຫ້ສະແດງຂໍ້ຄວາມແທນ
         if (!hasAlert) {
             alertEmpty.style.display = 'block';
         } else {
@@ -588,7 +598,7 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
         document.getElementById('btnCloseAptModal').addEventListener('click', () => { aptModal.style.display = 'none'; });
 
         loadDashboardData();
-        loadNotifications(); // ເອີ້ນໃຊ້ຟັງຊັນແຈ້ງເຕືອນເມື່ອໂຫຼດໜ້າເວັບ
+        loadNotifications(); 
     });
 
     async function loadDashboardData() {
@@ -624,7 +634,6 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
                     const hn = p.hn_number ? `HN: ${p.hn_number}` : '-';
                     const gender = p.gender || '-';
                     
-                    // ແປງຮູບແບບວັນທີເກີດໃຫ້ສັ້ນລົງ ແລະ ເປັນລະບຽບ
                     let dobDisplay = '-';
                     if(p.dob) {
                         const d = new Date(p.dob);
