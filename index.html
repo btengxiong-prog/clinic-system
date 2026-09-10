@@ -439,12 +439,11 @@ td {
     z-index: 1000;
 }
 
-.modal-card {
-    background: white;
-    padding: 25px;
-    border-radius: 12px;
-    width: 400px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+.modal-card.large {
+    width: 1000px; /* ຂະຫຍາຍຄວາມກວ້າງໃຫ້ເຕັມພື້ນທີ່ກ່ອງສີແດງ */
+    max-width: 95%; /* ປ້ອງກັນບໍ່ໃຫ້ລົ້ນຈໍໃນກໍລະນີເປີດໃນຈໍນ້ອຍ */
+    max-height: 90vh;
+    overflow-y: auto;
 }
 
 .modal-card h3 {
