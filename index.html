@@ -68,7 +68,7 @@ body { font-family: "Phetsarath OT", "Times New Roman", serif; background: #f4f7
 .card-header button { border: none; background: transparent; color: #1976d2; cursor: pointer; font-family: inherit; font-size: 14px; font-weight: bold; }
 
 .table-responsive { overflow-x: auto; }
-table { width: 100%; border-collapse: collapse; min-width: 950px; }
+table { width: 100%; border-collapse: collapse; min-width: 1100px; /* ປັບຄວາມກວ້າງຂຶ້ນເພາະມີຫຼາຍຄໍລຳ */ }
 th { text-align: left; color: #7b8794; font-size: 14px; font-weight: bold; padding: 12px 10px; border-bottom: 1px solid #edf0f4; background: #f9fbfd; }
 td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vertical-align: middle; }
 
@@ -270,12 +270,16 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
                     <table>
                         <thead>
                             <tr>
-                                <th>ລະຫັດ (ID/HN)</th>
+                                <th>ID</th>
+                                <th>HN</th>
                                 <th>ຊື່ ແລະ ນາມສະກຸນ</th>
-                                <th>ເພດ / ວັນເກີດ</th>
-                                <th>ເບີໂທ / ກຸ່ມເລືອດ</th>
+                                <th>ເພດ</th>
+                                <th>ວັນເກີດ</th>
+                                <th>ເບີໂທ</th>
+                                <th>ກຸ່ມເລືອດ</th>
                                 <th>ທີ່ຢູ່ປັດຈຸບັນ</th>
-                                <th>ແພ້ຢາ / ປະຫວັດ</th>
+                                <th>ແພ້ຢາ</th>
+                                <th>ປະຫວັດ</th>
                                 <th>ສະຖານະ</th>
                                 <th style="text-align: center;">ຈັດການ</th>
                             </tr>
@@ -355,12 +359,16 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
                 <table>
                     <thead>
                         <tr>
-                            <th>ລະຫັດ (ID/HN)</th>
+                            <th>ID</th>
+                            <th>HN</th>
                             <th>ຊື່ ແລະ ນາມສະກຸນ</th>
-                            <th>ເພດ / ວັນເກີດ</th>
-                            <th>ເບີໂທ / ກຸ່ມເລືອດ</th>
+                            <th>ເພດ</th>
+                            <th>ວັນເກີດ</th>
+                            <th>ເບີໂທ</th>
+                            <th>ກຸ່ມເລືອດ</th>
                             <th>ທີ່ຢູ່ປັດຈຸບັນ</th>
-                            <th>ແພ້ຢາ / ປະຫວັດ</th>
+                            <th>ແພ້ຢາ</th>
+                            <th>ປະຫວັດ</th>
                             <th>ສະຖານະ</th>
                             <th style="text-align: center;">ຈັດການ</th>
                         </tr>
@@ -385,7 +393,7 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
                 <div><div class="stat-label">🟡 ລໍຖ້າ</div><div class="stat-number" id="apt-stat-pending">0</div></div>
             </div>
             <div class="card stat-card" style="padding: 15px;">
-                <div><div class="stat-label">🟢 ຢືນຢັນແລ້ວ</div><div class="stat-number" id="apt-stat-confirmed">0</div></div>
+                <div><div class="stat-label">🟢 ຢືນຢັນແລ້ວ</div><div class="stat-number" id="apt-stat-completed">0</div></div>
             </div>
             <div class="card stat-card" style="padding: 15px;">
                 <div><div class="stat-label">🔵 ສຳເລັດ</div><div class="stat-number" id="apt-stat-completed">0</div></div>
@@ -1182,16 +1190,16 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
             const response = await fetch('http://127.0.0.1:5000/api/patients'); const result = await response.json(); let patients = [];
             if (response.ok && result.status === 'success') { patients = result.data; globalPatientsList = patients; const aptPatientSelect = document.getElementById('apt_patient'); aptPatientSelect.innerHTML = '<option value="">-- ເລືອກຄົນເຈັບ --</option>'; patients.forEach(p => { aptPatientSelect.innerHTML += `<option value="${p.fullname}">${p.fullname} (${p.patient_code || 'ID-'+p.id})</option>`; }); }
             document.getElementById('total-patients').innerText = patients.length; document.getElementById('today-patients').innerText = patients.length; tbody.innerHTML = "";
-            if (patients.length === 0) { tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; color:#7b8794; padding: 20px;">ຍັງບໍ່ມີຂໍ້ມູນຄົນເຈັບໃນ Database</td></tr>`; } else {
+            if (patients.length === 0) { tbody.innerHTML = `<tr><td colspan="12" style="text-align:center; color:#7b8794; padding: 20px;">ຍັງບໍ່ມີຂໍ້ມູນຄົນເຈັບໃນ Database</td></tr>`; } else {
                 patients.forEach((p) => {
-                    const name = p.fullname || 'ບໍ່ລະບຸຊື່'; const firstLetter = name.charAt(0); const ptId = p.patient_code || ('ID-' + (1000 + p.id)); const hn = p.hn_number ? `HN: ${p.hn_number}` : '-'; const gender = p.gender || '-';
+                    const name = p.fullname || 'ບໍ່ລະບຸຊື່'; const firstLetter = name.charAt(0); const ptId = p.patient_code || ('ID-' + (1000 + p.id)); const hn = p.hn_number ? p.hn_number : '-'; const gender = p.gender || '-';
                     let dobDisplay = '-'; if(p.dob) { const d = new Date(p.dob); dobDisplay = !isNaN(d.getTime()) ? d.toLocaleDateString('en-GB') : p.dob; }
                     const phone = p.phone || '-'; const blood = p.blood_group || '-'; const address = p.address || '-'; const allergy = p.allergy || 'ບໍ່ລະບຸ'; const history = p.health_history || 'ບໍ່ລະບຸ';
                     let statusBadge = (p.status === 'Active' || p.status === 'Active/ເຄື່ອນໄຫວ') ? '<span class="badge badge-green">Active</span>' : '<span class="badge badge-gray">Inactive</span>';
                     
                     const tr = document.createElement('tr');
-                    // ເອົາປຸ່ມແກ້ໄຂ ແລະ ລຶບ ອອກສະເພາະໜ້າ Dashboard
-                    tr.innerHTML = `<td><strong>${ptId}</strong><br><small style="color: #7b8794;">${hn}</small></td><td><div class="patient"><div class="patient-avatar">${firstLetter}</div><div><strong>${name}</strong></div></div></td><td>${gender}<br><small style="color: #7b8794;">${dobDisplay}</small></td><td>${phone}<br><small style="color: #e53935; font-weight: bold;">ເລືອດ: ${blood}</small></td><td><span style="font-size: 13px;">${address}</span></td><td><small><strong>ແພ້:</strong> ${allergy}</small><br><small style="color: #7b8794;"><strong>ພະຍາດ:</strong> ${history}</small></td><td>${statusBadge}</td><td style="text-align: center;"><span class="action-icon" title="ເບິ່ງຂໍ້ມູນ" onclick="viewPatientQuick('${name}')">👁️</span></td>`;
+                    // ແຍກຄໍລຳແລ້ວໃນໜ້າ Dashboard (12 ຖັນ)
+                    tr.innerHTML = `<td><strong>${ptId}</strong></td><td><small style="color: #7b8794;">${hn}</small></td><td><div class="patient"><div class="patient-avatar">${firstLetter}</div><div><strong>${name}</strong></div></div></td><td>${gender}</td><td><small style="color: #7b8794;">${dobDisplay}</small></td><td>${phone}</td><td><small style="color: #e53935; font-weight: bold;">${blood}</small></td><td><span style="font-size: 13px;">${address}</span></td><td><small>${allergy}</small></td><td><small style="color: #7b8794;">${history}</small></td><td>${statusBadge}</td><td style="text-align: center;"><span class="action-icon" title="ເບິ່ງຂໍ້ມູນ" onclick="viewPatientQuick('${name}')">👁️</span></td>`;
                     tbody.appendChild(tr);
                 });
             }
@@ -1492,7 +1500,7 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
         document.getElementById('pat-page-active').innerText = globalPatientsList.filter(p => p.status === 'Active' || p.status === 'Active/ເຄື່ອນໄຫວ').length;
 
         if (filtered.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; color:#7b8794; padding: 20px;">ບໍ່ພົບຂໍ້ມູນຄົນເຈັບ</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="12" style="text-align:center; color:#7b8794; padding: 20px;">ບໍ່ພົບຂໍ້ມູນຄົນເຈັບ</td></tr>`;
             return;
         }
 
@@ -1500,7 +1508,7 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
             const name = p.fullname || 'ບໍ່ລະບຸຊື່'; 
             const firstLetter = name.charAt(0); 
             const ptId = p.patient_code || ('ID-' + p.id); 
-            const hn = p.hn_number ? `HN: ${p.hn_number}` : '-'; 
+            const hn = p.hn_number ? p.hn_number : '-'; 
             const gender = p.gender || '-';
             let dobDisplay = '-'; 
             if(p.dob) { 
@@ -1515,14 +1523,18 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
             let statusBadge = (p.status === 'Active' || p.status === 'Active/ເຄື່ອນໄຫວ') ? '<span class="badge badge-green">Active</span>' : '<span class="badge badge-gray">Inactive</span>';
             
             const tr = document.createElement('tr');
-            // ເພີ່ມປຸ່ມແກ້ໄຂ ແລະ ລຶບ ກັບຄືນມາແລ້ວໃນໜ້າຄົນເຈັບຫຼັກ ພ້ອມດຶງ ID ມາໃຊ້ງານຈິງ
+            // ແຍກຄໍລຳແລ້ວໃນໜ້າລາຍຊື່ຄົນເຈັບ (12 ຖັນ)
             tr.innerHTML = `
-                <td><strong>${ptId}</strong><br><small style="color: #7b8794;">${hn}</small></td>
+                <td><strong>${ptId}</strong></td>
+                <td><small style="color: #7b8794;">${hn}</small></td>
                 <td><div class="patient"><div class="patient-avatar">${firstLetter}</div><div><strong>${name}</strong></div></div></td>
-                <td>${gender}<br><small style="color: #7b8794;">${dobDisplay}</small></td>
-                <td>${phone}<br><small style="color: #e53935; font-weight: bold;">ເລືອດ: ${blood}</small></td>
+                <td>${gender}</td>
+                <td><small style="color: #7b8794;">${dobDisplay}</small></td>
+                <td>${phone}</td>
+                <td><small style="color: #e53935; font-weight: bold;">${blood}</small></td>
                 <td><span style="font-size: 13px;">${address}</span></td>
-                <td><small><strong>ແພ້:</strong> ${allergy}</small><br><small style="color: #7b8794;"><strong>ພະຍາດ:</strong> ${history}</small></td>
+                <td><small>${allergy}</small></td>
+                <td><small style="color: #7b8794;">${history}</small></td>
                 <td>${statusBadge}</td>
                 <td style="text-align: center;">
                     <span class="action-icon" title="ເບິ່ງຂໍ້ມູນ" onclick="viewPatientQuick('${name}')">👁️</span>
