@@ -54,7 +54,7 @@ body { font-family: "Phetsarath OT", "Times New Roman", serif; background: #f4f7
 .card-header button { border: none; background: transparent; color: #1976d2; cursor: pointer; font-family: inherit; font-size: 14px; font-weight: bold; }
 
 .table-responsive { overflow-x: auto; }
-table { width: 100%; border-collapse: collapse; min-width: 850px; }
+table { width: 100%; border-collapse: collapse; min-width: 950px; }
 th { text-align: left; color: #7b8794; font-size: 14px; font-weight: bold; padding: 12px 10px; border-bottom: 1px solid #edf0f4; }
 td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vertical-align: middle; }
 
@@ -158,7 +158,7 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
         </div>
     </header>
 
-    <!-- ================= DASHBOARD PAGE (ORIGINAL) ================= -->
+    <!-- ================= DASHBOARD PAGE ================= -->
     <section class="content" id="page-dashboard">
         <!-- STATISTICS -->
         <div class="stats">
@@ -214,6 +214,7 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
                                 <th>ທີ່ຢູ່ປັດຈຸບັນ</th>
                                 <th>ແພ້ຢາ / ປະຫວັດ</th>
                                 <th>ສະຖານະ</th>
+                                <th style="text-align: center;">ຈັດການ</th> <!-- ເພີ່ມຖັນຈັດການໃໝ່ -->
                             </tr>
                         </thead>
                         <tbody id="patient-table-body">
@@ -259,7 +260,7 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
         </div>
     </section>
 
-    <!-- ================= APPOINTMENTS PAGE (NEW) ================= -->
+    <!-- ================= APPOINTMENTS PAGE ================= -->
     <section class="content" id="page-appointments" style="display: none;">
         
         <!-- Cards -->
@@ -333,7 +334,7 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
     </section>
 </main>
 
-<!-- ================= MODAL ຟອມລົງທະບຽນຄົນເຈັບ (ORIGINAL) ================= -->
+<!-- ================= MODAL ຟອມລົງທະບຽນຄົນເຈັບ ================= -->
 <div class="modal-overlay" id="patientModal">
     <div class="modal-card large">
         <h3>+ ເພີ່ມຄົນເຈັບ</h3>
@@ -373,7 +374,7 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
     </div>
 </div>
 
-<!-- ================= MODAL ຟອມເພີ່ມນັດໝາຍ (NEW UPGRADED) ================= -->
+<!-- ================= MODAL ຟອມເພີ່ມນັດໝາຍ ================= -->
 <div class="modal-overlay" id="appointmentModal">
     <div class="modal-card large">
         <h3>📅 ເພີ່ມນັດໝາຍໃໝ່</h3>
@@ -395,10 +396,8 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
 
             <div class="form-group">
                 <label>🔍 ຄົ້ນຫາ/ເລືອກ ຄົນເຈັບ *</label>
-                <!-- ສົມມຸດເປັນ Dropdown, ຖ້າລະບົບຈິງອາດຈະເປັນ Select2 search ໄດ້ -->
                 <select id="apt_patient" onchange="autoFillPhone()">
                     <option value="">-- ເລືອກຄົນເຈັບ --</option>
-                    <!-- Data will be loaded via JS -->
                 </select>
             </div>
             <div class="form-group">
@@ -452,10 +451,8 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
 
 <!-- ================= JAVASCRIPT ================= -->
 <script>
-    // Global variable to store patients for dropdown
     let globalPatientsList = [];
 
-    // Districts Data (Original)
     const districtsByProvince = {
         "ນະຄອນຫຼວງວຽງຈັນ": ["ຈັນທະບູລີ", "ສີໂຄດຕະບອງ", "ໄຊເສດຖາ", "ສີສັດຕະນາກ", "ນາຊາຍທອງ", "ໄຊທານີ", "ຫາດຊາຍຟອງ", "ສັງທອງ", "ປາກງື່ມ"],
         "ໄຊຍະບູລີ": ["ໄຊຍະບູລີ", "ຄອບ", "ຊຽງຮ່ອນ", "ເງິນ", "ຫົງສາ", "ພຽງ", "ປາກລາຍ", "ແກ່ນທ້າວ", "ບໍ່ແຕນ", "ທົ່ງມີໄຊ", "ໄຊສະຖານ"]
@@ -476,7 +473,6 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
         }
     }
 
-    // Auto fill phone for appointments
     function autoFillPhone() {
         const selectedPatient = document.getElementById('apt_patient').value;
         const phoneInput = document.getElementById('apt_phone');
@@ -489,7 +485,6 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
         }
     }
 
-    // Generate Auto Appointment Number
     function generateAptNumber() {
         const dateStr = new Date().toISOString().slice(2, 10).replace(/-/g, '');
         const randomNum = Math.floor(Math.random() * 900) + 100;
@@ -501,7 +496,6 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
         const updateTime = () => { timeDisplay.innerText = new Date().toLocaleTimeString('lo-LA', { hour: '2-digit', minute: '2-digit' }); };
         updateTime(); setInterval(updateTime, 60000);
 
-        // Sidebar Navigation Logic
         const menuItems = document.querySelectorAll('.menu-item');
         menuItems.forEach(item => {
             item.addEventListener('click', function() {
@@ -511,7 +505,6 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
                 const pageName = this.getAttribute('data-page');
                 document.getElementById('page-header-title').innerText = this.querySelector('span').innerText;
 
-                // Toggle Sections
                 document.getElementById('page-dashboard').style.display = 'none';
                 document.getElementById('page-appointments').style.display = 'none';
 
@@ -522,33 +515,25 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
                     document.getElementById('page-appointments').style.display = 'block';
                     renderAppointmentsPage();
                 } else {
-                    // Default to showing dashboard if not mapped
                     document.getElementById('page-dashboard').style.display = 'block';
                 }
             });
         });
 
-        // Modals Logic
         const patientModal = document.getElementById('patientModal');
         document.getElementById('btn-register-patient').addEventListener('click', () => { patientModal.style.display = 'flex'; });
         document.getElementById('btnCloseModal').addEventListener('click', () => { patientModal.style.display = 'none'; });
 
         const aptModal = document.getElementById('appointmentModal');
-        const openAptModal = () => { 
-            generateAptNumber(); 
-            aptModal.style.display = 'flex'; 
-        };
+        const openAptModal = () => { generateAptNumber(); aptModal.style.display = 'flex'; };
         
-        // Connect both Add Appointment buttons
         if(document.getElementById('btn-register-appointment')) document.getElementById('btn-register-appointment').addEventListener('click', openAptModal);
         if(document.getElementById('btn-add-appointment-page')) document.getElementById('btn-add-appointment-page').addEventListener('click', openAptModal);
-        
         document.getElementById('btnCloseAptModal').addEventListener('click', () => { aptModal.style.display = 'none'; });
 
         loadDashboardData();
     });
 
-    // Load Dashboard Data (Original)
     async function loadDashboardData() {
         const tbody = document.getElementById('patient-table-body');
         
@@ -559,9 +544,8 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
             let patients = [];
             if (response.ok && result.status === 'success') {
                 patients = result.data;
-                globalPatientsList = patients; // Store globally for dropdowns
+                globalPatientsList = patients;
                 
-                // Populate Appointment Dropdown
                 const aptPatientSelect = document.getElementById('apt_patient');
                 aptPatientSelect.innerHTML = '<option value="">-- ເລືອກຄົນເຈັບ --</option>';
                 patients.forEach(p => {
@@ -574,7 +558,7 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
 
             tbody.innerHTML = "";
             if (patients.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:#7b8794; padding: 20px;">ຍັງບໍ່ມີຂໍ້ມູນຄົນເຈັບໃນ Database</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; color:#7b8794; padding: 20px;">ຍັງບໍ່ມີຂໍ້ມູນຄົນເຈັບໃນ Database</td></tr>`;
             } else {
                 patients.forEach((p) => {
                     const name = p.fullname || 'ບໍ່ລະບຸຊື່';
@@ -582,23 +566,38 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
                     const ptId = p.patient_code || ('ID-' + (1000 + p.id));
                     const hn = p.hn_number ? `HN: ${p.hn_number}` : '-';
                     const gender = p.gender || '-';
-                    const dob = p.dob || '-';
+                    
+                    // ແປງຮູບແບບວັນທີເກີດໃຫ້ສັ້ນລົງ ແລະ ເປັນລະບຽບ
+                    let dobDisplay = '-';
+                    if(p.dob) {
+                        const d = new Date(p.dob);
+                        dobDisplay = !isNaN(d.getTime()) ? d.toLocaleDateString('en-GB') : p.dob;
+                    }
+
                     const phone = p.phone || '-';
                     const blood = p.blood_group || '-';
                     const address = p.address || '-';
                     const allergy = p.allergy || 'ບໍ່ລະບຸ';
                     const history = p.health_history || 'ບໍ່ລະບຸ';
-                    let statusBadge = (p.status === 'Active' || p.status === 'Active/ເຄື່ອນໄຫວ') ? '<span class="badge badge-green">Active</span>' : '<span class="badge badge-gray">Inactive</span>';
+                    
+                    let statusBadge = (p.status === 'Active' || p.status === 'Active/ເຄື່ອນໄຫວ') 
+                        ? '<span class="badge badge-green">Active</span>' 
+                        : '<span class="badge badge-gray">Inactive</span>';
 
                     const tr = document.createElement('tr');
                     tr.innerHTML = `
                         <td><strong>${ptId}</strong><br><small style="color: #7b8794;">${hn}</small></td>
                         <td><div class="patient"><div class="patient-avatar">${firstLetter}</div><div><strong>${name}</strong></div></div></td>
-                        <td>${gender}<br><small style="color: #7b8794;">${dob}</small></td>
+                        <td>${gender}<br><small style="color: #7b8794;">${dobDisplay}</small></td>
                         <td>${phone}<br><small style="color: #e53935; font-weight: bold;">ເລືອດ: ${blood}</small></td>
                         <td><span style="font-size: 13px;">${address}</span></td>
                         <td><small><strong>ແພ້:</strong> ${allergy}</small><br><small style="color: #7b8794;"><strong>ພະຍາດ:</strong> ${history}</small></td>
                         <td>${statusBadge}</td>
+                        <td style="text-align: center;">
+                            <span class="action-icon" title="ເບິ່ງຂໍ້ມູນ" onclick="alert('ເບິ່ງຂໍ້ມູນຄົນເຈັບ: ${name}')">👁️</span>
+                            <span class="action-icon" title="ແກ້ໄຂ" onclick="alert('ແກ້ໄຂຄົນເຈັບ: ${name}')">✏️</span>
+                            <span class="action-icon" title="ລຶບ" onclick="alert('ລຶບຄົນເຈັບ: ${name}')">🗑️</span>
+                        </td>
                     `;
                     tbody.appendChild(tr);
                 });
@@ -607,7 +606,6 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
             console.error("DB Error:", error);
         }
 
-        // Original Stats Updates
         let appointments = JSON.parse(localStorage.getItem('clinic_appointments')) || [];
         document.getElementById('total-appointments').innerText = appointments.length;
 
@@ -616,10 +614,9 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
         document.getElementById('total-revenue').innerText = totalRevenue.toLocaleString() + ' ₭';
         document.getElementById('revenue-box-display').innerText = totalRevenue.toLocaleString() + ' ₭';
         
-        renderAppointmentsPage(); // Sync appointment views
+        renderAppointmentsPage();
     }
 
-    // Save Patient API (Original)
     document.getElementById('btnSavePatient').addEventListener('click', async () => {
         const prov = document.getElementById('pt_province').value;
         const dist = document.getElementById('pt_district').value;
@@ -663,14 +660,10 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
         } catch (error) { alert('🔴 ບໍ່ສາມາດເຊື່ອມຕໍ່ຫາເຊີບເວີໄດ້!'); }
     });
 
-    // ================= APPOINTMENTS LOGIC =================
-
-    // Render Appointments Page (Table & Timeline)
     function renderAppointmentsPage() {
         const appointments = JSON.parse(localStorage.getItem('clinic_appointments')) || [];
         
-        // 1. Update Cards
-        const todayDate = new Date().toISOString().split('T')[0]; // Format: YYYY-MM-DD
+        const todayDate = new Date().toISOString().split('T')[0];
         let countToday = 0; let countPending = 0; let countConfirmed = 0; let countCompleted = 0;
 
         appointments.forEach(a => {
@@ -684,19 +677,16 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
         document.getElementById('apt-stat-pending').innerText = countPending;
         document.getElementById('apt-stat-confirmed').innerText = countConfirmed;
         document.getElementById('apt-stat-completed').innerText = countCompleted;
-        document.getElementById('total-appointments').innerText = countToday; // Update dashboard card too
+        document.getElementById('total-appointments').innerText = countToday;
 
-        // 2. Render Table
         const tbody = document.getElementById('appointment-table-body');
         tbody.innerHTML = '';
         if(appointments.length === 0) {
             tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding: 20px;">ຍັງບໍ່ມີນັດໝາຍ</td></tr>';
         } else {
-            // Sort by Date & Time
             appointments.sort((a,b) => (a.appointment_date + a.appointment_time).localeCompare(b.appointment_date + b.appointment_time));
             
             appointments.forEach((apt, index) => {
-                // Convert Date format to DD/MM/YYYY
                 const dArr = apt.appointment_date.split('-');
                 const displayDate = dArr.length === 3 ? `${dArr[2]}/${dArr[1]}/${dArr[0]}` : apt.appointment_date;
                 
@@ -710,8 +700,8 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
                     <td>${apt.reason}</td>
                     <td>${apt.status}</td>
                     <td style="text-align: center;">
-                        <span class="action-icon" title="ເບິ່ງລາຍລະອຽດ">👁️</span>
-                        <span class="action-icon" title="ແກ້ໄຂ">✏️</span>
+                        <span class="action-icon" title="ເບິ່ງລາຍລະອຽດ" onclick="alert('ເບິ່ງລາຍລະອຽດນັດໝາຍນີ້')">👁️</span>
+                        <span class="action-icon" title="ແກ້ໄຂ" onclick="alert('ແກ້ໄຂນັດໝາຍນີ້')">✏️</span>
                         <span class="action-icon" title="ລຶບ" onclick="deleteAppointment(${index})">🗑️</span>
                     </td>
                 `;
@@ -719,7 +709,6 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
             });
         }
 
-        // 3. Render Timeline (Only show today's appointments for timeline)
         const timelineContainer = document.getElementById('appointment-timeline');
         timelineContainer.innerHTML = '';
         const todaysApts = appointments.filter(a => a.appointment_date === todayDate).sort((a,b) => a.appointment_time.localeCompare(b.appointment_time));
@@ -741,7 +730,6 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
         }
     }
 
-    // Save Upgraded Appointment
     document.getElementById('btnSaveAppointment').addEventListener('click', () => {
         const payload = {
             apt_no: document.getElementById('apt_no').value,
@@ -767,16 +755,14 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
         
         alert('✅ ບັນທຶກນັດໝາຍສຳເລັດ!');
         
-        // Clear Form
         document.querySelectorAll('#appointmentModal input, #appointmentModal select, #appointmentModal textarea').forEach(el => {
             if(el.id !== 'apt_status' && el.id !== 'apt_department') el.value = '';
         });
         document.getElementById('appointmentModal').style.display = 'none';
         
-        renderAppointmentsPage(); // Refresh views
+        renderAppointmentsPage();
     });
 
-    // Delete Dummy Function
     window.deleteAppointment = function(index) {
         if(confirm('ທ່ານຕ້ອງການລຶບນັດໝາຍນີ້ແທ້ຫຼືບໍ່?')) {
             let appointments = JSON.parse(localStorage.getItem('clinic_appointments')) || [];
