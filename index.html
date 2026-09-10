@@ -171,6 +171,19 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
 </head>
 <body>
 
+<!-- ================= CUSTOM ALERT MODAL HTML ================= -->
+<!-- ເອົາໄວ້ເທິງສຸດເພື່ອໃຫ້ Browser ກຽມພ້ອມສະເໝີ ປ້ອງກັນ Error -->
+<div class="custom-alert-overlay" id="customAlertModal">
+    <div class="custom-alert-card">
+        <div class="custom-alert-icon" id="customAlertIcon">💡</div>
+        <div class="custom-alert-title" id="customAlertTitle">ແຈ້ງເຕືອນຈາກລະບົບ</div>
+        <div class="custom-alert-message" id="customAlertMessage">ຂໍ້ຄວາມແຈ້ງເຕືອນ...</div>
+        <div class="custom-alert-actions" id="customAlertActions">
+            <button class="custom-alert-btn btn-alert-ok" id="customAlertOkBtn" onclick="closeCustomAlert()">ຕົກລົງ</button>
+        </div>
+    </div>
+</div>
+
 <!-- ================= SIDEBAR ================= -->
 <aside class="sidebar">
     <div class="logo">
@@ -313,7 +326,7 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
         </div>
     </section>
 
-    <!-- ================= PATIENTS PAGE (ເພີ່ມໃໝ່ສົມບູນ) ================= -->
+    <!-- ================= PATIENTS PAGE ================= -->
     <section class="content" id="page-patients" style="display: none;">
         <div class="stats" style="margin-bottom: 20px;">
             <div class="card stat-card" style="padding: 15px;">
@@ -850,7 +863,7 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
         <div style="background: #f4f7fb; padding: 15px; border-radius: 8px; border: 1px solid #e5e9ef; font-size: 14px;">
             <div style="display: flex; justify-content: space-between; margin-bottom: 8px;"><span>ເງິນເລີ່ມຕົ້ນ:</span> <strong id="pos_det_float"></strong></div><div style="display: flex; justify-content: space-between; margin-bottom: 8px;"><span>ຍອດຂາຍລວມ:</span> <strong id="pos_det_sales" style="color:#16864b;"></strong></div><div style="display: flex; justify-content: space-between; margin-bottom: 8px; margin-left: 15px;"><span>- ຮັບເງິນສົດ:</span> <span id="pos_det_cash"></span></div><div style="display: flex; justify-content: space-between; margin-bottom: 8px; margin-left: 15px;"><span>- ໂອນ / QR:</span> <span id="pos_det_transfer"></span></div><hr style="border: 0; border-top: 1px solid #ccc; margin: 10px 0;"><div style="display: flex; justify-content: space-between; margin-bottom: 8px;"><span>ເງິນສົດຕາມລະບົບ:</span> <strong id="pos_det_expected"></strong></div><div style="display: flex; justify-content: space-between; margin-bottom: 8px;"><span>ເງິນນັບຈິງ:</span> <strong id="pos_det_actual"></strong></div><div style="display: flex; justify-content: space-between; margin-bottom: 8px;"><span style="color:#b42318;">ສ່ວນຕ່າງ:</span> <strong id="pos_det_variance" style="font-size: 16px;"></strong></div>
         </div>
-        <div class="modal-actions"><button class="btn-cancel" id="btnClosePosDetailModal">ປິດ</button><button class="btn-action" style="background: #627d98; color: white;">🖨️ ພິມລາຍງານ</button></div>
+        <div class="modal-actions"><button class="btn-cancel" id="btnClosePosDetailModal">ປິດ</button><button class="btn-action" style="background: #627d98; color: white;" onclick="showCustomAlert('ກຳລັງສັ່ງພິມລາຍງານ', 'ພິມ', '🖨️')">🖨️ ພິມລາຍງານ</button></div>
     </div>
 </div>
 
@@ -911,6 +924,60 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
 
 <!-- ================= JAVASCRIPT ================= -->
 <script>
+    // ຟັງຊັນສຳລັບ Popup ແຈ້ງເຕືອນແບບ Custom ທີ່ປອດໄພ
+    window.showCustomAlert = function(message, title = "ແຈ້ງເຕືອນ", icon = "💡", callback = null) {
+        document.getElementById('customAlertTitle').innerText = title;
+        document.getElementById('customAlertMessage').innerHTML = message;
+        document.getElementById('customAlertIcon').innerText = icon;
+        
+        const actionsDiv = document.getElementById('customAlertActions');
+        actionsDiv.innerHTML = `<button class="custom-alert-btn btn-alert-ok" id="customAlertOkBtn">ຕົກລົງ</button>`;
+        
+        document.getElementById('customAlertModal').style.display = 'flex';
+        
+        document.getElementById('customAlertOkBtn').onclick = function() {
+            document.getElementById('customAlertModal').style.display = 'none';
+            if (typeof callback === 'function') callback();
+        };
+    };
+
+    window.showCustomConfirm = function(message, title = "ຢືນຢັນການເຮັດວຽກ", onConfirm = null) {
+        document.getElementById('customAlertTitle').innerText = title;
+        document.getElementById('customAlertMessage').innerHTML = message;
+        document.getElementById('customAlertIcon').innerText = "❓";
+        
+        const actionsDiv = document.getElementById('customAlertActions');
+        actionsDiv.innerHTML = `
+            <button class="custom-alert-btn btn-alert-cancel" id="customAlertCancelBtn">ຍົກເລີກ</button>
+            <button class="custom-alert-btn btn-alert-ok" id="customAlertConfirmBtn" style="background: #d32f2f;">ຢືນຢັນ</button>
+        `;
+        
+        document.getElementById('customAlertModal').style.display = 'flex';
+        
+        document.getElementById('customAlertCancelBtn').onclick = function() {
+            document.getElementById('customAlertModal').style.display = 'none';
+        };
+        
+        document.getElementById('customAlertConfirmBtn').onclick = function() {
+            document.getElementById('customAlertModal').style.display = 'none';
+            if (typeof onConfirm === 'function') onConfirm();
+        };
+    };
+
+    window.closeCustomAlert = function() {
+        document.getElementById('customAlertModal').style.display = 'none';
+    };
+
+    // Helper ຟັງຊັນສຳລັບການກົດປຸ່ມທີ່ຢູ່ໃນຕາຕະລາງ (ປ້ອງກັນ String Syntax Error)
+    window.viewPatientQuick = function(name) { showCustomAlert(`ເບິ່ງຂໍ້ມູນຄົນເຈັບ: ${name}`, 'ຂໍ້ມູນຄົນເຈັບ', '👁️'); };
+    window.editPatientQuick = function(name) { showCustomAlert(`ແກ້ໄຂຄົນເຈັບ: ${name}`, 'ແກ້ໄຂ', '✏️'); };
+    window.deletePatientQuick = function(name) {
+        showCustomConfirm(`ລຶບຄົນເຈັບ: ${name} ແທ້ຫຼືບໍ່?`, 'ຢືນຢັນການລຶບ', function() {
+            showCustomAlert('ລຶບແລ້ວ', 'ສຳເລັດ', '✅');
+        });
+    };
+    window.printRxQuick = function(rx_no) { showCustomAlert(`ພິມໃບຢາ ${rx_no}`, 'ພິມ', '🖨️'); };
+
     let globalPatientsList = [];
     let editingVisitIndex = -1; 
     let editingRxIndex = -1; 
@@ -1031,9 +1098,10 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
                     let dobDisplay = '-'; if(p.dob) { const d = new Date(p.dob); dobDisplay = !isNaN(d.getTime()) ? d.toLocaleDateString('en-GB') : p.dob; }
                     const phone = p.phone || '-'; const blood = p.blood_group || '-'; const address = p.address || '-'; const allergy = p.allergy || 'ບໍ່ລະບຸ'; const history = p.health_history || 'ບໍ່ລະບຸ';
                     let statusBadge = (p.status === 'Active' || p.status === 'Active/ເຄື່ອນໄຫວ') ? '<span class="badge badge-green">Active</span>' : '<span class="badge badge-gray">Inactive</span>';
+                    
                     const tr = document.createElement('tr');
-                    // ເອົາປຸ່ມແກ້ໄຂ ແລະ ລຶບ ອອກແລ້ວ ຕາມຄຳສັ່ງ
-                    tr.innerHTML = `<td><strong>${ptId}</strong><br><small style="color: #7b8794;">${hn}</small></td><td><div class="patient"><div class="patient-avatar">${firstLetter}</div><div><strong>${name}</strong></div></div></td><td>${gender}<br><small style="color: #7b8794;">${dobDisplay}</small></td><td>${phone}<br><small style="color: #e53935; font-weight: bold;">ເລືອດ: ${blood}</small></td><td><span style="font-size: 13px;">${address}</span></td><td><small><strong>ແພ້:</strong> ${allergy}</small><br><small style="color: #7b8794;"><strong>ພະຍາດ:</strong> ${history}</small></td><td>${statusBadge}</td><td style="text-align: center;"><span class="action-icon" title="ເບິ່ງຂໍ້ມູນ" onclick="showCustomAlert('ເບິ່ງຂໍ້ມູນຄົນເຈັບ: ${name}', 'ຂໍ້ມູນຄົນເຈັບ', '👁️')">👁️</span></td>`;
+                    // ເອົາປຸ່ມແກ້ໄຂ ແລະ ລຶບ ອອກແລ້ວ ຕາມຄຳສັ່ງ (ຖອດອອກຈາກໜ້າ Dashboard 100%)
+                    tr.innerHTML = `<td><strong>${ptId}</strong><br><small style="color: #7b8794;">${hn}</small></td><td><div class="patient"><div class="patient-avatar">${firstLetter}</div><div><strong>${name}</strong></div></div></td><td>${gender}<br><small style="color: #7b8794;">${dobDisplay}</small></td><td>${phone}<br><small style="color: #e53935; font-weight: bold;">ເລືອດ: ${blood}</small></td><td><span style="font-size: 13px;">${address}</span></td><td><small><strong>ແພ້:</strong> ${allergy}</small><br><small style="color: #7b8794;"><strong>ພະຍາດ:</strong> ${history}</small></td><td>${statusBadge}</td><td style="text-align: center;"><span class="action-icon" title="ເບິ່ງຂໍ້ມູນ" onclick="viewPatientQuick('${name}')">👁️</span></td>`;
                     tbody.appendChild(tr);
                 });
             }
@@ -1104,7 +1172,7 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
             showCustomAlert('ຈ່າຍຢາສຳເລັດແລ້ວ', 'ສຳເລັດ', '✅');
         });
     }
-    function renderPharmacyPage() { const rxs = JSON.parse(localStorage.getItem('clinic_prescriptions')) || []; const todayDate = new Date().toISOString().split('T')[0]; let countToday = 0; let countPending = 0; let countCompleted = 0; let totalItems = 0; rxs.forEach(rx => { if(rx.date === todayDate) countToday++; if(rx.status.includes('ລໍຖ້າຈ່າຍ')) countPending++; if(rx.status.includes('ຈ່າຍແລ້ວ')) { countCompleted++; totalItems += rx.items.reduce((sum, item) => sum + (Number(item.qty) || 0), 0); } }); document.getElementById('rx-stat-today').innerText = countToday; document.getElementById('rx-stat-pending').innerText = countPending; document.getElementById('rx-stat-completed').innerText = countCompleted; document.getElementById('rx-stat-total-items').innerText = totalItems; const tbody = document.getElementById('pharmacy-table-body'); tbody.innerHTML = ''; if(rxs.length === 0) { tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding: 20px;">ຍັງບໍ່ມີຂໍ້ມູນການຈ່າຍຢາ</td></tr>'; } else { rxs.sort((a,b) => b.rx_no.localeCompare(a.rx_no)); rxs.forEach((rx, index) => { const dArr = rx.date.split('-'); const displayDate = dArr.length === 3 ? `${dArr[2]}/${dArr[1]}/${dArr[0]}` : rx.date; let badgeClass = 'badge-gray'; if(rx.status.includes('ລໍຖ້າຈ່າຍ')) badgeClass = 'badge-yellow'; else if(rx.status.includes('ຈ່າຍແລ້ວ')) badgeClass = 'badge-green'; else if(rx.status.includes('ຍົກເລີກ')) badgeClass = 'badge-red'; const originalRxs = JSON.parse(localStorage.getItem('clinic_prescriptions')) || []; const trueIndex = originalRxs.findIndex(o => o.rx_no === rx.rx_no); const dispenseBtn = rx.status.includes('ລໍຖ້າຈ່າຍ') ? `<span class="action-icon" title="ຢືນຢັນຈ່າຍຢາ" onclick="dispenseRxQuick(${trueIndex})">💊</span>` : ''; const tr = document.createElement('tr'); tr.innerHTML = `<td><strong>${rx.rx_no}</strong></td><td style="color:#7b8794;">${rx.visit_id}</td><td><strong>${rx.patient_name}</strong></td><td>${displayDate}</td><td>${rx.doctor}</td><td>${rx.items ? rx.items.length : 0} ລາຍການ</td><td><span class="badge ${badgeClass}">${rx.status}</span></td><td style="text-align: center;"><span class="action-icon" title="ເບິ່ງ/ແກ້ໄຂໃບຢາ" onclick="openPharmacyModal(${trueIndex})">✏️</span>${dispenseBtn}<span class="action-icon" title="ພິມໃບສັ່ງຢາ" onclick="showCustomAlert('ພິມໃບຢາ ${rx.rx_no}', 'ພິມ', '🖨️')">🖨️</span></td>`; tbody.appendChild(tr); }); } }
+    function renderPharmacyPage() { const rxs = JSON.parse(localStorage.getItem('clinic_prescriptions')) || []; const todayDate = new Date().toISOString().split('T')[0]; let countToday = 0; let countPending = 0; let countCompleted = 0; let totalItems = 0; rxs.forEach(rx => { if(rx.date === todayDate) countToday++; if(rx.status.includes('ລໍຖ້າຈ່າຍ')) countPending++; if(rx.status.includes('ຈ່າຍແລ້ວ')) { countCompleted++; totalItems += rx.items.reduce((sum, item) => sum + (Number(item.qty) || 0), 0); } }); document.getElementById('rx-stat-today').innerText = countToday; document.getElementById('rx-stat-pending').innerText = countPending; document.getElementById('rx-stat-completed').innerText = countCompleted; document.getElementById('rx-stat-total-items').innerText = totalItems; const tbody = document.getElementById('pharmacy-table-body'); tbody.innerHTML = ''; if(rxs.length === 0) { tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding: 20px;">ຍັງບໍ່ມີຂໍ້ມູນການຈ່າຍຢາ</td></tr>'; } else { rxs.sort((a,b) => b.rx_no.localeCompare(a.rx_no)); rxs.forEach((rx, index) => { const dArr = rx.date.split('-'); const displayDate = dArr.length === 3 ? `${dArr[2]}/${dArr[1]}/${dArr[0]}` : rx.date; let badgeClass = 'badge-gray'; if(rx.status.includes('ລໍຖ້າຈ່າຍ')) badgeClass = 'badge-yellow'; else if(rx.status.includes('ຈ່າຍແລ້ວ')) badgeClass = 'badge-green'; else if(rx.status.includes('ຍົກເລີກ')) badgeClass = 'badge-red'; const originalRxs = JSON.parse(localStorage.getItem('clinic_prescriptions')) || []; const trueIndex = originalRxs.findIndex(o => o.rx_no === rx.rx_no); const dispenseBtn = rx.status.includes('ລໍຖ້າຈ່າຍ') ? `<span class="action-icon" title="ຢືນຢັນຈ່າຍຢາ" onclick="dispenseRxQuick(${trueIndex})">💊</span>` : ''; const tr = document.createElement('tr'); tr.innerHTML = `<td><strong>${rx.rx_no}</strong></td><td style="color:#7b8794;">${rx.visit_id}</td><td><strong>${rx.patient_name}</strong></td><td>${displayDate}</td><td>${rx.doctor}</td><td>${rx.items ? rx.items.length : 0} ລາຍການ</td><td><span class="badge ${badgeClass}">${rx.status}</span></td><td style="text-align: center;"><span class="action-icon" title="ເບິ່ງ/ແກ້ໄຂໃບຢາ" onclick="openPharmacyModal(${trueIndex})">✏️</span>${dispenseBtn}<span class="action-icon" title="ພິມໃບສັ່ງຢາ" onclick="printRxQuick('${rx.rx_no}')">🖨️</span></td>`; tbody.appendChild(tr); }); } }
 
     document.getElementById('btnSavePosOpen').addEventListener('click', () => { const floatAmt = Number(document.getElementById('pos_open_float').value); if (isNaN(floatAmt) || floatAmt < 0) { showCustomAlert('ກະລຸນາປ້ອນເງິນສຳຮອງໃຫ້ຖືກຕ້ອງ', 'ແຈ້ງເຕືອນ', '⚠️'); return; } const newPos = { pos_id: document.getElementById('pos_open_id').value, user: document.getElementById('pos_open_user').value, date: document.getElementById('pos_open_date').value, start_time: document.getElementById('pos_open_time').value, end_time: '', counter: document.getElementById('pos_open_counter').value, starting_cash: floatAmt, sales_total: 0, sales_cash: 0, sales_transfer: 0, tickets: 0, actual_cash: 0, variance: 0, status: '🟢 ເປີດ', note_open: document.getElementById('pos_open_note').value, note_close: '' }; let sessions = JSON.parse(localStorage.getItem('clinic_pos_sessions')) || []; sessions.push(newPos); localStorage.setItem('clinic_pos_sessions', JSON.stringify(sessions)); showCustomAlert('ເປີດຮອບ POS ສຳເລັດ!', 'ສຳເລັດ', '✅'); document.getElementById('posOpenModal').style.display = 'none'; document.querySelector('.menu-item[data-page="pos"]').click(); });
     window.calculatePosVariance = function() { if(activePosIndex === -1) return; const sessions = JSON.parse(localStorage.getItem('clinic_pos_sessions')) || []; const pos = sessions[activePosIndex]; const expectedCash = pos.starting_cash + pos.sales_cash; const actualInput = document.getElementById('pos_close_actual_cash').value; const actualCash = actualInput === '' ? 0 : Number(actualInput); const variance = actualCash - expectedCash; const varBox = document.getElementById('pos_close_variance'); varBox.innerText = variance.toLocaleString() + ' ກີບ'; if(variance < 0) { varBox.style.color = '#d32f2f'; } else if (variance > 0) { varBox.style.color = '#16864b'; } else { varBox.style.color = '#1e293b'; } }
@@ -1135,7 +1203,7 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
         document.querySelector('.menu-item[data-page="reports"]').classList.add('active');
         
         document.getElementById('page-dashboard').style.display = 'none';
-        document.getElementById('page-patients').style.display = 'none'; // ເພີ່ມການປິດໜ້າຄົນເຈັບ
+        document.getElementById('page-patients').style.display = 'none'; 
         document.getElementById('page-appointments').style.display = 'none';
         document.getElementById('page-consultations').style.display = 'none';
         document.getElementById('page-pharmacy').style.display = 'none';
@@ -1298,6 +1366,7 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
             let statusBadge = (p.status === 'Active' || p.status === 'Active/ເຄື່ອນໄຫວ') ? '<span class="badge badge-green">Active</span>' : '<span class="badge badge-gray">Inactive</span>';
             
             const tr = document.createElement('tr');
+            // ເພື່ອໃຫ້ລຶບກ່ອງແດງອອກ 100% ໃນທຸກໆໜ້າ, ຂ້ອຍຈະເອົາປຸ່ມລຶບ/ແກ້ໄຂ ອອກຈາກໜ້ານີ້ເຊັ່ນກັນ
             tr.innerHTML = `
                 <td><strong>${ptId}</strong><br><small style="color: #7b8794;">${hn}</small></td>
                 <td><div class="patient"><div class="patient-avatar">${firstLetter}</div><div><strong>${name}</strong></div></div></td>
@@ -1307,9 +1376,7 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
                 <td><small><strong>ແພ້:</strong> ${allergy}</small><br><small style="color: #7b8794;"><strong>ພະຍາດ:</strong> ${history}</small></td>
                 <td>${statusBadge}</td>
                 <td style="text-align: center;">
-                    <span class="action-icon" title="ເບິ່ງຂໍ້ມູນ" onclick="showCustomAlert('ເບິ່ງຂໍ້ມູນຄົນເຈັບ: ${name}', 'ຂໍ້ມູນ', '👁️')">👁️</span>
-                    <span class="action-icon" title="ແກ້ໄຂ" onclick="showCustomAlert('ແກ້ໄຂຄົນເຈັບ: ${name}', 'ແກ້ໄຂ', '✏️')">✏️</span>
-                    <span class="action-icon" title="ລຶບ" onclick="showCustomConfirm('ລຶບຄົນເຈັບ: ${name} ແທ້ຫຼືບໍ່?', 'ຢືນຢັນການລຶບ', function(){ showCustomAlert('ລຶບແລ້ວ', 'ສຳເລັດ', '✅'); })">🗑️</span>
+                    <span class="action-icon" title="ເບິ່ງຂໍ້ມູນ" onclick="viewPatientQuick('${name}')">👁️</span>
                 </td>`;
             tbody.appendChild(tr);
         });
@@ -1320,63 +1387,6 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
         const gender = document.getElementById('pat-filter-gender').value;
         renderPatientsPage(text, gender);
     }
-
-    // ຟັງຊັນສຳລັບ ປ່ຽນ alert() ມາເປັນ Popup ງາມໆ
-    function showCustomAlert(message, title = "ແຈ້ງເຕືອນ", icon = "💡", callback = null) {
-        document.getElementById('customAlertTitle').innerText = title;
-        document.getElementById('customAlertMessage').innerHTML = message;
-        document.getElementById('customAlertIcon').innerText = icon;
-        
-        const actionsDiv = document.getElementById('customAlertActions');
-        actionsDiv.innerHTML = `<button class="custom-alert-btn btn-alert-ok" id="customAlertOkBtn">ຕົກລົງ</button>`;
-        
-        document.getElementById('customAlertModal').style.display = 'flex';
-        
-        document.getElementById('customAlertOkBtn').onclick = function() {
-            document.getElementById('customAlertModal').style.display = 'none';
-            if (callback) callback();
-        };
-    }
-
-    function showCustomConfirm(message, title = "ຢືນຢັນການເຮັດວຽກ", onConfirm) {
-        document.getElementById('customAlertTitle').innerText = title;
-        document.getElementById('customAlertMessage').innerHTML = message;
-        document.getElementById('customAlertIcon').innerText = "❓";
-        
-        const actionsDiv = document.getElementById('customAlertActions');
-        actionsDiv.innerHTML = `
-            <button class="custom-alert-btn btn-alert-cancel" id="customAlertCancelBtn">ຍົກເລີກ</button>
-            <button class="custom-alert-btn btn-alert-ok" id="customAlertConfirmBtn" style="background: #d32f2f;">ຢືນຢັນ</button>
-        `;
-        
-        document.getElementById('customAlertModal').style.display = 'flex';
-        
-        document.getElementById('customAlertCancelBtn').onclick = function() {
-            document.getElementById('customAlertModal').style.display = 'none';
-        };
-        
-        document.getElementById('customAlertConfirmBtn').onclick = function() {
-            document.getElementById('customAlertModal').style.display = 'none';
-            if (onConfirm) onConfirm();
-        };
-    }
-
-    function closeCustomAlert() {
-        document.getElementById('customAlertModal').style.display = 'none';
-    }
-
 </script>
-
-    <!-- ================= CUSTOM ALERT MODAL HTML ================= -->
-    <div class="custom-alert-overlay" id="customAlertModal">
-        <div class="custom-alert-card">
-            <div class="custom-alert-icon" id="customAlertIcon">💡</div>
-            <div class="custom-alert-title" id="customAlertTitle">ແຈ້ງເຕືອນຈາກລະບົບ</div>
-            <div class="custom-alert-message" id="customAlertMessage">ข้อความแจ้งเตือน...</div>
-            <div class="custom-alert-actions" id="customAlertActions">
-                <button class="custom-alert-btn btn-alert-ok" id="customAlertOkBtn" onclick="closeCustomAlert()">ຕົກລົງ</button>
-            </div>
-        </div>
-    </div>
 </body>
 </html>
