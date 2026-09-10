@@ -131,7 +131,7 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
 .med-table input, .med-table select { width: 100%; border: 1px solid #ccc; padding: 6px; border-radius: 4px; font-family: inherit; font-size: 13px; }
 .btn-remove-row { background: #ffebee; color: #d32f2f; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-weight: bold; }
 
-/* POS Dashboard */
+/* POS Specific Dashboard */
 .pos-active-card { background: linear-gradient(135deg, #102a43 0%, #1976d2 100%); color: white; border-radius: 12px; padding: 25px; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(25,118,210,0.2); }
 .pos-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 15px; margin-bottom: 20px; }
 .pos-header h2 { font-size: 20px; display: flex; align-items: center; gap: 10px; }
@@ -175,7 +175,7 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
     <div class="menu-item active" data-page="dashboard"><div class="menu-icon">🏠</div><span>Dashboard</span></div>
     <div class="menu-item" data-page="appointments"><div class="menu-icon">📅</div><span>ນັດໝາຍ</span></div>
     
-    <!-- ເມນູຄົນເຈັບ ທີ່ເຊື່ອມຕໍ່ໄປໜ້າຈັດການຄົນເຈັບ -->
+    <!-- ເມນູຄົນເຈັບ ທີ່ເຊື່ອມຕໍ່ໄປໜ້າຈັດການຄົນເຈັບ (ກ່ອງສີແດງຊ້າຍມື) -->
     <div class="menu-item" data-page="patients"><div class="menu-icon">👥</div><span>ຄົນເຈັບ</span></div>
     
     <div class="menu-item" data-page="consultations"><div class="menu-icon">🩺</div><span>ຫ້ອງກວດ</span></div>
@@ -206,7 +206,6 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
 
     <!-- ================= DASHBOARD PAGE ================= -->
     <section class="content" id="page-dashboard">
-        <!-- STATISTICS -->
         <div class="stats">
             <div class="card stat-card">
                 <div>
@@ -242,7 +241,6 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
             </div>
         </div>
 
-        <!-- MAIN GRID -->
         <div class="dashboard-grid">
             <div class="card" style="overflow: hidden;">
                 <div class="card-header">
@@ -270,7 +268,6 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
                 </div>
             </div>
 
-            <!-- QUICK ACTIONS -->
             <div class="card">
                 <div class="card-header"><h3>⚡ Quick Actions</h3></div>
                 <div class="quick-actions">
@@ -310,7 +307,6 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
 
     <!-- ================= PATIENTS MANAGEMENT PAGE ================= -->
     <section class="content" id="page-patients" style="display: none;">
-        <!-- Dashboard 5 Cards -->
         <div class="stats-5" style="margin-bottom: 20px;">
             <div class="card stat-card" style="padding: 15px;">
                 <div><div class="stat-label">👥 ຄົນເຈັບທັງໝົດ</div><div class="stat-number" id="pat-stat-total">0</div></div>
@@ -329,7 +325,6 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
             </div>
         </div>
 
-        <!-- Filter & Table Card -->
         <div class="card">
             <div class="filter-bar">
                 <div class="filter-group">
@@ -808,7 +803,7 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
 
     document.addEventListener('DOMContentLoaded', () => {
         const timeDisplay = document.getElementById('current-time');
-        const updateTime = () => { timeDisplay.innerText = new Date().toLocaleTimeString('lo-LA', { hour: '2-digit', minute: '2-digit' }); };
+        const updateTime = () => { if(timeDisplay) timeDisplay.innerText = new Date().toLocaleTimeString('lo-LA', { hour: '2-digit', minute: '2-digit' }); };
         updateTime(); setInterval(updateTime, 60000);
 
         // Sidebar Navigation
@@ -821,78 +816,125 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
 
                 menuItems.forEach(m => m.classList.remove('active')); this.classList.add('active');
                 
-                document.getElementById('page-header-title').innerText = this.querySelector('span').innerText;
-                document.getElementById('page-dashboard').style.display = 'none';
-                document.getElementById('page-appointments').style.display = 'none';
-                document.getElementById('page-consultations').style.display = 'none';
-                document.getElementById('page-pharmacy').style.display = 'none';
-                document.getElementById('page-pos').style.display = 'none';
-                document.getElementById('page-reports').style.display = 'none';
-                document.getElementById('page-patients').style.display = 'none';
-                document.getElementById('page-patient-profile').style.display = 'none';
+                const headerTitle = document.getElementById('page-header-title');
+                if(headerTitle) headerTitle.innerText = this.querySelector('span').innerText;
 
-                if (pageName === 'dashboard') { document.getElementById('page-dashboard').style.display = 'block'; loadDashboardData(); } 
-                else if (pageName === 'appointments') { document.getElementById('page-appointments').style.display = 'block'; renderAppointmentsPage(); } 
-                else if (pageName === 'consultations') { document.getElementById('page-consultations').style.display = 'block'; renderConsultationsPage(); } 
-                else if (pageName === 'pharmacy') { document.getElementById('page-pharmacy').style.display = 'block'; renderPharmacyPage(); }
-                else if (pageName === 'pos') { document.getElementById('page-pos').style.display = 'block'; renderPosPage(); }
-                else if (pageName === 'patients') { document.getElementById('page-patients').style.display = 'block'; renderPatientsManagementPage(); }
+                document.querySelectorAll('.content').forEach(el => el.style.display = 'none');
+
+                if (pageName === 'dashboard') { 
+                    const dash = document.getElementById('page-dashboard');
+                    if(dash) dash.style.display = 'block'; 
+                    loadDashboardData(); 
+                } 
+                else if (pageName === 'appointments') { 
+                    const apt = document.getElementById('page-appointments');
+                    if(apt) apt.style.display = 'block'; 
+                    renderAppointmentsPage(); 
+                } 
+                else if (pageName === 'consultations') { 
+                    const cst = document.getElementById('page-consultations');
+                    if(cst) cst.style.display = 'block'; 
+                    renderConsultationsPage(); 
+                } 
+                else if (pageName === 'pharmacy') { 
+                    const ph = document.getElementById('page-pharmacy');
+                    if(ph) ph.style.display = 'block'; 
+                    renderPharmacyPage(); 
+                }
+                else if (pageName === 'pos') { 
+                    const pos = document.getElementById('page-pos');
+                    if(pos) pos.style.display = 'block'; 
+                    renderPosPage(); 
+                }
+                else if (pageName === 'patients') { 
+                    const pat = document.getElementById('page-patients');
+                    if(pat) pat.style.display = 'block'; 
+                    renderPatientsManagementPage(); 
+                }
             });
         });
 
         // Patient Modal
         const patientModal = document.getElementById('patientModal');
-        document.getElementById('btn-register-patient').addEventListener('click', () => { openPatientModal(-1); });
-        document.getElementById('btnClosePatientModal').addEventListener('click', () => { patientModal.style.display = 'none'; });
-        document.getElementById('btnSavePatientModal').addEventListener('click', savePatientFromModal);
+        const btnRegPat = document.getElementById('btn-register-patient');
+        if(btnRegPat) btnRegPat.addEventListener('click', () => { openPatientModal(-1); });
+        const btnClosePat = document.getElementById('btnClosePatientModal');
+        if(btnClosePat) btnClosePat.addEventListener('click', () => { patientModal.style.display = 'none'; });
+        const btnSavePat = document.getElementById('btnSavePatientModal');
+        if(btnSavePat) btnSavePat.addEventListener('click', savePatientFromModal);
 
         // Appointment Modal
         const aptModal = document.getElementById('appointmentModal');
         const openAptModal = () => { generateAptNumber(); aptModal.style.display = 'flex'; };
-        if(document.getElementById('btn-register-appointment')) document.getElementById('btn-register-appointment').addEventListener('click', openAptModal);
-        if(document.getElementById('btn-add-appointment-page')) document.getElementById('btn-add-appointment-page').addEventListener('click', openAptModal);
-        document.getElementById('btnCloseAptModal').addEventListener('click', () => { aptModal.style.display = 'none'; });
-        document.getElementById('btnSaveAppointment').addEventListener('click', saveAppointment);
+        const btnRegApt = document.getElementById('btn-register-appointment');
+        if(btnRegApt) btnRegApt.addEventListener('click', openAptModal);
+        const btnAddApt = document.getElementById('btn-add-appointment-page');
+        if(btnAddApt) addEventListener('click', openAptModal);
+        const btnCloseApt = document.getElementById('btnCloseAptModal');
+        if(btnCloseApt) btnCloseApt.addEventListener('click', () => { aptModal.style.display = 'none'; });
+        const btnSaveApt = document.getElementById('btnSaveAppointment');
+        if(btnSaveApt) btnSaveApt.addEventListener('click', saveAppointment);
 
         // Consultation Modals
         const cst1Modal = document.getElementById('consultationStep1Modal');
         const openCst1Modal = () => { populateConsultationPatientDropdown(); setCurrentDateTimeCst1(); cst1Modal.style.display = 'flex'; };
-        document.getElementById('btn-quick-consult').addEventListener('click', openCst1Modal);
-        document.getElementById('btn-add-consultation-page').addEventListener('click', openCst1Modal);
-        document.getElementById('btnCloseCst1Modal').addEventListener('click', () => { cst1Modal.style.display = 'none'; });
-        document.getElementById('btnProceedCst1').addEventListener('click', proceedConsultationStep1);
+        const btnQuickCst = document.getElementById('btn-quick-consult');
+        if(btnQuickCst) btnQuickCst.addEventListener('click', openCst1Modal);
+        const btnAddCst = document.getElementById('btn-add-consultation-page');
+        if(btnAddCst) btnAddCst.addEventListener('click', openCst1Modal);
+        const btnCloseCst1 = document.getElementById('btnCloseCst1Modal');
+        if(btnCloseCst1) btnCloseCst1.addEventListener('click', () => { cst1Modal.style.display = 'none'; });
+        const btnProceedCst1 = document.getElementById('btnProceedCst1');
+        if(btnProceedCst1) btnProceedCst1.addEventListener('click', proceedConsultationStep1);
 
         const cst2Modal = document.getElementById('consultationStep2Modal');
-        document.getElementById('btnCloseCst2Modal').addEventListener('click', () => { cst2Modal.style.display = 'none'; });
-        document.getElementById('btnSaveCst2').addEventListener('click', saveConsultationStep2);
+        const btnCloseCst2 = document.getElementById('btnCloseCst2Modal');
+        if(btnCloseCst2) btnCloseCst2.addEventListener('click', () => { cst2Modal.style.display = 'none'; });
+        const btnSaveCst2 = document.getElementById('btnSaveCst2');
+        if(btnSaveCst2) btnSaveCst2.addEventListener('click', saveConsultationStep2);
 
         // Pharmacy Modal
         const pharmacyModal = document.getElementById('pharmacyModal');
         const openRxModal = () => { openPharmacyModal(); };
-        document.getElementById('btn-quick-pharmacy').addEventListener('click', openRxModal);
-        document.getElementById('btn-add-pharmacy-page').addEventListener('click', openRxModal);
-        document.getElementById('btnClosePharmacyModal').addEventListener('click', () => { pharmacyModal.style.display = 'none'; });
-        document.getElementById('btnSavePharmacy').addEventListener('click', savePharmacyPrescription);
+        const btnQuickRx = document.getElementById('btn-quick-pharmacy');
+        if(btnQuickRx) btnQuickRx.addEventListener('click', openRxModal);
+        const btnAddRx = document.getElementById('btn-add-pharmacy-page');
+        if(btnAddRx) btnAddRx.addEventListener('click', openRxModal);
+        const btnCloseRx = document.getElementById('btnClosePharmacyModal');
+        if(btnCloseRx) btnCloseRx.addEventListener('click', () => { pharmacyModal.style.display = 'none'; });
+        const btnSaveRx = document.getElementById('btnSavePharmacy');
+        if(btnSaveRx) btnSaveRx.addEventListener('click', savePharmacyPrescription);
 
         // POS Modals
         const posOpenModal = document.getElementById('posOpenModal');
         const posCloseModal = document.getElementById('posCloseModal');
         const posDetailModal = document.getElementById('posDetailModal');
         
-        document.getElementById('btn-quick-pos').addEventListener('click', openPosOpenModal);
-        document.getElementById('btn-add-pos-page').addEventListener('click', openPosOpenModal);
-        document.getElementById('btnClosePosOpenModal').addEventListener('click', () => { posOpenModal.style.display = 'none'; });
-        document.getElementById('btnSavePosOpen').addEventListener('click', savePosOpen);
-        document.getElementById('btnClosePosCloseModal').addEventListener('click', () => { posCloseModal.style.display = 'none'; });
-        document.getElementById('btnSavePosClose').addEventListener('click', savePosClose);
-        document.getElementById('btnClosePosDetailModal').addEventListener('click', () => { posDetailModal.style.display = 'none'; });
-        document.getElementById('btn-dashboard-close-pos').addEventListener('click', () => { if (activePosIndex !== -1) { openPosCloseModal(activePosIndex); } });
+        const btnQuickPos = document.getElementById('btn-quick-pos');
+        if(btnQuickPos) btnQuickPos.addEventListener('click', openPosOpenModal);
+        const btnAddPos = document.getElementById('btn-add-pos-page');
+        if(btnAddPos) btnAddPos.addEventListener('click', openPosOpenModal);
+        const btnClosePosOpen = document.getElementById('btnClosePosOpenModal');
+        if(btnClosePosOpen) btnClosePosOpen.addEventListener('click', () => { posOpenModal.style.display = 'none'; });
+        const btnSavePosOpen = document.getElementById('btnSavePosOpen');
+        if(btnSavePosOpen) btnSavePosOpen.addEventListener('click', savePosOpen);
+        const btnClosePosClose = document.getElementById('btnClosePosCloseModal');
+        if(btnClosePosClose) btnClosePosClose.addEventListener('click', () => { posCloseModal.style.display = 'none'; });
+        const btnSavePosClose = document.getElementById('btnSavePosClose');
+        if(btnSavePosClose) btnSavePosClose.addEventListener('click', savePosClose);
+        const btnClosePosDetail = document.getElementById('btnClosePosDetailModal');
+        if(btnClosePosDetail) btnClosePosDetail.addEventListener('click', () => { posDetailModal.style.display = 'none'; });
+        const btnDashClosePos = document.getElementById('btn-dashboard-close-pos');
+        if(btnDashClosePos) btnDashClosePos.addEventListener('click', () => { if (activePosIndex !== -1) { openPosCloseModal(activePosIndex); } });
 
         // Report Modal
         const reportConfigModal = document.getElementById('reportConfigModal');
-        document.getElementById('btn-quick-reports').addEventListener('click', openReportConfigModal);
-        document.getElementById('btnCloseRepConfigModal').addEventListener('click', () => { reportConfigModal.style.display = 'none'; });
-        document.getElementById('btnShowReport').addEventListener('click', handleShowReport);
+        const btnQuickRep = document.getElementById('btn-quick-reports');
+        if(btnQuickRep) btnQuickRep.addEventListener('click', openReportConfigModal);
+        const btnCloseRep = document.getElementById('btnCloseRepConfigModal');
+        if(btnCloseRep) btnCloseRep.addEventListener('click', () => { reportConfigModal.style.display = 'none'; });
+        const btnShowRep = document.getElementById('btnShowReport');
+        if(btnShowRep) btnShowRep.addEventListener('click', handleShowReport);
 
         loadDashboardData();
         loadNotifications();
@@ -902,33 +944,37 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
         let patients = JSON.parse(localStorage.getItem('clinic_patients_db')) || [];
         globalPatientsList = patients;
 
-        document.getElementById('total-patients').innerText = patients.length;
-        document.getElementById('today-patients').innerText = patients.length > 0 ? 1 : 0;
+        const totalPat = document.getElementById('total-patients');
+        if(totalPat) totalPat.innerText = patients.length;
+        const todayPat = document.getElementById('today-patients');
+        if(todayPat) todayPat.innerText = patients.length > 0 ? 1 : 0;
 
         const tbody = document.getElementById('patient-table-body');
-        tbody.innerHTML = "";
-        if (patients.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; color:#7b8794; padding: 20px;">ຍັງບໍ່ມີຂໍ້ມູນຄົນເຈັບ</td></tr>`;
-        } else {
-            patients.slice(0, 5).forEach((p, idx) => {
-                const fullName = `${p.prefix} ${p.fname} ${p.lname}`;
-                let statusBadge = p.status === 'Active' ? '<span class="badge badge-green">Active</span>' : '<span class="badge badge-gray">Inactive</span>';
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td><strong>${p.code}</strong></td>
-                    <td><div class="patient"><div class="patient-avatar">${p.avatar || '👤'}</div><div><strong>${fullName}</strong></div></div></td>
-                    <td>${p.gender}<br><small style="color: #7b8794;">${p.dob || '-'}</small></td>
-                    <td>${p.phone}<br><small style="color: #e53935; font-weight: bold;">ເລືອດ: ${p.blood}</small></td>
-                    <td><span style="font-size: 13px;">${p.address || '-'}</span></td>
-                    <td><small><strong>ແພ້:</strong> ${p.allergy}</small><br><small style="color: #7b8794;"><strong>ພະຍາດ:</strong> ${p.history}</small></td>
-                    <td>${statusBadge}</td>
-                    <td style="text-align: center;">
-                        <span class="action-icon" title="ເບິ່ງ Profile" onclick="openPatientProfile(${idx})">👁️</span>
-                        <span class="action-icon" title="ແກ້ໄຂ" onclick="openPatientModal(${idx})">✏️</span>
-                    </td>
-                `;
-                tbody.appendChild(tr);
-            });
+        if(tbody) {
+            tbody.innerHTML = "";
+            if (patients.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; color:#7b8794; padding: 20px;">ຍັງບໍ່ມີຂໍ້ມູນຄົນເຈັບ</td></tr>`;
+            } else {
+                patients.slice(0, 5).forEach((p, idx) => {
+                    const fullName = `${p.prefix} ${p.fname} ${p.lname}`;
+                    let statusBadge = p.status === 'Active' ? '<span class="badge badge-green">Active</span>' : '<span class="badge badge-gray">Inactive</span>';
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td><strong>${p.code}</strong></td>
+                        <td><div class="patient"><div class="patient-avatar">${p.avatar || '👤'}</div><div><strong>${fullName}</strong></div></div></td>
+                        <td>${p.gender}<br><small style="color: #7b8794;">${p.dob || '-'}</small></td>
+                        <td>${p.phone}<br><small style="color: #e53935; font-weight: bold;">ເລືອດ: ${p.blood}</small></td>
+                        <td><span style="font-size: 13px;">${p.address || '-'}</span></td>
+                        <td><small><strong>ແພ້:</strong> ${p.allergy}</small><br><small style="color: #7b8794;"><strong>ພະຍາດ:</strong> ${p.history}</small></td>
+                        <td>${statusBadge}</td>
+                        <td style="text-align: center;">
+                            <span class="action-icon" title="ເບິ່ງ Profile" onclick="openPatientProfile(${idx})">👁️</span>
+                            <span class="action-icon" title="ແກ້ໄຂ" onclick="openPatientModal(${idx})">✏️</span>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            }
         }
         renderPatientsManagementPage();
         renderAppointmentsPage();
@@ -942,17 +988,18 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
         let patients = JSON.parse(localStorage.getItem('clinic_patients_db')) || [];
         globalPatientsList = patients;
 
-        document.getElementById('pat-stat-total').innerText = patients.length;
-        document.getElementById('pat-stat-today').innerText = patients.length > 0 ? 1 : 0;
-        document.getElementById('pat-stat-male').innerText = patients.filter(p => p.gender === 'ຊາຍ').length;
-        document.getElementById('pat-stat-female').innerText = patients.filter(p => p.gender === 'ຍິງ').length;
-        document.getElementById('pat-stat-active').innerText = patients.filter(p => p.status === 'Active').length;
+        if(document.getElementById('pat-stat-total')) document.getElementById('pat-stat-total').innerText = patients.length;
+        if(document.getElementById('pat-stat-today')) document.getElementById('pat-stat-today').innerText = patients.length > 0 ? 1 : 0;
+        if(document.getElementById('pat-stat-male')) document.getElementById('pat-stat-male').innerText = patients.filter(p => p.gender === 'ຊາຍ').length;
+        if(document.getElementById('pat-stat-female')) document.getElementById('pat-stat-female').innerText = patients.filter(p => p.gender === 'ຍິງ').length;
+        if(document.getElementById('pat-stat-active')) document.getElementById('pat-stat-active').innerText = patients.filter(p => p.status === 'Active').length;
 
-        const searchVal = document.getElementById('pat_search_input') ? document.getElementById('pat_search_input'].value.toLowerCase() : '';
-        const genderVal = document.getElementById('pat_filter_gender') ? document.getElementById('pat_filter_gender'].value : '';
-        const bloodVal = document.getElementById('pat_filter_blood') ? document.getElementById('pat_filter_blood'].value : '';
+        const searchVal = document.getElementById('pat_search_input') ? document.getElementById('pat_search_input').value.toLowerCase() : '';
+        const genderVal = document.getElementById('pat_filter_gender') ? document.getElementById('pat_filter_gender').value : '';
+        const bloodVal = document.getElementById('pat_filter_blood') ? document.getElementById('pat_filter_blood').value : '';
 
         const tbody = document.getElementById('patients-management-tbody');
+        if(!tbody) return;
         tbody.innerHTML = '';
 
         let filtered = patients.filter(p => {
@@ -1143,38 +1190,44 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
         let visits = JSON.parse(localStorage.getItem('clinic_visits')) || [];
         let pVisits = visits.filter(v => v.patient_name && v.patient_name.includes(p.fname));
         const consultTbody = document.getElementById('pro_consult_tbody');
-        consultTbody.innerHTML = '';
-        if(pVisits.length === 0) {
-            consultTbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding: 20px; color:#7b8794;">ບໍ່ມີປະຫວັດການກວດ</td></tr>';
-        } else {
-            pVisits.forEach(v => {
-                consultTbody.innerHTML += `<tr><td><strong>${v.visit_id}</strong></td><td>${v.date}</td><td>${v.doctor}</td><td>${v.symptoms||'-'}</td><td>${v.diagnosis||'-'}</td><td><span class="badge badge-green">${v.status}</span></td></tr>`;
-            });
+        if(consultTbody) {
+            consultTbody.innerHTML = '';
+            if(pVisits.length === 0) {
+                consultTbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding: 20px; color:#7b8794;">ບໍ່ມີປະຫວັດການກວດ</td></tr>';
+            } else {
+                pVisits.forEach(v => {
+                    consultTbody.innerHTML += `<tr><td><strong>${v.visit_id}</strong></td><td>${v.date}</td><td>${v.doctor}</td><td>${v.symptoms||'-'}</td><td>${v.diagnosis||'-'}</td><td><span class="badge badge-green">${v.status}</span></td></tr>`;
+                });
+            }
         }
 
         let apts = JSON.parse(localStorage.getItem('clinic_appointments')) || [];
         let pApts = apts.filter(a => a.patient_name && a.patient_name.includes(p.fname));
         const aptTbody = document.getElementById('pro_apt_tbody');
-        aptTbody.innerHTML = '';
-        if(pApts.length === 0) {
-            aptTbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding: 20px; color:#7b8794;">ບໍ່ມີປະຫວັດນັດໝາຍ</td></tr>';
-        } else {
-            pApts.forEach(a => {
-                aptTbody.innerHTML += `<tr><td><strong>${a.apt_no}</strong></td><td>${a.appointment_date} | ${a.appointment_time}</td><td>${a.doctor}</td><td>${a.reason}</td><td><span class="badge badge-blue">${a.status}</span></td></tr>`;
-            });
+        if(aptTbody) {
+            aptTbody.innerHTML = '';
+            if(pApts.length === 0) {
+                aptTbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding: 20px; color:#7b8794;">ບໍ່ມີປະຫວັດນັດໝາຍ</td></tr>';
+            } else {
+                pApts.forEach(a => {
+                    aptTbody.innerHTML += `<tr><td><strong>${a.apt_no}</strong></td><td>${a.appointment_date} | ${a.appointment_time}</td><td>${a.doctor}</td><td>${a.reason}</td><td><span class="badge badge-blue">${a.status}</span></td></tr>`;
+                });
+            }
         }
 
         let rxs = JSON.parse(localStorage.getItem('clinic_prescriptions')) || [];
         let pRxs = rxs.filter(r => r.patient_name && r.patient_name.includes(p.fname));
         const rxTbody = document.getElementById('pro_rx_tbody');
-        rxTbody.innerHTML = '';
-        if(pRxs.length === 0) {
-            rxTbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding: 20px; color:#7b8794;">ບໍ່ມີປະຫວັດການຈ່າຍຢາ</td></tr>';
-        } else {
-            pRxs.forEach(r => {
-                let itemsStr = r.items ? r.items.map(i=>`${i.name} (${i.qty} ${i.unit})`).join(', ') : '-';
-                rxTbody.innerHTML += `<tr><td><strong>${r.rx_no}</strong></td><td>${r.date}</td><td>${r.doctor}</td><td>${itemsStr}</td><td><span class="badge badge-green">${r.status}</span></td></tr>`;
-            });
+        if(rxTbody) {
+            rxTbody.innerHTML = '';
+            if(pRxs.length === 0) {
+                rxTbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding: 20px; color:#7b8794;">ບໍ່ມີປະຫວັດການຈ່າຍຢາ</td></tr>';
+            } else {
+                pRxs.forEach(r => {
+                    let itemsStr = r.items ? r.items.map(i=>`${i.name} (${i.qty} ${i.unit})`).join(', ') : '-';
+                    rxTbody.innerHTML += `<tr><td><strong>${r.rx_no}</strong></td><td>${r.date}</td><td>${r.doctor}</td><td>${itemsStr}</td><td><span class="badge badge-green">${r.status}</span></td></tr>`;
+                });
+            }
         }
     }
 
@@ -1189,16 +1242,17 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
     function generateAptNumber() {
         const dateStr = new Date().toISOString().slice(2, 10).replace(/-/g, '');
         const randomNum = Math.floor(Math.random() * 900) + 100;
-        document.getElementById('apt_no').value = `AP-${dateStr}-${randomNum}`;
+        const aptNoEl = document.getElementById('apt_no');
+        if(aptNoEl) aptNoEl.value = `AP-${dateStr}-${randomNum}`;
     }
     function autoFillPhone() {
         const selectedPatient = document.getElementById('apt_patient').value;
         const phoneInput = document.getElementById('apt_phone');
-        phoneInput.value = '';
+        if(phoneInput) phoneInput.value = '';
         if(selectedPatient) {
             let patients = JSON.parse(localStorage.getItem('clinic_patients_db')) || [];
             const patient = patients.find(p => `${p.prefix} ${p.fname} ${p.lname}` === selectedPatient);
-            if(patient && patient.phone) { phoneInput.value = patient.phone; }
+            if(patient && patient.phone && phoneInput) { phoneInput.value = patient.phone; }
         }
     }
     function renderAppointmentsPage() {
@@ -1256,6 +1310,7 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
     // Consultations Logic
     function populateConsultationPatientDropdown() {
         const sel = document.getElementById('cst1_patient');
+        if(!sel) return;
         sel.innerHTML = '<option value="">-- ເລືອກຄົນເຈັບ --</option>';
         let patients = JSON.parse(localStorage.getItem('clinic_patients_db')) || [];
         patients.forEach(p => {
@@ -1264,18 +1319,20 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
     }
     function setCurrentDateTimeCst1() {
         const now = new Date();
-        document.getElementById('cst1_date').value = now.toISOString().split('T')[0];
-        document.getElementById('cst1_time').value = now.toTimeString().slice(0,5);
+        const dateEl = document.getElementById('cst1_date');
+        const timeEl = document.getElementById('cst1_time');
+        if(dateEl) dateEl.value = now.toISOString().split('T')[0];
+        if(timeEl) timeEl.value = now.toTimeString().slice(0,5);
     }
     function autoFillConsultationPatient() {
         const val = document.getElementById('cst1_patient').value;
         let patients = JSON.parse(localStorage.getItem('clinic_patients_db')) || [];
         const p = patients.find(item => `${item.prefix} ${item.fname} ${item.lname}` === val);
         if(p) {
-            document.getElementById('cst1_pt_code').innerText = p.code;
-            document.getElementById('cst1_pt_name').innerText = `${p.prefix} ${p.fname} ${p.lname}`;
-            document.getElementById('cst1_pt_age').innerText = p.age || '-';
-            document.getElementById('cst1_pt_gender').innerText = p.gender;
+            if(document.getElementById('cst1_pt_code')) document.getElementById('cst1_pt_code').innerText = p.code;
+            if(document.getElementById('cst1_pt_name')) document.getElementById('cst1_pt_name').innerText = `${p.prefix} ${p.fname} ${p.lname}`;
+            if(document.getElementById('cst1_pt_age')) document.getElementById('cst1_pt_age').innerText = p.age || '-';
+            if(document.getElementById('cst1_pt_gender')) document.getElementById('cst1_pt_gender').innerText = p.gender;
         }
     }
     function proceedConsultationStep1() {
@@ -1311,12 +1368,13 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
         const v = visits[index];
         if(!v) return;
         editingVisitIndex = index;
-        document.getElementById('cst2_visit_id').innerText = v.visit_id;
-        document.getElementById('cst2_pt_name').innerText = v.patient_name;
-        document.getElementById('cst2_doctor').innerText = v.doctor;
-        document.getElementById('cst2_status').value = v.status;
-        document.getElementById('cst2_diagnosis').value = v.diagnosis || '';
-        document.getElementById('consultationStep2Modal').style.display = 'flex';
+        if(document.getElementById('cst2_visit_id')) document.getElementById('cst2_visit_id').innerText = v.visit_id;
+        if(document.getElementById('cst2_pt_name')) document.getElementById('cst2_pt_name').innerText = v.patient_name;
+        if(document.getElementById('cst2_doctor')) document.getElementById('cst2_doctor').innerText = v.doctor;
+        if(document.getElementById('cst2_status')) document.getElementById('cst2_status').value = v.status;
+        if(document.getElementById('cst2_diagnosis')) document.getElementById('cst2_diagnosis').value = v.diagnosis || '';
+        const modal = document.getElementById('consultationStep2Modal');
+        if(modal) modal.style.display = 'flex';
     }
     function saveConsultationStep2() {
         if(editingVisitIndex === -1) return;
@@ -1325,33 +1383,44 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
         visits[editingVisitIndex].diagnosis = document.getElementById('cst2_diagnosis').value;
         localStorage.setItem('clinic_visits', JSON.stringify(visits));
         alert('✅ ບັນທຶກຜົນການກວດສຳເລັດ!');
-        document.getElementById('consultationStep2Modal').style.display = 'none';
+        const modal = document.getElementById('consultationStep2Modal');
+        if(modal) modal.style.display = 'none';
         renderConsultationsPage();
     }
 
     // Pharmacy Logic
     function populatePharmacyVisits() {
         const sel = document.getElementById('rx_visit');
+        if(!sel) return;
         sel.innerHTML = '<option value="">-- ເລືອກ Visit --</option>';
         let visits = JSON.parse(localStorage.getItem('clinic_visits')) || [];
         visits.forEach(v => { sel.innerHTML += `<option value="${v.visit_id}">${v.visit_id} - ${v.patient_name}</option>`; });
     }
+    function generateRxNumber() {
+        const dateStr = new Date().toISOString().slice(2, 10).replace(/-/g, '');
+        const rxNoEl = document.getElementById('rx_no');
+        if(rxNoEl) rxNoEl.value = `RX-${dateStr}-${Math.floor(Math.random()*900+100)}`;
+    }
     function openPharmacyModal() {
         populatePharmacyVisits();
         generateRxNumber();
-        document.getElementById('rx_med_body').innerHTML = '';
+        const bodyEl = document.getElementById('rx_med_body');
+        if(bodyEl) bodyEl.innerHTML = '';
         addMedRow();
-        document.getElementById('pharmacyModal').style.display = 'flex';
+        const modal = document.getElementById('pharmacyModal');
+        if(modal) modal.style.display = 'flex';
     }
-    function addMedRow(item = {}) {
+    window.addMedRow = function(item = {}) {
         const tbody = document.getElementById('rx_med_body');
+        if(!tbody) return;
         tbody.innerHTML += `<tr><td><input type="text" class="med-name" value="${item.name||''}"></td><td><input type="text" class="med-strength" value="${item.strength||''}"></td><td><input type="number" class="med-qty" value="${item.qty||1}"></td><td><select class="med-unit"><option>ເມັດ</option><option>ແຄັບຊູນ</option></select></td><td><select class="med-usage"><option>ກິນ</option></select></td><td><input type="text" class="med-freq" value="3 ເທື່ອ/ມື້"></td><td><input type="number" class="med-days" value="3"></td><td style="text-align:center;"><button class="btn-remove-row" onclick="this.closest('tr').remove()">🗑️</button></td></tr>`;
     }
     function savePharmacyPrescription() {
         const visitId = document.getElementById('rx_visit').value;
         if(!visitId) { alert('⚠️ ກະລຸນາເລືອກ Visit!'); return; }
         alert('✅ ບັນທຶກໃບຢາສຳເລັດ!');
-        document.getElementById('pharmacyModal').style.display = 'none';
+        const modal = document.getElementById('pharmacyModal');
+        if(modal) modal.style.display = 'none';
         renderPharmacyPage();
     }
     function renderPharmacyPage() {
@@ -1362,10 +1431,17 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
     }
 
     // POS Logic
+    function generatePosNumber() {
+        const dateStr = new Date().toISOString().slice(2, 10).replace(/-/g, '');
+        const posNoEl = document.getElementById('pos_open_id');
+        if(posNoEl) posNoEl.value = `POS-${dateStr}-${Math.floor(Math.random()*9000+1000)}`;
+    }
     function openPosOpenModal() {
         generatePosNumber();
-        document.getElementById('pos_open_user').value = "Super Admin";
-        document.getElementById('posOpenModal').style.display = 'flex';
+        const userEl = document.getElementById('pos_open_user');
+        if(userEl) userEl.value = "Super Admin";
+        const modal = document.getElementById('posOpenModal');
+        if(modal) modal.style.display = 'flex';
     }
     function savePosOpen() {
         const newPos = {
@@ -1380,13 +1456,16 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
         sessions.push(newPos);
         localStorage.setItem('clinic_pos_sessions', JSON.stringify(sessions));
         alert('✅ ເປີດ POS ສຳເລັດ!');
-        document.getElementById('posOpenModal').style.display = 'none';
+        const modal = document.getElementById('posOpenModal');
+        if(modal) modal.style.display = 'none';
         renderPosPage();
     }
     function openPosCloseModal(index) {
         activePosIndex = index;
-        document.getElementById('pos_close_actual_cash').value = '';
-        document.getElementById('posCloseModal').style.display = 'flex';
+        const cashEl = document.getElementById('pos_close_actual_cash');
+        if(cashEl) cashEl.value = '';
+        const modal = document.getElementById('posCloseModal');
+        if(modal) modal.style.display = 'flex';
     }
     function savePosClose() {
         if(activePosIndex === -1) return;
@@ -1395,7 +1474,8 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
         sessions[activePosIndex].end_time = new Date().toTimeString().slice(0,5);
         localStorage.setItem('clinic_pos_sessions', JSON.stringify(sessions));
         alert('🔒 ປິດ POS ສຳເລັດ!');
-        document.getElementById('posCloseModal').style.display = 'none';
+        const modal = document.getElementById('posCloseModal');
+        if(modal) modal.style.display = 'none';
         renderPosPage();
     }
     function renderPosPage() {
@@ -1405,8 +1485,10 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
         if(dash) {
             if(active) {
                 dash.style.display = 'block';
-                document.getElementById('pos_dash_id').innerText = active.pos_id;
-                document.getElementById('pos_dash_starting').innerText = active.starting_cash.toLocaleString();
+                const dashId = document.getElementById('pos_dash_id');
+                const dashStart = document.getElementById('pos_dash_starting');
+                if(dashId) dashId.innerText = active.pos_id;
+                if(dashStart) dashStart.innerText = active.starting_cash.toLocaleString();
             } else {
                 dash.style.display = 'none';
             }
@@ -1418,20 +1500,32 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
 
     // Reports Logic
     function openReportConfigModal() {
-        document.getElementById('reportConfigModal').style.display = 'flex';
+        const modal = document.getElementById('reportConfigModal');
+        if(modal) modal.style.display = 'flex';
     }
     function handleShowReport() {
-        document.getElementById('reportConfigModal').style.display = 'none';
+        const modal = document.getElementById('reportConfigModal');
+        if(modal) modal.style.display = 'none';
+
         document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('active'));
-        document.querySelector('.menu-item[data-page="reports"]').classList.add('active');
+        const repMenu = document.querySelector('.menu-item[data-page="reports"]');
+        if(repMenu) repMenu.classList.add('active');
+
         document.querySelectorAll('.content').forEach(el => el.style.display = 'none');
-        document.getElementById('page-reports').style.display = 'block';
-        document.getElementById('page-header-title').innerText = "ລາຍງານສະຫຼຸບລວມ";
+        const repPage = document.getElementById('page-reports');
+        if(repPage) repPage.style.display = 'block';
         
-        const type = document.getElementById('rep_type').value;
+        const titleEl = document.getElementById('page-header-title');
+        if(titleEl) titleEl.innerText = "ລາຍງານສະຫຼຸບລວມ";
+        
+        const typeEl = document.getElementById('rep_type');
+        const type = typeEl ? typeEl.value : 'consultation';
+        
         const thead = document.getElementById('report-thead-tr');
         const tbody = document.getElementById('report-tbody');
+        if(!tbody || !thead) return;
         tbody.innerHTML = '';
+        
         if(type === 'consultation') {
             thead.innerHTML = '<th>Visit ID</th><th>ຄົນເຈັບ</th><th>ວັນທີ</th><th>ແພດ</th><th>ສະຖານະ</th>';
             let visits = JSON.parse(localStorage.getItem('clinic_visits')) || [];
