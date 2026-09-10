@@ -243,17 +243,12 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
                     <div class="card-header">
                         <h3>🔔 ການແຈ້ງເຕືອນ</h3><button onclick="alert('ເປີດໜ້າຈັດການການແຈ້ງເຕືອນ')">ເບິ່ງທັງໝົດ</button>
                     </div>
-                    
-                    <!-- ຮັກສາໂຄດເດີມທຸກຢ່າງ ພຽງແຕ່ເພີ່ມ id ແລະ span ກວມຕົວເລກ -->
                     <div class="alert alert-red" id="alert-expired">🔴 <strong>ຢາໝົດອາຍຸ:</strong>&nbsp; <span id="count-expired">5</span> ລາຍການ</div>
-                    
                     <div class="alert alert-yellow" id="alert-stock">🟡 <strong>Stock ຕ່ຳ:</strong>&nbsp; <span id="count-stock">12</span> ລາຍການ</div>
-                    
                     <div class="alert alert-blue" id="alert-lab">🔵 <strong>Lab:</strong>&nbsp; ມີ <span id="count-lab">4</span> ຜົນກວດລໍຖ້າ</div>
-
-                    <!-- ໂຄດເພີ່ມໃໝ່ (ບໍ່ຕັດຂອງເກົ່າ): ຂໍ້ຄວາມທີ່ຈະສະແດງເມື່ອບໍ່ມີການແຈ້ງເຕືອນຫຍັງເລີຍ (ເປັນ 0 ທັງໝົດ) -->
+                    
                     <div id="no-notification" style="display: none; text-align: center; color: #7b8794; padding: 20px;">
-                        🎉 ບໍ່ມີການແຈ້ງເຕືອນໃໝ່ໃນຂະນະນີ້
+                        ບໍ່ມີການແຈ້ງເຕືອນໃນຂະນະນີ້
                     </div>
                 </div>
                 <div class="card-header">
@@ -625,13 +620,38 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
         renderAppointmentsPage();
 
         // ----------------------------------------------------------------
-        // ສ່ວນທີ່ເພີ່ມໃໝ່: ກວດສອບ ແລະ ສະແດງການແຈ້ງເຕືອນ
+        // ສ່ວນຄວບຄຸມການແຈ້ງເຕືອນ (ຈະສະແດງສະເພາະໂຕທີ່ມີຄ່າຫຼາຍກວ່າ 0)
         // ----------------------------------------------------------------
-        let mockExpired = 0; // ສົມມຸດວ່າບໍ່ມີຢາໝົດອາຍຸ (ຈະຖືກເຊື່ອງ)
-        let mockStock = 2;   // ສົມມຸດວ່າມີຢາໃກ້ໝົດ 2 ລາຍການ (ຈະສະແດງ)
-        let mockLab = 0;     // ສົມມຸດວ່າບໍ່ມີຜົນ Lab ລໍຖ້າ (ຈະຖືກເຊື່ອງ)
+        let mockExpired = 0; // ຄ່າເປັນ 0 ຈະຖືກເຊື່ອງ
+        let mockStock = 2;   // ຄ່າເປັນ 2 ຈະສະແດງຕາມຮູບທີ 2 ທີ່ທ່ານຕ້ອງການ
+        let mockLab = 0;     // ຄ່າເປັນ 0 ຈະຖືກເຊື່ອງ
 
         updateNotifications(mockExpired, mockStock, mockLab);
+    }
+
+    // ຟັງຊັນສຳລັບອັບເດດຕົວເລກ ແລະ ເຊື່ອງ/ສະແດງ ແຈ້ງເຕືອນ
+    function updateNotifications(expiredCount, stockCount, labCount) {
+        const alertExpired = document.getElementById('alert-expired');
+        const alertStock = document.getElementById('alert-stock');
+        const alertLab = document.getElementById('alert-lab');
+        const noNotif = document.getElementById('no-notification');
+        
+        // ອັບເດດຕົວເລກ
+        if (document.getElementById('count-expired')) document.getElementById('count-expired').innerText = expiredCount;
+        if (document.getElementById('count-stock')) document.getElementById('count-stock').innerText = stockCount;
+        if (document.getElementById('count-lab')) document.getElementById('count-lab').innerText = labCount;
+        
+        // ກວດສອບເງື່ອນໄຂການສະແດງຜົນ
+        if (alertExpired) alertExpired.style.display = (expiredCount > 0) ? 'flex' : 'none';
+        if (alertStock) alertStock.style.display = (stockCount > 0) ? 'flex' : 'none';
+        if (alertLab) alertLab.style.display = (labCount > 0) ? 'flex' : 'none';
+        
+        // ສະແດງຂໍ້ຄວາມເມື່ອບໍ່ມີແຈ້ງເຕືອນເລີຍ
+        if (expiredCount === 0 && stockCount === 0 && labCount === 0) {
+            if (noNotif) noNotif.style.display = 'block';
+        } else {
+            if (noNotif) noNotif.style.display = 'none';
+        }
     }
 
     document.getElementById('btnSavePatient').addEventListener('click', async () => {
