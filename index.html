@@ -172,7 +172,7 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
     <div class="menu-item"><div class="menu-icon">🧪</div><span>Laboratory</span></div>
     <div class="menu-item" data-page="pharmacy"><div class="menu-icon">💊</div><span>ຈ່າຍຢາ</span></div>
     <div class="menu-item"><div class="menu-icon">📦</div><span>Inventory</span></div>
-    <div class="menu-item" data-page="pos"><div class="menu-icon">💰</div><span>POS / ຮັບເງິນ</span></div>
+    <div class="menu-item" data-page="pos"><div class="menu-icon">💰</div><span>POS/ຮັບເງິນ</span></div>
 
     <div class="menu-title">MANAGEMENT</div>
     <div class="menu-item"><div class="menu-icon">💵</div><span>ການເງິນ</span></div>
@@ -248,10 +248,10 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
                             <tr>
                                 <th>ລະຫັດ (ID/HN)</th>
                                 <th>ຊື່ ແລະ ນາມສະກຸນ</th>
-                                <th>ເພດ / ວັນເກີດ</th>
-                                <th>ເບີໂທ / ກຸ່ມເລືອດ</th>
+                                <th>ເພດ/ວັນເກີດ</th>
+                                <th>ເບີໂທ/ກຸ່ມເລືອດ</th>
                                 <th>ທີ່ຢູ່ປັດຈຸບັນ</th>
-                                <th>ແພ້ຢາ / ປະຫວັດ</th>
+                                <th>ແພ້ຢາ/ປະຫວັດ</th>
                                 <th>ສະຖານະ</th>
                                 <th style="text-align: center;">ຈັດການ</th>
                             </tr>
@@ -321,7 +321,7 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
             </div>
         </div>
 
-        <!-- Timeline / Daily View -->
+        <!-- Timeline/Daily View -->
         <div class="timeline-container">
             <h3 style="margin-bottom: 15px; font-size: 16px; color: #102a43;">🕒 ມຸມມອງນັດໝາຍປະຈຳວັນ (Timeline)</h3>
             <div id="appointment-timeline">
@@ -348,7 +348,7 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
                 </div>
                 <div class="filter-group">
                     <button class="btn-action btn-export" onclick="alert('ກຳລັງໂຫຼດ Excel...')">📥 Excel</button>
-                    <button class="btn-action btn-print" onclick="alert('ກຳລັງເປີດໜ້າພິມ...')">🖨️ ພິມ / PDF</button>
+                    <button class="btn-action btn-print" onclick="alert('ກຳລັງເປີດໜ້າພິມ...')">🖨️ ພິມ/PDF</button>
                     <button class="btn-action btn-add" id="btn-add-appointment-page">+ ເພີ່ມນັດໝາຍ</button>
                 </div>
             </div>
@@ -427,7 +427,7 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
                             <th>ວັນທີ</th>
                             <th>ເວລາ</th>
                             <th>ແພດ</th>
-                            <th>ອາການ / ການວິນິດໄສ</th>
+                            <th>ອາການ/ການວິນິດໄສ</th>
                             <th>ສະຖານະ</th>
                             <th style="text-align: center;">ຈັດການ</th>
                         </tr>
@@ -462,7 +462,7 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
         <div class="card">
             <div class="filter-bar">
                 <div class="filter-group">
-                    <input type="text" class="filter-input" placeholder="🔍 ຄົ້ນຫາຄົນເຈັບ / RX / Visit ID...">
+                    <input type="text" class="filter-input" placeholder="🔍 ຄົ້ນຫາຄົນເຈັບ/RX/Visit ID...">
                     <input type="date" class="filter-input">
                     <select class="filter-input">
                         <option value="">👨‍⚕️ ແພດທັງໝົດ</option>
@@ -478,7 +478,7 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
                     </select>
                 </div>
                 <div class="filter-group">
-                    <button class="btn-action btn-add" id="btn-add-pharmacy-page">➕ ຈ່າຍຢາ / ສັ່ງຢາ</button>
+                    <button class="btn-action btn-add" id="btn-add-pharmacy-page">➕ ຈ່າຍຢາ/ສັ່ງຢາ</button>
                 </div>
             </div>
 
@@ -517,11 +517,11 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
                 <div class="pos-stat-box"><label>💵 ເງິນເລີ່ມຕົ້ນ (ກີບ)</label><div id="pos_dash_starting">0</div></div>
                 <div class="pos-stat-box"><label>💰 ຍອດຂາຍລວມ (ກີບ)</label><div id="pos_dash_total_sales" style="color: #69f0ae;">0</div></div>
                 <div class="pos-stat-box"><label>💵 ຮັບເງິນສົດ (ກີບ)</label><div id="pos_dash_cash">0</div></div>
-                <div class="pos-stat-box"><label>💳 ໂອນ / QR (ກີບ)</label><div id="pos_dash_transfer">0</div></div>
+                <div class="pos-stat-box"><label>💳 ໂອນ/QR (ກີບ)</label><div id="pos_dash_transfer">0</div></div>
                 <div class="pos-stat-box"><label>🧾 ຈຳນວນໃບບິນ</label><div id="pos_dash_tickets">0</div></div>
             </div>
             <div class="pos-actions-bar">
-                <button class="btn-sell" onclick="alert('ກຳລັງເປີດໜ້າຈໍຂາຍ POS...')">🛒 ເຂົ້າໜ້າຂາຍ / ຮັບເງິນ</button>
+                <button class="btn-sell" onclick="alert('ກຳລັງເປີດໜ້າຈໍຂາຍ POS...')">🛒 ເຂົ້າໜ້າຂາຍ/ຮັບເງິນ</button>
                 <button class="btn-cashio" onclick="alert('ພັດທະນາໃນອະນາຄົດ: ເອົາເງິນເຂົ້າ/ອອກ ລະຫວ່າງຮອບ')">💸 ເງິນເຂົ້າ/ອອກ</button>
                 <button class="btn-close-session" id="btn-dashboard-close-pos">🔒 ປິດ POS (ປິດຮອບ)</button>
             </div>
@@ -531,7 +531,7 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
         <div class="card">
             <div class="filter-bar">
                 <div class="filter-group">
-                    <input type="text" class="filter-input" placeholder="🔍 ຄົ້ນຫາ POS ID / ພະນັກງານ...">
+                    <input type="text" class="filter-input" placeholder="🔍 ຄົ້ນຫາ POS ID/ພະນັກງານ...">
                     <input type="date" class="filter-input">
                     <select class="filter-input">
                         <option value="">👤 ຜູ້ເປີດທັງໝົດ</option>
@@ -616,7 +616,7 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
                 </div>
                 <div class="filter-group">
                     <button class="btn-action" style="background: #e2e8f0; color: #333;" onclick="openReportConfigModal()">⚙️ ປ່ຽນເງື່ອນໄຂ</button>
-                    <button class="btn-action btn-print" onclick="alert('ພິມລາຍງານນີ້')">🖨️ ພິມ / PDF</button>
+                    <button class="btn-action btn-print" onclick="alert('ພິມລາຍງານນີ້')">🖨️ ພິມ/PDF</button>
                     <button class="btn-action btn-export" onclick="alert('Export to Excel')">📊 Excel</button>
                 </div>
             </div>
@@ -659,7 +659,7 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
                 <input type="text" id="pt_village" placeholder="ປ້ອນຊື່ບ້ານ...">
             </div>
         </div>
-        <div class="form-group"><label>ແພ້ຢາ / Allergy</label><textarea id="pt_allergy" rows="2"></textarea></div>
+        <div class="form-group"><label>ແພ້ຢາ/Allergy</label><textarea id="pt_allergy" rows="2"></textarea></div>
         <div class="form-group"><label>ປະຫວັດສຸຂະພາບ</label><textarea id="pt_health_history" rows="2"></textarea></div>
         <div class="modal-actions">
             <button class="btn-cancel" id="btnCloseModal">ຍົກເລີກ</button>
@@ -693,7 +693,7 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
     <div class="modal-card">
         <h3>🩺 ເປີດການກວດ</h3>
         <div class="form-group"><label>🔍 ຄົ້ນຫາ/ເລືອກ ຄົນເຈັບ *</label><select id="cst1_patient" onchange="autoFillConsultationPatient()"><option value="">-- ເລືອກຄົນເຈັບ --</option></select></div>
-        <div class="info-box" id="cst1_patient_info"><p>ເລກຄົນເຈັບ: <span id="cst1_pt_code">-</span></p><p>ຊື່: <span id="cst1_pt_name">-</span></p><p>ອາຍຸ: <span id="cst1_pt_age">-</span> / ເພດ: <span id="cst1_pt_gender">-</span></p></div>
+        <div class="info-box" id="cst1_patient_info"><p>ເລກຄົນເຈັບ: <span id="cst1_pt_code">-</span></p><p>ຊື່: <span id="cst1_pt_name">-</span></p><p>ອາຍຸ: <span id="cst1_pt_age">-</span>/ເພດ: <span id="cst1_pt_gender">-</span></p></div>
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;"><div class="form-group"><label>📅 ວັນທີກວດ</label><input type="date" id="cst1_date" readonly style="background: #f4f7fb;"></div><div class="form-group"><label>🕐 ເວລາ</label><input type="time" id="cst1_time" readonly style="background: #f4f7fb;"></div></div>
         <div class="form-group"><label>👨‍⚕️ ແພດຜູ້ກວດ *</label><select id="cst1_doctor"><option value="">-- ເລືອກແພດ --</option><option value="ດຣ. ສົມພອນ">ດຣ. ສົມພອນ</option><option value="ດຣ. ໃຈດີ">ດຣ. ໃຈດີ</option><option value="ດຣ. ວິໄລ">ດຣ. ວິໄລ</option></select></div>
         <div class="modal-actions"><button class="btn-cancel" id="btnCloseCst1Modal">ຍົກເລີກ</button><button class="btn-submit" id="btnProceedCst1">🩺 ເປີດການກວດ</button></div>
@@ -709,14 +709,14 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
             <div><strong>ສະຖານະ:</strong> <select id="cst2_status" style="padding: 4px; border-radius: 4px; border: 1px solid #ccc;"><option value="🔵 ລໍຖ້າກວດ">🔵 ລໍຖ້າກວດ</option><option value="🟡 ກຳລັງກວດ">🟡 ກຳລັງກວດ</option><option value="🟢 ສຳເລັດ">🟢 ສຳເລັດ</option></select></div>
         </div>
         <div class="section-title">🩺 ອາການປັດຈຸບັນ ແລະ ສັນຍານຊີບ (Vital Signs)</div>
-        <div class="form-group"><label>ອາການສຳຄັນ / ອາການໃນປັດຈຸບັນ</label><textarea id="cst2_symptoms" rows="2" placeholder="ປ້ອນອາການທີ່ຄົນເຈັບເປັນມາ..."></textarea></div>
+        <div class="form-group"><label>ອາການສຳຄັນ/ອາການໃນປັດຈຸບັນ</label><textarea id="cst2_symptoms" rows="2" placeholder="ປ້ອນອາການທີ່ຄົນເຈັບເປັນມາ..."></textarea></div>
         <div class="vital-signs-grid">
             <div class="form-group"><label>ອຸນຫະພູມ (°C)</label><input type="number" id="cst2_temp" placeholder="36.5" step="0.1"></div><div class="form-group"><label>ຄວາມດັນ (mmHg)</label><input type="text" id="cst2_bp" placeholder="120/80"></div><div class="form-group"><label>ຊີບຈອນ (bpm)</label><input type="number" id="cst2_pulse" placeholder="80"></div><div class="form-group"><label>SpO2 (%)</label><input type="number" id="cst2_spo2" placeholder="98"></div><div class="form-group"><label>ນ້ຳໜັກ (kg)</label><input type="number" id="cst2_weight" placeholder="60" step="0.1"></div><div class="form-group"><label>ສ່ວນສູງ (cm)</label><input type="number" id="cst2_height" placeholder="165"></div>
         </div>
         <div class="section-title">🔬 ການກວດ ແລະ ການວິນິດໄສ</div>
         <div class="form-group"><label>ການກວດຮ່າງກາຍ (Physical Examination)</label><textarea id="cst2_physical_exam" rows="2"></textarea></div><div class="form-group"><label>ຜົນກວດ Lab (ຖ້າມີ)</label><textarea id="cst2_lab_result" rows="2"></textarea></div><div class="form-group"><label style="color: #b42318; font-weight: bold;">ການວິນິດໄສເບື້ອງຕົ້ນ (Diagnosis) *</label><textarea id="cst2_diagnosis" rows="2" placeholder="ລະບຸພະຍາດ ຫຼື ການວິນິດໄສ..."></textarea></div>
         <div class="section-title">💊 ການຮັກສາ ແລະ ສັ່ງຢາ</div>
-        <div class="form-group"><label>ວິທີການຮັກສາ / ຫັດຖະການ</label><textarea id="cst2_treatment" rows="2"></textarea></div><div class="form-group"><label>ລາຍການຢາ (Prescription) <i>*ຖ້າສັ່ງຜ່ານລະບົບ Pharmacy ແລ້ວ ປ່ອຍຫວ່າງໄດ້</i></label><textarea id="cst2_medicine" rows="2" placeholder="ລະບຸຊື່ຢາ ແລະ ວິທີກິນ..."></textarea></div>
+        <div class="form-group"><label>ວິທີການຮັກສາ/ຫັດຖະການ</label><textarea id="cst2_treatment" rows="2"></textarea></div><div class="form-group"><label>ລາຍການຢາ (Prescription) <i>*ຖ້າສັ່ງຜ່ານລະບົບ Pharmacy ແລ້ວ ປ່ອຍຫວ່າງໄດ້</i></label><textarea id="cst2_medicine" rows="2" placeholder="ລະບຸຊື່ຢາ ແລະ ວິທີກິນ..."></textarea></div>
         <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 15px;"><div class="form-group"><label>ຄຳແນະນຳເພີ່ມເຕີມ</label><textarea id="cst2_advice" rows="2"></textarea></div><div class="form-group"><label>ນັດຄັ້ງຕໍ່ໄປ (ຖ້າມີ)</label><input type="date" id="cst2_next_apt"></div></div>
         <div class="modal-actions"><button class="btn-cancel" id="btnCloseCst2Modal">ປິດ</button><button class="btn-success" id="btnSaveCst2">💾 ບັນທຶກຜົນການກວດ</button></div>
     </div>
@@ -756,7 +756,7 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
             <div class="form-group"><label>ວັນທີເປີດ</label><input type="date" id="pos_open_date" readonly style="background: #f4f7fb;"></div>
             <div class="form-group"><label>ເວລາເປີດ</label><input type="time" id="pos_open_time" readonly style="background: #f4f7fb;"></div>
         </div>
-        <div class="form-group"><label>ຈຸດຂາຍ / ເຄົາເຕີ</label><select id="pos_open_counter"><option value="Counter 1 (ຈຸດຮັບແຂກ)">Counter 1 (ຈຸດຮັບແຂກ)</option><option value="Counter 2 (ຫ້ອງຢາ)">Counter 2 (ຫ້ອງຢາ)</option></select></div>
+        <div class="form-group"><label>ຈຸດຂາຍ/ເຄົາເຕີ</label><select id="pos_open_counter"><option value="Counter 1 (ຈຸດຮັບແຂກ)">Counter 1 (ຈຸດຮັບແຂກ)</option><option value="Counter 2 (ຫ້ອງຢາ)">Counter 2 (ຫ້ອງຢາ)</option></select></div>
         <div class="form-group"><label style="color: #16864b; font-weight: bold;">ເງິນສຳຮອງຕອນເປີດ (ກີບ) *</label><input type="number" id="pos_open_float" placeholder="ປ້ອນຈຳນວນເງິນ..." value="500000" style="font-size: 18px; font-weight: bold;"></div>
         <div class="form-group"><label>ໝາຍເຫດ</label><textarea id="pos_open_note" rows="2" placeholder="..."></textarea></div>
         <div class="modal-actions"><button class="btn-cancel" id="btnClosePosOpenModal">ຍົກເລີກ</button><button class="btn-submit" id="btnSavePosOpen">🔓 ເປີດ POS</button></div>
@@ -770,7 +770,7 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
         <div class="info-box" style="margin-bottom: 20px;">
             <div style="display: flex; justify-content: space-between; margin-bottom: 5px;"><span>ເງິນເລີ່ມຕົ້ນ (ສຳຮອງ):</span><strong id="pos_close_float">0 ກີບ</strong></div>
             <div style="display: flex; justify-content: space-between; margin-bottom: 5px;"><span>ຍອດຂາຍລວມ (ທັງໝົດ):</span><strong id="pos_close_sales_total">0 ກີບ</strong></div>
-            <div style="display: flex; justify-content: space-between; margin-bottom: 5px;"><span>ໂອນ / QR (ບໍ່ລວມໃນລິ້ນຊັກ):</span><strong id="pos_close_sales_transfer">0 ກີບ</strong></div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 5px;"><span>ໂອນ/QR (ບໍ່ລວມໃນລິ້ນຊັກ):</span><strong id="pos_close_sales_transfer">0 ກີບ</strong></div>
             <hr style="border: 0; border-top: 1px dashed #ccc; margin: 10px 0;">
             <div style="display: flex; justify-content: space-between; font-size: 16px;"><span style="color: #1976d2; font-weight: bold;">ເງິນສົດຕາມລະບົບ (ຄາດຫວັງ):</span><strong id="pos_close_expected_cash" style="color: #1976d2;">0 ກີບ</strong></div>
         </div>
@@ -789,7 +789,7 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
             <tr><td style="padding: 6px 0; color: #555;">ສະຖານະ:</td><td style="text-align: right;" id="pos_det_status"></td></tr><tr><td style="padding: 6px 0; color: #555;">ຜູ້ເປີດ POS:</td><td style="text-align: right;" id="pos_det_user"></td></tr><tr><td style="padding: 6px 0; color: #555;">ເວລາເປີດ:</td><td style="text-align: right;" id="pos_det_time_open"></td></tr><tr><td style="padding: 6px 0; color: #555;">ເວລາປິດ:</td><td style="text-align: right;" id="pos_det_time_close"></td></tr><tr><td style="padding: 6px 0; color: #555;">ຈຳນວນໃບບິນ:</td><td style="text-align: right; font-weight: bold;" id="pos_det_tickets"></td></tr>
         </table>
         <div style="background: #f4f7fb; padding: 15px; border-radius: 8px; border: 1px solid #e5e9ef; font-size: 14px;">
-            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;"><span>ເງິນເລີ່ມຕົ້ນ:</span> <strong id="pos_det_float"></strong></div><div style="display: flex; justify-content: space-between; margin-bottom: 8px;"><span>ຍອດຂາຍລວມ:</span> <strong id="pos_det_sales" style="color:#16864b;"></strong></div><div style="display: flex; justify-content: space-between; margin-bottom: 8px; margin-left: 15px;"><span>- ຮັບເງິນສົດ:</span> <span id="pos_det_cash"></span></div><div style="display: flex; justify-content: space-between; margin-bottom: 8px; margin-left: 15px;"><span>- ໂອນ / QR:</span> <span id="pos_det_transfer"></span></div><hr style="border: 0; border-top: 1px solid #ccc; margin: 10px 0;"><div style="display: flex; justify-content: space-between; margin-bottom: 8px;"><span>ເງິນສົດຕາມລະບົບ:</span> <strong id="pos_det_expected"></strong></div><div style="display: flex; justify-content: space-between; margin-bottom: 8px;"><span>ເງິນນັບຈິງ:</span> <strong id="pos_det_actual"></strong></div><div style="display: flex; justify-content: space-between; margin-bottom: 8px;"><span style="color:#b42318;">ສ່ວນຕ່າງ:</span> <strong id="pos_det_variance" style="font-size: 16px;"></strong></div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;"><span>ເງິນເລີ່ມຕົ້ນ:</span> <strong id="pos_det_float"></strong></div><div style="display: flex; justify-content: space-between; margin-bottom: 8px;"><span>ຍອດຂາຍລວມ:</span> <strong id="pos_det_sales" style="color:#16864b;"></strong></div><div style="display: flex; justify-content: space-between; margin-bottom: 8px; margin-left: 15px;"><span>- ຮັບເງິນສົດ:</span> <span id="pos_det_cash"></span></div><div style="display: flex; justify-content: space-between; margin-bottom: 8px; margin-left: 15px;"><span>- ໂອນ/QR:</span> <span id="pos_det_transfer"></span></div><hr style="border: 0; border-top: 1px solid #ccc; margin: 10px 0;"><div style="display: flex; justify-content: space-between; margin-bottom: 8px;"><span>ເງິນສົດຕາມລະບົບ:</span> <strong id="pos_det_expected"></strong></div><div style="display: flex; justify-content: space-between; margin-bottom: 8px;"><span>ເງິນນັບຈິງ:</span> <strong id="pos_det_actual"></strong></div><div style="display: flex; justify-content: space-between; margin-bottom: 8px;"><span style="color:#b42318;">ສ່ວນຕ່າງ:</span> <strong id="pos_det_variance" style="font-size: 16px;"></strong></div>
         </div>
         <div class="modal-actions"><button class="btn-cancel" id="btnClosePosDetailModal">ປິດ</button><button class="btn-action" style="background: #627d98; color: white;">🖨️ ພິມລາຍງານ</button></div>
     </div>
@@ -824,7 +824,7 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
         </div>
 
         <div class="form-group">
-            <label>ແພດຜູ້ກວດ / ຜູ້ສັ່ງ</label>
+            <label>ແພດຜູ້ກວດ/ຜູ້ສັ່ງ</label>
             <select id="rep_doctor">
                 <option value="">-- ທັງໝົດ --</option>
                 <option value="ດຣ. ສົມພອນ">ດຣ. ສົມພອນ</option>
@@ -837,8 +837,8 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
             <label>ສະຖານະ</label>
             <select id="rep_status">
                 <option value="">-- ທັງໝົດ --</option>
-                <option value="ສຳເລັດ">ສຳເລັດ / ປິດຮອບແລ້ວ</option>
-                <option value="ລໍຖ້າ">ລໍຖ້າ / ກຳລັງດຳເນີນການ</option>
+                <option value="ສຳເລັດ">ສຳເລັດ/ປິດຮອບແລ້ວ</option>
+                <option value="ລໍຖ້າ">ລໍຖ້າ/ກຳລັງດຳເນີນການ</option>
                 <option value="ຍົກເລີກ">ຍົກເລີກ</option>
             </select>
         </div>
@@ -1025,7 +1025,7 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
     document.getElementById('btnProceedCst1').addEventListener('click', () => { const ptName = document.getElementById('cst1_patient').value; const doctor = document.getElementById('cst1_doctor').value; if(!ptName || !doctor) { alert('⚠️ ກະລຸນາເລືອກ ຄົນເຈັບ ແລະ ແພດຜູ້ກວດ!'); return; } const dateStr = document.getElementById('cst1_date').value.replace(/-/g, ''); const randomNum = Math.floor(Math.random() * 900) + 100; const visitId = `V-${dateStr}-${randomNum}`; const newVisit = { visit_id: visitId, patient_name: ptName, date: document.getElementById('cst1_date').value, time: document.getElementById('cst1_time').value, doctor: doctor, status: '🟡 ກຳລັງກວດ', symptoms: '', temp: '', bp: '', pulse: '', spo2: '', weight: '', height: '', physical_exam: '', lab_result: '', diagnosis: '', treatment: '', medicine: '', advice: '', next_apt: '' }; let visits = JSON.parse(localStorage.getItem('clinic_visits')) || []; visits.push(newVisit); localStorage.setItem('clinic_visits', JSON.stringify(visits)); document.getElementById('consultationStep1Modal').style.display = 'none'; openConsultationStep2(visits.length - 1); renderConsultationsPage(); });
     window.openConsultationStep2 = function(index) { let visits = JSON.parse(localStorage.getItem('clinic_visits')) || []; if(index < 0 || index >= visits.length) return; const visit = visits[index]; editingVisitIndex = index; document.getElementById('cst2_visit_id').innerText = visit.visit_id; document.getElementById('cst2_pt_name').innerText = visit.patient_name; document.getElementById('cst2_doctor').innerText = visit.doctor; document.getElementById('cst2_status').value = visit.status || '🟡 ກຳລັງກວດ'; document.getElementById('cst2_symptoms').value = visit.symptoms || ''; document.getElementById('cst2_temp').value = visit.temp || ''; document.getElementById('cst2_bp').value = visit.bp || ''; document.getElementById('cst2_pulse').value = visit.pulse || ''; document.getElementById('cst2_spo2').value = visit.spo2 || ''; document.getElementById('cst2_weight').value = visit.weight || ''; document.getElementById('cst2_height').value = visit.height || ''; document.getElementById('cst2_physical_exam').value = visit.physical_exam || ''; document.getElementById('cst2_lab_result').value = visit.lab_result || ''; document.getElementById('cst2_diagnosis').value = visit.diagnosis || ''; document.getElementById('cst2_treatment').value = visit.treatment || ''; document.getElementById('cst2_medicine').value = visit.medicine || ''; document.getElementById('cst2_advice').value = visit.advice || ''; document.getElementById('cst2_next_apt').value = visit.next_apt || ''; document.getElementById('consultationStep2Modal').style.display = 'flex'; };
     document.getElementById('btnSaveCst2').addEventListener('click', () => { if(editingVisitIndex === -1) return; let visits = JSON.parse(localStorage.getItem('clinic_visits')) || []; const diagnosis = document.getElementById('cst2_diagnosis').value; if(!diagnosis.trim() && document.getElementById('cst2_status').value === '🟢 ສຳເລັດ') { alert('⚠️ ກະລຸນາປ້ອນ "ການວິນິດໄສເບື້ອງຕົ້ນ" ກ່ອນປິດການກວດ!'); return; } visits[editingVisitIndex] = { ...visits[editingVisitIndex], status: document.getElementById('cst2_status').value, symptoms: document.getElementById('cst2_symptoms').value, temp: document.getElementById('cst2_temp').value, bp: document.getElementById('cst2_bp').value, pulse: document.getElementById('cst2_pulse').value, spo2: document.getElementById('cst2_spo2').value, weight: document.getElementById('cst2_weight').value, height: document.getElementById('cst2_height').value, physical_exam: document.getElementById('cst2_physical_exam').value, lab_result: document.getElementById('cst2_lab_result').value, diagnosis: diagnosis, treatment: document.getElementById('cst2_treatment').value, medicine: document.getElementById('cst2_medicine').value, advice: document.getElementById('cst2_advice').value, next_apt: document.getElementById('cst2_next_apt').value }; localStorage.setItem('clinic_visits', JSON.stringify(visits)); alert('✅ ບັນທຶກຜົນການກວດສຳເລັດ!'); document.getElementById('consultationStep2Modal').style.display = 'none'; renderConsultationsPage(); });
-    function renderConsultationsPage() { const visits = JSON.parse(localStorage.getItem('clinic_visits')) || []; const todayDate = new Date().toISOString().split('T')[0]; let countToday = 0; let countProgress = 0; let countCompleted = 0; let countWaiting = 0; visits.forEach(v => { if(v.date === todayDate) countToday++; if(v.status.includes('ກຳລັງກວດ')) countProgress++; if(v.status.includes('ສຳເລັດ')) countCompleted++; if(v.status.includes('ລໍຖ້າ')) countWaiting++; }); document.getElementById('cst-stat-today').innerText = countToday + ' ຄັ້ງ'; document.getElementById('cst-stat-progress').innerText = countProgress + ' ຄົນ'; document.getElementById('cst-stat-completed').innerText = countCompleted + ' ຄົນ'; document.getElementById('cst-stat-waiting').innerText = countWaiting + ' ຄົນ'; const tbody = document.getElementById('consultation-table-body'); tbody.innerHTML = ''; if(visits.length === 0) { tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding: 20px;">ຍັງບໍ່ມີຂໍ້ມູນການກວດ</td></tr>'; } else { visits.sort((a,b) => (b.date + b.time).localeCompare(a.date + a.time)); visits.forEach((v, index) => { const dArr = v.date.split('-'); const displayDate = dArr.length === 3 ? `${dArr[2]}/${dArr[1]}/${dArr[0]}` : v.date; let badgeClass = 'badge-gray'; if(v.status.includes('ກຳລັງກວດ')) badgeClass = 'badge-yellow'; else if(v.status.includes('ສຳເລັດ')) badgeClass = 'badge-green'; else if(v.status.includes('ລໍຖ້າ')) badgeClass = 'badge-blue'; const displaySymDiag = (v.diagnosis) ? `<strong>${v.diagnosis}</strong>` : (v.symptoms || '-'); const originalVisits = JSON.parse(localStorage.getItem('clinic_visits')) || []; const trueIndex = originalVisits.findIndex(ov => ov.visit_id === v.visit_id); const tr = document.createElement('tr'); tr.innerHTML = `<td><strong>${v.visit_id}</strong></td><td>${v.patient_name}</td><td>${displayDate}</td><td style="font-weight:bold;">${v.time}</td><td>${v.doctor}</td><td>${displaySymDiag}</td><td><span class="badge ${badgeClass}">${v.status}</span></td><td style="text-align: center;"><span class="action-icon" title="ສັ່ງຢາ (ສົ່ງໄປຫ້ອງຈ່າຍຢາ)" onclick="sendVisitToPharmacy('${v.visit_id}')">💊</span><span class="action-icon" title="ບັນທຶກຜົນການກວດ / ແກ້ໄຂ" onclick="openConsultationStep2(${trueIndex})">✏️</span></td>`; tbody.appendChild(tr); }); } }
+    function renderConsultationsPage() { const visits = JSON.parse(localStorage.getItem('clinic_visits')) || []; const todayDate = new Date().toISOString().split('T')[0]; let countToday = 0; let countProgress = 0; let countCompleted = 0; let countWaiting = 0; visits.forEach(v => { if(v.date === todayDate) countToday++; if(v.status.includes('ກຳລັງກວດ')) countProgress++; if(v.status.includes('ສຳເລັດ')) countCompleted++; if(v.status.includes('ລໍຖ້າ')) countWaiting++; }); document.getElementById('cst-stat-today').innerText = countToday + ' ຄັ້ງ'; document.getElementById('cst-stat-progress').innerText = countProgress + ' ຄົນ'; document.getElementById('cst-stat-completed').innerText = countCompleted + ' ຄົນ'; document.getElementById('cst-stat-waiting').innerText = countWaiting + ' ຄົນ'; const tbody = document.getElementById('consultation-table-body'); tbody.innerHTML = ''; if(visits.length === 0) { tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding: 20px;">ຍັງບໍ່ມີຂໍ້ມູນການກວດ</td></tr>'; } else { visits.sort((a,b) => (b.date + b.time).localeCompare(a.date + a.time)); visits.forEach((v, index) => { const dArr = v.date.split('-'); const displayDate = dArr.length === 3 ? `${dArr[2]}/${dArr[1]}/${dArr[0]}` : v.date; let badgeClass = 'badge-gray'; if(v.status.includes('ກຳລັງກວດ')) badgeClass = 'badge-yellow'; else if(v.status.includes('ສຳເລັດ')) badgeClass = 'badge-green'; else if(v.status.includes('ລໍຖ້າ')) badgeClass = 'badge-blue'; const displaySymDiag = (v.diagnosis) ? `<strong>${v.diagnosis}</strong>` : (v.symptoms || '-'); const originalVisits = JSON.parse(localStorage.getItem('clinic_visits')) || []; const trueIndex = originalVisits.findIndex(ov => ov.visit_id === v.visit_id); const tr = document.createElement('tr'); tr.innerHTML = `<td><strong>${v.visit_id}</strong></td><td>${v.patient_name}</td><td>${displayDate}</td><td style="font-weight:bold;">${v.time}</td><td>${v.doctor}</td><td>${displaySymDiag}</td><td><span class="badge ${badgeClass}">${v.status}</span></td><td style="text-align: center;"><span class="action-icon" title="ສັ່ງຢາ (ສົ່ງໄປຫ້ອງຈ່າຍຢາ)" onclick="sendVisitToPharmacy('${v.visit_id}')">💊</span><span class="action-icon" title="ບັນທຶກຜົນການກວດ/ແກ້ໄຂ" onclick="openConsultationStep2(${trueIndex})">✏️</span></td>`; tbody.appendChild(tr); }); } }
 
     function populatePharmacyVisits() { const visits = JSON.parse(localStorage.getItem('clinic_visits')) || []; const sel = document.getElementById('rx_visit'); sel.innerHTML = '<option value="">-- ເລືອກ Visit ທີ່ລໍຖ້າຈ່າຍຢາ --</option>'; visits.sort((a,b) => (b.date + b.time).localeCompare(a.date + a.time)).forEach(v => { sel.innerHTML += `<option value="${v.visit_id}">${v.visit_id} - ${v.patient_name} (ແພດ: ${v.doctor})</option>`; }); }
     window.autoFillPharmacyInfo = function() { const visitId = document.getElementById('rx_visit').value; const visits = JSON.parse(localStorage.getItem('clinic_visits')) || []; const visit = visits.find(v => v.visit_id === visitId); if (visit) { document.getElementById('rx_dr_name').innerText = visit.doctor; const dArr = visit.date.split('-'); document.getElementById('rx_date_display').innerText = dArr.length === 3 ? `${dArr[2]}/${dArr[1]}/${dArr[0]}` : visit.date; } else { document.getElementById('rx_dr_name').innerText = '-'; document.getElementById('rx_date_display').innerText = '-'; } }
