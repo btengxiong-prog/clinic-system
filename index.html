@@ -6,6 +6,19 @@
 <title>Clinic Management System - Database</title>
 
 <style>
+
+/* ================= CUSTOM ALERT MODAL ================= */
+.custom-alert-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; z-index: 2000; animation: fadeIn 0.2s ease; }
+.custom-alert-card { background: white; padding: 25px; border-radius: 14px; width: 380px; max-width: 90%; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.15); font-family: inherit; }
+.custom-alert-icon { font-size: 40px; margin-bottom: 12px; }
+.custom-alert-title { font-size: 18px; font-weight: bold; color: #102a43; margin-bottom: 8px; }
+.custom-alert-message { font-size: 15px; color: #555; margin-bottom: 20px; line-height: 1.5; }
+.custom-alert-actions { display: flex; gap: 10px; justify-content: center; }
+.custom-alert-btn { padding: 10px 20px; border: none; border-radius: 8px; font-weight: bold; font-family: inherit; cursor: pointer; font-size: 14px; flex: 1; }
+.btn-alert-ok { background: #1976d2; color: white; }
+.btn-alert-cancel { background: #e2e8f0; color: #333; }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body { font-family: "Phetsarath OT", "Times New Roman", serif; background: #f4f7fb; color: #172033; font-size: 15px; }
 
@@ -1290,6 +1303,63 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
         const gender = document.getElementById('pat-filter-gender').value;
         renderPatientsPage(text, gender);
     }
+
+    // ຟັງຊັນສຳລັບ ປ່ຽນ alert() ມາເປັນ Popup ງາມໆ
+    function showCustomAlert(message, title = "ແຈ້ງເຕືອນ", icon = "💡", callback = null) {
+        document.getElementById('customAlertTitle').innerText = title;
+        document.getElementById('customAlertMessage').innerHTML = message;
+        document.getElementById('customAlertIcon').innerText = icon;
+        
+        const actionsDiv = document.getElementById('customAlertActions');
+        actionsDiv.innerHTML = `<button class="custom-alert-btn btn-alert-ok" id="customAlertOkBtn">ຕົກລົງ</button>`;
+        
+        document.getElementById('customAlertModal').style.display = 'flex';
+        
+        document.getElementById('customAlertOkBtn').onclick = function() {
+            document.getElementById('customAlertModal').style.display = 'none';
+            if (callback) callback();
+        };
+    }
+
+    function showCustomConfirm(message, title = "ຢືນຢັນການເຮັດວຽກ", onConfirm) {
+        document.getElementById('customAlertTitle').innerText = title;
+        document.getElementById('customAlertMessage').innerHTML = message;
+        document.getElementById('customAlertIcon').innerText = "❓";
+        
+        const actionsDiv = document.getElementById('customAlertActions');
+        actionsDiv.innerHTML = `
+            <button class="custom-alert-btn btn-alert-cancel" id="customAlertCancelBtn">ຍົກເລີກ</button>
+            <button class="custom-alert-btn btn-alert-ok" id="customAlertConfirmBtn" style="background: #d32f2f;">ຢືນຢັນ</button>
+        `;
+        
+        document.getElementById('customAlertModal').style.display = 'flex';
+        
+        document.getElementById('customAlertCancelBtn').onclick = function() {
+            document.getElementById('customAlertModal').style.display = 'none';
+        };
+        
+        document.getElementById('customAlertConfirmBtn').onclick = function() {
+            document.getElementById('customAlertModal').style.display = 'none';
+            if (onConfirm) onConfirm();
+        };
+    }
+
+    function closeCustomAlert() {
+        document.getElementById('customAlertModal').style.display = 'none';
+    }
+
 </script>
+
+    <!-- ================= CUSTOM ALERT MODAL HTML ================= -->
+    <div class="custom-alert-overlay" id="customAlertModal">
+        <div class="custom-alert-card">
+            <div class="custom-alert-icon" id="customAlertIcon">💡</div>
+            <div class="custom-alert-title" id="customAlertTitle">ແຈ້ງເຕືອນຈາກລະບົບ</div>
+            <div class="custom-alert-message" id="customAlertMessage">ข้อความแจ้งเตือน...</div>
+            <div class="custom-alert-actions" id="customAlertActions">
+                <button class="custom-alert-btn btn-alert-ok" id="customAlertOkBtn" onclick="closeCustomAlert()">ຕົກລົງ</button>
+            </div>
+        </div>
+    </div>
 </body>
 </html>
