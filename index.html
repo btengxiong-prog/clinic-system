@@ -244,12 +244,12 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
                 <div class="card-header">
                     <h3>🔔 ການແຈ້ງເຕືອນ</h3><button onclick="alert('ເປີດໜ້າຈັດການການແຈ້ງເຕືອນ')">ເບິ່ງທັງໝົດ</button>
                 </div>
-                <!-- ປັບປຸງ: ເພີ່ມ ID ແລະ ຕັ້ງ Span ໃຫ້ກັບຕົວເລກເພື່ອດຶງຂໍ້ມູນມາສະແດງແບບ Dynamic -->
-                <div class="alert alert-red" id="alert-expired">🔴 <strong>ຢາໝົດອາຍຸ:</strong>&nbsp; <span id="num-expired">5</span> ລາຍການ</div>
-                <div class="alert alert-yellow" id="alert-stock">🟡 <strong>Stock ຕ່ຳ:</strong>&nbsp; <span id="num-stock">12</span> ລາຍການ</div>
-                <div class="alert alert-blue" id="alert-lab">🔵 <strong>Lab:</strong>&nbsp; ມີ <span id="num-lab">4</span> ຜົນກວດລໍຖ້າ</div>
-                <!-- ເພີ່ມຂໍ້ຄວາມສະແດງກໍລະນີທີ່ບໍ່ມີການແຈ້ງເຕືອນ -->
-                <div class="alert-none" id="alert-empty">🎉 ບໍ່ມີການແຈ້ງເຕືອນໃໝ່ໃນຕອນນີ້</div>
+                <!-- ປັບປຸງ: ຕັ້ງຄ່າເລີ່ມຕົ້ນໃນ HTML ເປັນ 0 ໄວ້ເລີຍ -->
+                <div class="alert alert-red" id="alert-expired" style="display: none;">🔴 <strong>ຢາໝົດອາຍຸ:</strong>&nbsp; <span id="num-expired">0</span> ລາຍການ</div>
+                <div class="alert alert-yellow" id="alert-stock" style="display: none;">🟡 <strong>Stock ຕ່ຳ:</strong>&nbsp; <span id="num-stock">0</span> ລາຍການ</div>
+                <div class="alert alert-blue" id="alert-lab" style="display: none;">🔵 <strong>Lab:</strong>&nbsp; ມີ <span id="num-lab">0</span> ຜົນກວດລໍຖ້າ</div>
+                <!-- ຂໍ້ຄວາມສະແດງກໍລະນີທີ່ບໍ່ມີການແຈ້ງເຕືອນ -->
+                <div class="alert-none" id="alert-empty" style="display: block;">🎉 ບໍ່ມີການແຈ້ງເຕືອນໃໝ່ໃນຕອນນີ້</div>
             </div>
             
             <div class="card">
@@ -465,12 +465,11 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
 
     // ຟັງຊັນໃໝ່: ໂຫຼດ ແລະ ກວດສອບການແຈ້ງເຕືອນ
     function loadNotifications() {
-        // ຈຳລອງຂໍ້ມູນ (ອະນາຄົດສາມາດປ່ຽນເປັນດຶງຈາກ API ໄດ້)
-        // ທ່ານສາມາດທົດລອງປ່ຽນຕົວເລກລຸ່ມນີ້ເປັນ 0 ເພື່ອເບິ່ງວ່າແຖບແຈ້ງເຕືອນຈະຫາຍໄປ
+        // ປັບປຸງ: ກຳນົດຄ່າເລີ່ມຕົ້ນເປັນ 0 ທັງໝົດເນື່ອງຈາກຕອນນີ້ຍັງບໍ່ມີຂໍ້ມູນ
         let mockData = {
-            expiredMeds: 5,  // ລອງປ່ຽນເປັນ 0 
-            lowStock: 12,    // ລອງປ່ຽນເປັນ 0
-            labPending: 4    // ລອງປ່ຽນເປັນ 0
+            expiredMeds: 0,  
+            lowStock: 0,    
+            labPending: 0    
         };
 
         const alertExpired = document.getElementById('alert-expired');
