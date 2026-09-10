@@ -439,16 +439,36 @@ td {
     z-index: 1000;
 }
 
-.modal-card.large {
-    width: 1000px; /* ຂະຫຍາຍຄວາມກວ້າງໃຫ້ເຕັມພື້ນທີ່ກ່ອງສີແດງ */
-    max-width: 95%; /* ປ້ອງກັນບໍ່ໃຫ້ລົ້ນຈໍໃນກໍລະນີເປີດໃນຈໍນ້ອຍ */
-    max-height: 90vh;
-    overflow-y: auto;
+.modal-card {
+    background: white;
+    padding: 25px;
+    border-radius: 12px;
+    width: 420px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
 }
 
 .modal-card h3 {
     margin-bottom: 15px;
     font-size: 18px;
+}
+
+.modal-card.large {
+    width: 700px;
+    max-width: 95%;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+/* ບັງຄັບໃຫ້ຊ່ອງປ້ອນຂໍ້ມູນຢູ່ພາຍໃນຂອບ ບໍ່ໃຫ້ລົ້ນອອກ */
+.form-group input, .form-group select, .form-group textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-family: inherit;
+    font-size: 15.5px;
+    box-sizing: border-box;
+    background: #fff;
 }
 
 .form-group {
@@ -737,12 +757,13 @@ td {
 <!-- ================= MODAL ຟອມລົງທະບຽນຄົນເຈັບ ================= -->
 <div class="modal-overlay" id="patientModal">
     <div class="modal-card large">
-        <h3 style="border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 20px;">+ ເພີ່ມຄົນເຈັບ</h3>
+        <h3 style="margin-bottom: 20px; font-size: 20px; color: #102a43;">+ ເພີ່ມຄົນເຈັບ</h3>
         
+        <!-- ພາກສ່ວນທີ 1: ແບ່ງເປັນ 2 ຖັນ (ຊ້າຍ-ຂວາ) -->
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
             <div class="form-group">
                 <label>Patient ID</label>
-                <input type="text" id="pt_patient_code" placeholder="PT-000001" style="background-color: #f8fafc;" readonly>
+                <input type="text" id="pt_patient_code" placeholder="PT-000001" style="background: #f4f7fb;" readonly>
             </div>
             <div class="form-group">
                 <label>ເລກ HN</label>
@@ -790,6 +811,7 @@ td {
             </div>
         </div>
 
+        <!-- ພາກສ່ວນທີ 2: ແຖວຍາວເຕັມພື້ນທີ່ -->
         <div class="form-group" style="margin-top: 15px;">
             <label>ທີ່ຢູ່</label>
             <textarea id="pt_address" rows="2" placeholder="ບ້ານ, ເມືອງ, ແຂວງ"></textarea>
@@ -805,7 +827,8 @@ td {
             <textarea id="pt_health_history" rows="2" placeholder="ຂໍ້ມູນປະຫວັດສຸຂະພາບ"></textarea>
         </div>
 
-        <div class="modal-actions" style="border-top: 1px solid #eee; padding-top: 15px;">
+        <!-- ປຸ່ມບັນທຶກ -->
+        <div class="modal-actions" style="margin-top: 25px;">
             <button class="btn-cancel" id="btnCloseModal">ຍົກເລີກ</button>
             <button class="btn-submit" id="btnSavePatient">💾 ບັນທຶກ</button>
         </div>
