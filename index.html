@@ -811,10 +811,24 @@ td {
             </div>
         </div>
 
-        <!-- ພາກສ່ວນທີ 2: ແຖວຍາວເຕັມພື້ນທີ່ -->
+    <!-- ພາກສ່ວນທີ່ຢູ່: ແບ່ງເປັນ 3 ລ໋ອກ -->
         <div class="form-group" style="margin-top: 15px;">
-            <label>ທີ່ຢູ່</label>
-            <textarea id="pt_address" rows="2" placeholder="ບ້ານ, ເມືອງ, ແຂວງ"></textarea>
+            <label>ທີ່ຢູ່ປັດຈຸບັນ (ແຂວງ, ເມືອງ, ບ້ານ)</label>
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
+                <select id="pt_province" onchange="updateDistricts()">
+                    <option value="">-- ເລືອກແຂວງ --</option>
+                    <option value="ນະຄອນຫຼວງວຽງຈັນ">ນະຄອນຫຼວງວຽງຈັນ</option>
+                    <option value="ໄຊຍະບູລີ">ໄຊຍະບູລີ</option>
+                    <option value="ຫຼວງພະບາງ">ຫຼວງພະບາງ</option>
+                    <!-- ສາມາດເພີ່ມແຂວງອື່ນໆໃສ່ບ່ອນນີ້ໄດ້ -->
+                </select>
+                
+                <select id="pt_district">
+                    <option value="">-- ເລືອກເມືອງ --</option>
+                </select>
+
+                <input type="text" id="pt_village" placeholder="ປ້ອນຊື່ບ້ານ...">
+            </div>
         </div>
 
         <div class="form-group">
@@ -962,8 +976,21 @@ td {
         document.getElementById('revenue-box-display').innerText = formattedRevenue;
     }
 
-    // ບັນທຶກຄົນເຈັບໃໝ່ລົງ Database ຜ່ານ Python API
+// ບັນທຶກຄົນເຈັບໃໝ່ລົງ Database ຜ່ານ Python API
     document.getElementById('btnSavePatient').addEventListener('click', async () => {
+        
+        // --- ເພີ່ມໂຄດດຶງຂໍ້ມູນທີ່ຢູ່ບ່ອນນີ້ ---
+        const prov = document.getElementById('pt_province').value;
+        const dist = document.getElementById('pt_district').value;
+        const vill = document.getElementById('pt_village').value.trim();
+        
+        // ສ້າງປະໂຫຍກທີ່ຢູ່ເຕັມ (ຕົວຢ່າງ: ບ້ານ ໂພນສິນວນ, ເມືອງ ສີສັດຕະນາກ, ແຂວງ ນະຄອນຫຼວງວຽງຈັນ)
+        let fullAddress = "";
+        if (vill) fullAddress += `ບ້ານ ${vill}, `;
+        if (dist) fullAddress += `ເມືອງ ${dist}, `;
+        if (prov) fullAddress += `ແຂວງ ${prov}`;
+        // --------------------------------
+
         const payload = {
             patient_code: document.getElementById('pt_patient_code').value.trim(),
             hn_number: document.getElementById('pt_hn_number').value.trim(),
@@ -973,7 +1000,10 @@ td {
             phone: document.getElementById('pt_phone').value.trim(),
             blood_group: document.getElementById('pt_blood_group').value,
             status: document.getElementById('pt_status').value,
-            address: document.getElementById('pt_address').value.trim(),
+            
+            // ປ່ຽນຄ່າ address ມາໃຊ້ຕົວແປ fullAddress ທີ່ເຮົາປະກອບໄວ້ດ້ານເທິງ
+            address: fullAddress.replace(/, $/, ""), 
+            
             allergy: document.getElementById('pt_allergy').value.trim(),
             health_history: document.getElementById('pt_health_history').value.trim()
         };
@@ -1000,6 +1030,8 @@ td {
                 document.querySelectorAll('#patientModal input, #patientModal textarea, #patientModal select').forEach(el => {
                     if(el.id !== 'pt_status') el.value = '';
                 });
+                // ລ້າງຂໍ້ມູນເມືອງ
+                document.getElementById('pt_district').innerHTML = '<option value="">-- ເລືອກເມືອງ --</option>';
                 
                 document.getElementById('patientModal').style.display = 'none';
                 loadDashboardData(); 
@@ -1042,6 +1074,32 @@ td {
         document.getElementById('appointmentModal').style.display = 'none';
         loadDashboardData();
     });
+
+// ຂໍ້ມູນເມືອງໃນແຕ່ລະແຂວງ (ສາມາດເພີ່ມແຂວງອື່ນໆໄດ້ຕາມໂຄງສ້າງນີ້)
+        const districtsByProvince = {
+            "ນະຄອນຫຼວງວຽງຈັນ": ["ຈັນທະບູລີ", "ສີໂຄດຕະບອງ", "ໄຊເສດຖາ", "ສີສັດຕະນາກ", "ນາຊາຍທອງ", "ໄຊທານີ", "ຫາດຊາຍຟອງ", "ສັງທອງ", "ປາກງື່ມ"],
+            "ໄຊຍະບູລີ": ["ໄຊຍະບູລີ", "ຄອບ", "ຊຽງຮ່ອນ", "ເງິນ", "ຫົງສາ", "ພຽງ", "ປາກລາຍ", "ແກ່ນທ້າວ", "ບໍ່ແຕນ", "ທົ່ງມີໄຊ", "ໄຊສະຖານ"],
+            "ຫຼວງພະບາງ": ["ຫຼວງພະບາງ", "ຊຽງເງິນ", "ນານ", "ປາກອູ", "ນ້ຳບາກ", "ງອຍ", "ປາກແຊງ", "ໂພນໄຊ", "ຈອມເພັດ", "ວຽງຄຳ", "ພູຄູນ", "ໂພນທອງ"]
+        };
+
+        // ຟັງຊັນປ່ຽນແປງເມືອງອັດຕະໂນມັດ
+        function updateDistricts() {
+            const provSelect = document.getElementById('pt_province');
+            const distSelect = document.getElementById('pt_district');
+            const selectedProv = provSelect.value;
+
+            // ລ້າງຂໍ້ມູນເມືອງເກົ່າອອກກ່ອນ
+            distSelect.innerHTML = '<option value="">-- ເລືອກເມືອງ --</option>';
+
+            if (selectedProv && districtsByProvince[selectedProv]) {
+                districtsByProvince[selectedProv].forEach(dist => {
+                    const option = document.createElement('option');
+                    option.value = dist;
+                    option.textContent = dist;
+                    distSelect.appendChild(option);
+                });
+            }
+        }
 </script>
 </body>
 </html>
