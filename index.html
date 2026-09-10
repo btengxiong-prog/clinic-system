@@ -737,15 +737,78 @@ td {
 
 <!-- ================= MODAL ຟອມລົງທະບຽນຄົນເຈັບ ================= -->
 <div class="modal-overlay" id="patientModal">
-    <div class="modal-card">
-        <h3>👤 ລົງທະບຽນຄົນເຈັບໃໝ່</h3>
-        <div class="form-group">
-            <label>ຊື່ ແລະ ນາມສະກຸນ:</label>
-            <input type="text" id="patientFullName" placeholder="ພິມຊື່ຄົນເຈັບ...">
+    <div class="modal-card large">
+        <h3 style="border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 20px;">+ ເພີ່ມຄົນເຈັບ</h3>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+            <div class="form-group">
+                <label>Patient ID</label>
+                <input type="text" id="pt_patient_code" placeholder="PT-000001" style="background-color: #f8fafc;" readonly>
+            </div>
+            <div class="form-group">
+                <label>ເລກ HN</label>
+                <input type="text" id="pt_hn_number" placeholder="HN-000001">
+            </div>
+
+            <div class="form-group">
+                <label>ຊື່-ນາມສະກຸນ *</label>
+                <input type="text" id="pt_fullname" placeholder="ປ້ອນຊື່-ນາມສະກຸນ">
+            </div>
+            <div class="form-group">
+                <label>ເພດ *</label>
+                <select id="pt_gender">
+                    <option value="">-- ເລືອກ --</option>
+                    <option value="ຊາຍ">ຊາຍ</option>
+                    <option value="ຍິງ">ຍິງ</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>ວັນເກີດ</label>
+                <input type="date" id="pt_dob">
+            </div>
+            <div class="form-group">
+                <label>ເບີໂທ</label>
+                <input type="text" id="pt_phone" placeholder="020 xxxx xxxx">
+            </div>
+
+            <div class="form-group">
+                <label>ກຸ່ມເລືອດ</label>
+                <select id="pt_blood_group">
+                    <option value="">-- ບໍ່ລະບຸ --</option>
+                    <option value="A">A</option>
+                    <option value="B">B</option>
+                    <option value="AB">AB</option>
+                    <option value="O">O</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>ສະຖານະ</label>
+                <select id="pt_status">
+                    <option value="Active">Active</option>
+                    <option value="Inactive">Inactive</option>
+                </select>
+            </div>
         </div>
-        <div class="modal-actions">
+
+        <div class="form-group" style="margin-top: 15px;">
+            <label>ທີ່ຢູ່</label>
+            <textarea id="pt_address" rows="2" placeholder="ບ້ານ, ເມືອງ, ແຂວງ"></textarea>
+        </div>
+
+        <div class="form-group">
+            <label>ແພ້ຢາ / Allergy</label>
+            <textarea id="pt_allergy" rows="2" placeholder="ຕົວຢ່າງ: Penicillin"></textarea>
+        </div>
+
+        <div class="form-group">
+            <label>ປະຫວັດສຸຂະພາບ</label>
+            <textarea id="pt_health_history" rows="2" placeholder="ຂໍ້ມູນປະຫວັດສຸຂະພາບ"></textarea>
+        </div>
+
+        <div class="modal-actions" style="border-top: 1px solid #eee; padding-top: 15px;">
             <button class="btn-cancel" id="btnCloseModal">ຍົກເລີກ</button>
-            <button class="btn-submit" id="btnSavePatient">ບັນທຶກລົງ Local</button>
+            <button class="btn-submit" id="btnSavePatient">💾 ບັນທຶກ</button>
         </div>
     </div>
 </div>
@@ -877,30 +940,54 @@ td {
         document.getElementById('revenue-box-display').innerText = formattedRevenue;
     }
 
-    // ບັນທຶກຄົນເຈັບໃໝ່ລົງ LocalStorage
-    document.getElementById('btnSavePatient').addEventListener('click', () => {
-        const fullnameInput = document.getElementById('patientFullName');
-        const fullname = fullnameInput.value.trim();
+    // ບັນທຶກຄົນເຈັບໃໝ່ລົງ Database ຜ່ານ Python API
+    document.getElementById('btnSavePatient').addEventListener('click', async () => {
+        const payload = {
+            patient_code: document.getElementById('pt_patient_code').value.trim(),
+            hn_number: document.getElementById('pt_hn_number').value.trim(),
+            fullname: document.getElementById('pt_fullname').value.trim(),
+            gender: document.getElementById('pt_gender').value,
+            dob: document.getElementById('pt_dob').value || null,
+            phone: document.getElementById('pt_phone').value.trim(),
+            blood_group: document.getElementById('pt_blood_group').value,
+            status: document.getElementById('pt_status').value,
+            address: document.getElementById('pt_address').value.trim(),
+            allergy: document.getElementById('pt_allergy').value.trim(),
+            health_history: document.getElementById('pt_health_history').value.trim()
+        };
 
-        if (!fullname) {
-            alert('ກະລຸນາປ້ອນຊື່ ແລະ ນາມສະກຸນຄົນເຈັບ!');
+        // ກວດສອບຊ່ອງທີ່ບັງຄັບໃສ່ (*)
+        if (!payload.fullname || !payload.gender) {
+            showSysModal('ຜິດພາດ', 'ກະລຸນາປ້ອນ ຊື່-ນາມສະກຸນ ແລະ ເລືອກເພດ!', '⚠️');
             return;
         }
 
-        let patients = JSON.parse(localStorage.getItem('clinic_patients')) || [];
-        const nowStr = new Date().toLocaleString('lo-LA');
+        try {
+            const response = await fetch('http://127.0.0.1:5000/api/patients', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
 
-        patients.push({
-            fullname: fullname,
-            created_at: nowStr
-        });
+            const data = await response.json();
 
-        localStorage.setItem('clinic_patients', JSON.stringify(patients));
-
-        alert('ລົງທະບຽນຄົນເຈັບສຳເລັດ!');
-        fullnameInput.value = '';
-        document.getElementById('patientModal').style.display = 'none';
-        loadDashboardData();
+            if (response.ok) {
+                showSysModal('ສຳເລັດ', data.message, '✅');
+                
+                // ລ້າງຂໍ້ມູນໃນຟອມ
+                document.querySelectorAll('#patientModal input, #patientModal textarea, #patientModal select').forEach(el => {
+                    if(el.id !== 'pt_status') el.value = '';
+                });
+                
+                document.getElementById('patientModal').style.display = 'none';
+                loadDashboardData(); 
+            } else {
+                showSysModal('ຜິດພາດ', data.message, '⚠️');
+            }
+        } catch (error) {
+            console.error(error);
+            showSysModal('ຜິດພາດ', 'ບໍ່ສາມາດເຊື່ອມຕໍ່ຫາເຊີບເວີໄດ້!', '🔴');
+        }
     });
 
     // ບັນທຶກນັດໝາຍໃໝ່ລົງ LocalStorage
