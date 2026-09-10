@@ -78,6 +78,7 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
 .alert-red { background: #fff0f0; color: #b42318; }
 .alert-yellow { background: #fff8df; color: #8a6100; }
 .alert-blue { background: #edf6ff; color: #155b91; }
+.alert-none { display: none; text-align: center; padding: 15px; color: #7b8794; font-size: 14px; background: #f4f7fb; border-radius: 10px; }
 
 .bottom-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 25px; }
 .revenue-box { text-align: center; padding: 20px; }
@@ -214,7 +215,7 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
                                 <th>ທີ່ຢູ່ປັດຈຸບັນ</th>
                                 <th>ແພ້ຢາ / ປະຫວັດ</th>
                                 <th>ສະຖານະ</th>
-                                <th style="text-align: center;">ຈັດການ</th> <!-- ເພີ່ມຖັນຈັດການໃໝ່ -->
+                                <th style="text-align: center;">ຈັດການ</th>
                             </tr>
                         </thead>
                         <tbody id="patient-table-body">
@@ -239,18 +240,19 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
         </div>
 
         <div class="bottom-grid">
-                <div class="card">
-                    <div class="card-header">
-                        <h3>🔔 ການແຈ້ງເຕືອນ</h3><button onclick="alert('ເປີດໜ້າຈັດການການແຈ້ງເຕືອນ')">ເບິ່ງທັງໝົດ</button>
-                    </div>
-                    <div class="alert alert-red" id="alert-expired">🔴 <strong>ຢາໝົດອາຍຸ:</strong>&nbsp; <span id="count-expired">5</span> ລາຍການ</div>
-                    <div class="alert alert-yellow" id="alert-stock">🟡 <strong>Stock ຕ່ຳ:</strong>&nbsp; <span id="count-stock">12</span> ລາຍການ</div>
-                    <div class="alert alert-blue" id="alert-lab">🔵 <strong>Lab:</strong>&nbsp; ມີ <span id="count-lab">4</span> ຜົນກວດລໍຖ້າ</div>
-                    
-                    <div id="no-notification" style="display: none; text-align: center; color: #7b8794; padding: 20px;">
-                        ບໍ່ມີການແຈ້ງເຕືອນໃນຂະນະນີ້
-                    </div>
+            <div class="card">
+                <div class="card-header">
+                    <h3>🔔 ການແຈ້ງເຕືອນ</h3><button onclick="alert('ເປີດໜ້າຈັດການການແຈ້ງເຕືອນ')">ເບິ່ງທັງໝົດ</button>
                 </div>
+                <!-- ປັບປຸງ: ເພີ່ມ ID ແລະ ຕັ້ງ Span ໃຫ້ກັບຕົວເລກເພື່ອດຶງຂໍ້ມູນມາສະແດງແບບ Dynamic -->
+                <div class="alert alert-red" id="alert-expired">🔴 <strong>ຢາໝົດອາຍຸ:</strong>&nbsp; <span id="num-expired">5</span> ລາຍການ</div>
+                <div class="alert alert-yellow" id="alert-stock">🟡 <strong>Stock ຕ່ຳ:</strong>&nbsp; <span id="num-stock">12</span> ລາຍການ</div>
+                <div class="alert alert-blue" id="alert-lab">🔵 <strong>Lab:</strong>&nbsp; ມີ <span id="num-lab">4</span> ຜົນກວດລໍຖ້າ</div>
+                <!-- ເພີ່ມຂໍ້ຄວາມສະແດງກໍລະນີທີ່ບໍ່ມີການແຈ້ງເຕືອນ -->
+                <div class="alert-none" id="alert-empty">🎉 ບໍ່ມີການແຈ້ງເຕືອນໃໝ່ໃນຕອນນີ້</div>
+            </div>
+            
+            <div class="card">
                 <div class="card-header">
                     <h3>💵 ລາຍຮັບມື້ນີ້</h3><button onclick="alert('ເປີດໜ້າລາຍງານການເງິນ')">ເບິ່ງລາຍລະອຽດ</button>
                 </div>
@@ -461,6 +463,58 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
         "ໄຊຍະບູລີ": ["ໄຊຍະບູລີ", "ຄອບ", "ຊຽງຮ່ອນ", "ເງິນ", "ຫົງສາ", "ພຽງ", "ປາກລາຍ", "ແກ່ນທ້າວ", "ບໍ່ແຕນ", "ທົ່ງມີໄຊ", "ໄຊສະຖານ"]
     };
 
+    // ຟັງຊັນໃໝ່: ໂຫຼດ ແລະ ກວດສອບການແຈ້ງເຕືອນ
+    function loadNotifications() {
+        // ຈຳລອງຂໍ້ມູນ (ອະນາຄົດສາມາດປ່ຽນເປັນດຶງຈາກ API ໄດ້)
+        // ທ່ານສາມາດທົດລອງປ່ຽນຕົວເລກລຸ່ມນີ້ເປັນ 0 ເພື່ອເບິ່ງວ່າແຖບແຈ້ງເຕືອນຈະຫາຍໄປ
+        let mockData = {
+            expiredMeds: 5,  // ລອງປ່ຽນເປັນ 0 
+            lowStock: 12,    // ລອງປ່ຽນເປັນ 0
+            labPending: 4    // ລອງປ່ຽນເປັນ 0
+        };
+
+        const alertExpired = document.getElementById('alert-expired');
+        const alertStock = document.getElementById('alert-stock');
+        const alertLab = document.getElementById('alert-lab');
+        const alertEmpty = document.getElementById('alert-empty');
+
+        let hasAlert = false;
+
+        // ຈັດການແຈ້ງເຕືອນຢາໝົດອາຍຸ
+        if (mockData.expiredMeds > 0) {
+            document.getElementById('num-expired').innerText = mockData.expiredMeds;
+            alertExpired.style.display = 'flex';
+            hasAlert = true;
+        } else {
+            alertExpired.style.display = 'none';
+        }
+
+        // ຈັດການແຈ້ງເຕືອນ Stock ຕ່ຳ
+        if (mockData.lowStock > 0) {
+            document.getElementById('num-stock').innerText = mockData.lowStock;
+            alertStock.style.display = 'flex';
+            hasAlert = true;
+        } else {
+            alertStock.style.display = 'none';
+        }
+
+        // ຈັດການແຈ້ງເຕືອນ Lab
+        if (mockData.labPending > 0) {
+            document.getElementById('num-lab').innerText = mockData.labPending;
+            alertLab.style.display = 'flex';
+            hasAlert = true;
+        } else {
+            alertLab.style.display = 'none';
+        }
+
+        // ຖ້າບໍ່ມີຫຍັງແຈ້ງເຕືອນເລີຍ ໃຫ້ສະແດງຂໍ້ຄວາມແທນ
+        if (!hasAlert) {
+            alertEmpty.style.display = 'block';
+        } else {
+            alertEmpty.style.display = 'none';
+        }
+    }
+
     function updateDistricts() {
         const provSelect = document.getElementById('pt_province');
         const distSelect = document.getElementById('pt_district');
@@ -535,6 +589,7 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
         document.getElementById('btnCloseAptModal').addEventListener('click', () => { aptModal.style.display = 'none'; });
 
         loadDashboardData();
+        loadNotifications(); // ເອີ້ນໃຊ້ຟັງຊັນແຈ້ງເຕືອນເມື່ອໂຫຼດໜ້າເວັບ
     });
 
     async function loadDashboardData() {
@@ -618,40 +673,6 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
         document.getElementById('revenue-box-display').innerText = totalRevenue.toLocaleString() + ' ₭';
         
         renderAppointmentsPage();
-
-        // ----------------------------------------------------------------
-        // ສ່ວນຄວບຄຸມການແຈ້ງເຕືອນ (ຈະສະແດງສະເພາະໂຕທີ່ມີຄ່າຫຼາຍກວ່າ 0)
-        // ----------------------------------------------------------------
-        let mockExpired = 0; // ຄ່າເປັນ 0 ຈະຖືກເຊື່ອງ
-        let mockStock = 2;   // ຄ່າເປັນ 2 ຈະສະແດງຕາມຮູບທີ 2 ທີ່ທ່ານຕ້ອງການ
-        let mockLab = 0;     // ຄ່າເປັນ 0 ຈະຖືກເຊື່ອງ
-
-        updateNotifications(mockExpired, mockStock, mockLab);
-    }
-
-    // ຟັງຊັນສຳລັບອັບເດດຕົວເລກ ແລະ ເຊື່ອງ/ສະແດງ ແຈ້ງເຕືອນ
-    function updateNotifications(expiredCount, stockCount, labCount) {
-        const alertExpired = document.getElementById('alert-expired');
-        const alertStock = document.getElementById('alert-stock');
-        const alertLab = document.getElementById('alert-lab');
-        const noNotif = document.getElementById('no-notification');
-        
-        // ອັບເດດຕົວເລກ
-        if (document.getElementById('count-expired')) document.getElementById('count-expired').innerText = expiredCount;
-        if (document.getElementById('count-stock')) document.getElementById('count-stock').innerText = stockCount;
-        if (document.getElementById('count-lab')) document.getElementById('count-lab').innerText = labCount;
-        
-        // ກວດສອບເງື່ອນໄຂການສະແດງຜົນ
-        if (alertExpired) alertExpired.style.display = (expiredCount > 0) ? 'flex' : 'none';
-        if (alertStock) alertStock.style.display = (stockCount > 0) ? 'flex' : 'none';
-        if (alertLab) alertLab.style.display = (labCount > 0) ? 'flex' : 'none';
-        
-        // ສະແດງຂໍ້ຄວາມເມື່ອບໍ່ມີແຈ້ງເຕືອນເລີຍ
-        if (expiredCount === 0 && stockCount === 0 && labCount === 0) {
-            if (noNotif) noNotif.style.display = 'block';
-        } else {
-            if (noNotif) noNotif.style.display = 'none';
-        }
     }
 
     document.getElementById('btnSavePatient').addEventListener('click', async () => {
@@ -808,33 +829,6 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
             renderAppointmentsPage();
         }
     };
-
-    // ----------------------------------------------------------------
-    // ຟັງຊັນຈັດການການສະແດງຜົນແຈ້ງເຕືອນ (ເອົາໄວ້ຕໍ່ຈາກ loadDashboardData ເລີຍ)
-    // ----------------------------------------------------------------
-    function updateNotifications(expiredCount, stockCount, labCount) {
-        const alertExpired = document.getElementById('alert-expired');
-        const alertStock = document.getElementById('alert-stock');
-        const alertLab = document.getElementById('alert-lab');
-        const noNotif = document.getElementById('no-notification');
-        
-        // 1. ອັບເດດຕົວເລກເຂົ້າໃນ <span> (ຖ້າມີການໃສ່ id ໄວ້ໃນ HTML ແລ້ວ)
-        if (document.getElementById('count-expired')) document.getElementById('count-expired').innerText = expiredCount;
-        if (document.getElementById('count-stock')) document.getElementById('count-stock').innerText = stockCount;
-        if (document.getElementById('count-lab')) document.getElementById('count-lab').innerText = labCount;
-        
-        // 2. ເງື່ອນໄຂການສະແດງຜົນ (ຖ້າ > 0 ໃຫ້ສະແດງ, ຖ້າ = 0 ໃຫ້ເຊື່ອງ)
-        if (alertExpired) alertExpired.style.display = (expiredCount > 0) ? 'flex' : 'none';
-        if (alertStock) alertStock.style.display = (stockCount > 0) ? 'flex' : 'none';
-        if (alertLab) alertLab.style.display = (labCount > 0) ? 'flex' : 'none';
-        
-        // 3. ຖ້າບໍ່ມີແຈ້ງເຕືອນຫຍັງເລີຍທັງ 3 ຢ່າງ ໃຫ້ສະແດງຂໍ້ຄວາມ "ບໍ່ມີການແຈ້ງເຕືອນ" (ຖ້າມີແທັກນີ້ໃນ HTML)
-        if (expiredCount === 0 && stockCount === 0 && labCount === 0) {
-            if (noNotif) noNotif.style.display = 'block';
-        } else {
-            if (noNotif) noNotif.style.display = 'none';
-        }
-    }
 </script>
 </body>
 </html>
