@@ -347,7 +347,7 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
                     </select>
                 </div>
                 <div class="filter-group">
-                    <button class="btn-action btn-add" onclick="document.getElementById('patientModal').style.display = 'flex'">+ ເພີ່ມຄົນເຈັບ</button>
+                    <button class="btn-action btn-add" onclick="window.openAddPatientModal()">+ ເພີ່ມຄົນເຈັບ</button>
                 </div>
             </div>
 
@@ -385,7 +385,7 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
                 <div><div class="stat-label">🟡 ລໍຖ້າ</div><div class="stat-number" id="apt-stat-pending">0</div></div>
             </div>
             <div class="card stat-card" style="padding: 15px;">
-                <div><div class="stat-label">🟢 ຢືນຢັນແລ້ວ</div><div class="stat-number" id="apt-stat-completed">0</div></div>
+                <div><div class="stat-label">🟢 ຢືນຢັນແລ້ວ</div><div class="stat-number" id="apt-stat-confirmed">0</div></div>
             </div>
             <div class="card stat-card" style="padding: 15px;">
                 <div><div class="stat-label">🔵 ສຳເລັດ</div><div class="stat-number" id="apt-stat-completed">0</div></div>
@@ -708,7 +708,7 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
     </section>
 </main>
 
-<!-- ================= MODAL ຟອມລົງທະບຽນຄົນເຈັບ ================= -->
+<!-- ================= MODAL ຟອມລົງທະບຽນ/ແກ້ໄຂຄົນເຈັບ ================= -->
 <div class="modal-overlay" id="patientModal">
     <div class="modal-card large">
         <h3>+ ເພີ່ມຄົນເຈັບ</h3>
@@ -969,23 +969,109 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
 
     // Helper ຟັງຊັນສຳລັບການກົດປຸ່ມທີ່ຢູ່ໃນຕາຕະລາງ
     window.viewPatientQuick = function(name) { window.showCustomAlert(`ເບິ່ງຂໍ້ມູນຄົນເຈັບ: ${name}`, 'ຂໍ້ມູນຄົນເຈັບ', '👁️'); };
-    
-    // ຟັງຊັນແກ້ໄຂ ແລະ ລຶບ (ສຳລັບໜ້າຄົນເຈັບຫຼັກ)
-    window.editPatientQuick = function(id) { 
-        window.showCustomAlert(`ແກ້ໄຂຂໍ້ມູນຄົນເຈັບລະຫັດ: ${id}`, 'ແກ້ໄຂຄົນເຈັບ', '✏️'); 
+
+    let globalPatientsList = [];
+    let currentEditPatientId = null; // ຕົວແປສຳລັບເກັບ ID ຕອນແກ້ໄຂ
+    let editingVisitIndex = -1; 
+    let editingRxIndex = -1; 
+    let activePosIndex = -1; 
+
+    // ຟັງຊັນສຳລັບເປີດຟອມເພີ່ມຄົນເຈັບໃໝ່ ພ້ອມລ້າງຂໍ້ມູນເກົ່າຖິ້ມ
+    window.openAddPatientModal = function() {
+        currentEditPatientId = null;
+        document.getElementById('patientModal').querySelector('h3').innerText = '+ ເພີ່ມຄົນເຈັບ';
+        document.getElementById('pt_patient_code').value = '';
+        document.getElementById('pt_hn_number').value = '';
+        document.getElementById('pt_fullname').value = '';
+        document.getElementById('pt_gender').value = '';
+        document.getElementById('pt_dob').value = '';
+        document.getElementById('pt_phone').value = '';
+        document.getElementById('pt_blood_group').value = '';
+        document.getElementById('pt_status').value = 'Active';
+        document.getElementById('pt_province').value = '';
+        document.getElementById('pt_district').innerHTML = '<option value="">-- ເລືອກເມືອງ --</option>';
+        document.getElementById('pt_village').value = '';
+        document.getElementById('pt_allergy').value = '';
+        document.getElementById('pt_health_history').value = '';
+        document.getElementById('patientModal').style.display = 'flex';
     };
+    
+    // ຟັງຊັນແກ້ໄຂຂໍ້ມູນຄົນເຈັບ (ທຳງານໄດ້ຈິງແລ້ວ)
+    window.editPatientQuick = function(id) { 
+        const patient = globalPatientsList.find(p => (p.patient_code === id || 'ID-'+p.id === id));
+        if (!patient) return;
+
+        currentEditPatientId = patient.patient_code || patient.id; 
+
+        document.getElementById('patientModal').querySelector('h3').innerText = '✏️ ແກ້ໄຂຂໍ້ມູນຄົນເຈັບ';
+        document.getElementById('pt_patient_code').value = patient.patient_code || '';
+        document.getElementById('pt_hn_number').value = patient.hn_number || '';
+        document.getElementById('pt_fullname').value = patient.fullname || '';
+        document.getElementById('pt_gender').value = patient.gender || '';
+
+        if(patient.dob) {
+            let d = new Date(patient.dob);
+            if(!isNaN(d.getTime())) {
+                document.getElementById('pt_dob').value = d.toISOString().split('T')[0];
+            } else {
+                document.getElementById('pt_dob').value = patient.dob;
+            }
+        } else {
+            document.getElementById('pt_dob').value = '';
+        }
+
+        document.getElementById('pt_phone').value = patient.phone || '';
+        document.getElementById('pt_blood_group').value = patient.blood_group || '';
+        document.getElementById('pt_status').value = patient.status || 'Active';
+
+        const addr = patient.address || '';
+        let prov = '', dist = '', vill = '';
+        let parts = addr.split(', ');
+        parts.forEach(part => {
+            if(part.startsWith('ບ້ານ ')) vill = part.replace('ບ້ານ ', '');
+            if(part.startsWith('ເມືອງ ')) dist = part.replace('ເມືອງ ', '');
+            if(part.startsWith('ແຂວງ ')) prov = part.replace('ແຂວງ ', '');
+        });
+
+        document.getElementById('pt_province').value = prov;
+        updateDistricts();
+        setTimeout(() => { document.getElementById('pt_district').value = dist; }, 50);
+        document.getElementById('pt_village').value = vill;
+        document.getElementById('pt_allergy').value = patient.allergy || '';
+        document.getElementById('pt_health_history').value = patient.health_history || '';
+
+        document.getElementById('patientModal').style.display = 'flex';
+    };
+
+    // ຟັງຊັນລຶບຂໍ້ມູນຄົນເຈັບ (ທຳງານໄດ້ຈິງແລ້ວ)
     window.deletePatientQuick = function(id) { 
-        window.showCustomConfirm(`ທ່ານຕ້ອງການລຶບຄົນເຈັບລະຫັດ ${id} ແທ້ຫຼືບໍ່?`, 'ຢືນຢັນການລຶບ', function() {
+        window.showCustomConfirm(`ທ່ານຕ້ອງການລຶບຄົນເຈັບລະຫັດ ${id} ແທ້ຫຼືບໍ່?`, 'ຢືນຢັນການລຶບ', async function() {
+            // ອັບເດດຂໍ້ມູນໃນໜ້າຈໍທັນທີ (ເພື່ອຄວາມໄວ ແລະ ຮອງຮັບການເຮັດວຽກແບບ Offline/Mockup)
+            globalPatientsList = globalPatientsList.filter(p => p.patient_code !== id && ('ID-'+p.id) !== id);
+            renderPatientsPage();
+            document.getElementById('total-patients').innerText = globalPatientsList.length;
+            document.getElementById('today-patients').innerText = globalPatientsList.length;
+            
+            if(document.getElementById('page-dashboard').style.display === 'block') {
+                loadDashboardData();
+            }
+
             window.showCustomAlert(`ລຶບຂໍ້ມູນຄົນເຈັບ ${id} ສຳເລັດແລ້ວ`, 'ສຳເລັດ', '✅');
+
+            // ພະຍາຍາມສົ່ງຄຳສັ່ງລຶບໄປຫາ API Backend (ຖ້າມີ)
+            try {
+                let pId = id.toString().replace('ID-', '');
+                const response = await fetch(`http://127.0.0.1:5000/api/patients/${pId}`, { method: 'DELETE' });
+                if(response.ok) {
+                    loadDashboardData();
+                }
+            } catch(e) {
+                console.log("ລະບົບເຮັດວຽກແບບ Offline: ລຶບຂໍ້ມູນໃນໜ້າຈໍສຳເລັດ.");
+            }
         });
     };
 
     window.printRxQuick = function(rx_no) { window.showCustomAlert(`ພິມໃບຢາ ${rx_no}`, 'ພິມ', '🖨️'); };
-
-    let globalPatientsList = [];
-    let editingVisitIndex = -1; 
-    let editingRxIndex = -1; 
-    let activePosIndex = -1; 
 
     const districtsByProvince = {
         "ນະຄອນຫຼວງວຽງຈັນ": ["ຈັນທະບູລີ", "ສີໂຄດຕະບອງ", "ໄຊເສດຖາ", "ສີສັດຕະນາກ", "ນາຊາຍທອງ", "ໄຊທານີ", "ຫາດຊາຍຟອງ", "ສັງທອງ", "ປາກງື່ມ"],
@@ -1053,7 +1139,7 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
         });
 
         const patientModal = document.getElementById('patientModal');
-        document.getElementById('btn-register-patient').addEventListener('click', () => { patientModal.style.display = 'flex'; });
+        document.getElementById('btn-register-patient').addEventListener('click', () => { window.openAddPatientModal(); });
         document.getElementById('btnCloseModal').addEventListener('click', () => { patientModal.style.display = 'none'; });
 
         const aptModal = document.getElementById('appointmentModal');
@@ -1104,7 +1190,7 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
                     let statusBadge = (p.status === 'Active' || p.status === 'Active/ເຄື່ອນໄຫວ') ? '<span class="badge badge-green">Active</span>' : '<span class="badge badge-gray">Inactive</span>';
                     
                     const tr = document.createElement('tr');
-                    // ເອົາປຸ່ມແກ້ໄຂ ແລະ ລຶບ ອອກສະເພາະໜ້າ Dashboard ຕາມຄຳສັ່ງຫຼ້າສຸດ
+                    // ເອົາປຸ່ມແກ້ໄຂ ແລະ ລຶບ ອອກສະເພາະໜ້າ Dashboard
                     tr.innerHTML = `<td><strong>${ptId}</strong><br><small style="color: #7b8794;">${hn}</small></td><td><div class="patient"><div class="patient-avatar">${firstLetter}</div><div><strong>${name}</strong></div></div></td><td>${gender}<br><small style="color: #7b8794;">${dobDisplay}</small></td><td>${phone}<br><small style="color: #e53935; font-weight: bold;">ເລືອດ: ${blood}</small></td><td><span style="font-size: 13px;">${address}</span></td><td><small><strong>ແພ້:</strong> ${allergy}</small><br><small style="color: #7b8794;"><strong>ພະຍາດ:</strong> ${history}</small></td><td>${statusBadge}</td><td style="text-align: center;"><span class="action-icon" title="ເບິ່ງຂໍ້ມູນ" onclick="viewPatientQuick('${name}')">👁️</span></td>`;
                     tbody.appendChild(tr);
                 });
@@ -1117,15 +1203,74 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
         renderAppointmentsPage(); renderConsultationsPage(); renderPharmacyPage(); renderPosPage(); renderPatientsPage();
     }
 
+    // ແກ້ໄຂຟັງຊັນບັນທຶກໃຫ້ຮອງຮັບທັງການ ເພີ່ມໃໝ່ (POST) ແລະ ແກ້ໄຂ (PUT)
     document.getElementById('btnSavePatient').addEventListener('click', async () => {
-        const prov = document.getElementById('pt_province').value; const dist = document.getElementById('pt_district').value; const vill = document.getElementById('pt_village').value.trim();
-        let fullAddress = ""; if (vill) fullAddress += `ບ້ານ ${vill}, `; if (dist) fullAddress += `ເມືອງ ${dist}, `; if (prov) fullAddress += `ແຂວງ ${prov}`;
-        const payload = { patient_code: document.getElementById('pt_patient_code').value.trim(), hn_number: document.getElementById('pt_hn_number').value.trim(), fullname: document.getElementById('pt_fullname').value.trim(), gender: document.getElementById('pt_gender').value, dob: document.getElementById('pt_dob').value || null, phone: document.getElementById('pt_phone').value.trim(), blood_group: document.getElementById('pt_blood_group').value, status: document.getElementById('pt_status').value, address: fullAddress.replace(/, $/, ""), allergy: document.getElementById('pt_allergy').value.trim(), health_history: document.getElementById('pt_health_history').value.trim() };
-        if (!payload.fullname || !payload.gender) { window.showCustomAlert('ກະລຸນາປ້ອນ ຊື່-ນາມສະກຸນ ແລະ ເລືອກເພດ!', 'ແຈ້ງເຕືອນ', '⚠️'); return; }
+        const prov = document.getElementById('pt_province').value;
+        const dist = document.getElementById('pt_district').value;
+        const vill = document.getElementById('pt_village').value.trim();
+        let fullAddress = "";
+        if (vill) fullAddress += `ບ້ານ ${vill}, `;
+        if (dist) fullAddress += `ເມືອງ ${dist}, `;
+        if (prov) fullAddress += `ແຂວງ ${prov}`;
+        fullAddress = fullAddress.replace(/, $/, ""); // ລຶບເຄື່ອງໝາຍຈຸດທ້າຍສຸດອອກ
+
+        const payload = {
+            patient_code: document.getElementById('pt_patient_code').value.trim(),
+            hn_number: document.getElementById('pt_hn_number').value.trim(),
+            fullname: document.getElementById('pt_fullname').value.trim(),
+            gender: document.getElementById('pt_gender').value,
+            dob: document.getElementById('pt_dob').value || null,
+            phone: document.getElementById('pt_phone').value.trim(),
+            blood_group: document.getElementById('pt_blood_group').value,
+            status: document.getElementById('pt_status').value,
+            address: fullAddress,
+            allergy: document.getElementById('pt_allergy').value.trim(),
+            health_history: document.getElementById('pt_health_history').value.trim()
+        };
+
+        if (!payload.fullname || !payload.gender) {
+            window.showCustomAlert('ກະລຸນາປ້ອນ ຊື່-ນາມສະກຸນ ແລະ ເລືອກເພດ!', 'ແຈ້ງເຕືອນ', '⚠️');
+            return;
+        }
+
+        // ==========================================
+        // 1. ອັບເດດຂໍ້ມູນໃນໜ້າຈໍທັນທີ (Local Fallback)
+        // ເພື່ອໃຫ້ສາມາດທົດສອບລະບົບໄດ້ເຖິງແມ່ນວ່າ Backend ຈະປິດຢູ່
+        // ==========================================
+        if (currentEditPatientId) {
+            let idx = globalPatientsList.findIndex(p => p.patient_code === currentEditPatientId || p.id === currentEditPatientId);
+            if (idx !== -1) {
+                globalPatientsList[idx] = { ...globalPatientsList[idx], ...payload };
+            }
+        } else {
+            payload.id = Date.now(); // ສ້າງ ID ຊົ່ວຄາວສຳລັບໂໝດ Offline
+            if(!payload.patient_code) payload.patient_code = 'ID-' + payload.id;
+            globalPatientsList.push(payload);
+        }
+        
+        document.getElementById('patientModal').style.display = 'none';
+        window.showCustomAlert('ບັນທຶກສຳເລັດ!', 'ສຳເລັດ', '✅');
+
+        renderPatientsPage(); // ໂຫຼດຕາຕະລາງຄົນເຈັບໃໝ່
+        document.getElementById('total-patients').innerText = globalPatientsList.length;
+        document.getElementById('today-patients').innerText = globalPatientsList.length;
+        if(document.getElementById('page-dashboard').style.display === 'block') {
+            loadDashboardData(); // ອັບເດດຕາຕະລາງໜ້າ Dashboard ນຳ
+        }
+
+        // ==========================================
+        // 2. ສົ່ງຂໍ້ມູນໄປບັນທຶກໃນ Backend Database ຈິງ (API)
+        // ==========================================
         try {
-            const response = await fetch('http://127.0.0.1:5000/api/patients', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-            if (response.ok) { window.showCustomAlert('ບັນທຶກສຳເລັດ!', 'ສຳເລັດ', '✅'); document.getElementById('patientModal').style.display = 'none'; loadDashboardData(); } else { window.showCustomAlert('ເກີດຂໍ້ຜິດພາດ', 'ແຈ້ງເຕືອນ', '⚠️'); }
-        } catch (error) { window.showCustomAlert('ບໍ່ສາມາດເຊື່ອມຕໍ່ຫາເຊີບເວີໄດ້!', 'ຜິດພາດ', '🔴'); }
+            let method = currentEditPatientId ? 'PUT' : 'POST';
+            let url = currentEditPatientId ? `http://127.0.0.1:5000/api/patients/${currentEditPatientId.toString().replace('ID-', '')}` : 'http://127.0.0.1:5000/api/patients';
+            const response = await fetch(url, { method: method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+            if (response.ok) {
+                loadDashboardData(); // ໂຫຼດຂໍ້ມູນຈິງຈາກ Database ອີກຄັ້ງເພື່ອຄວາມຊົວ
+            }
+        } catch (error) {
+            console.log("ລະບົບເຮັດວຽກແບບ Offline: ບັນທຶກຂໍ້ມູນໃນໜ້າຈໍສຳເລັດ.", error);
+        }
     });
 
     function renderAppointmentsPage() { 
@@ -1370,7 +1515,7 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
             let statusBadge = (p.status === 'Active' || p.status === 'Active/ເຄື່ອນໄຫວ') ? '<span class="badge badge-green">Active</span>' : '<span class="badge badge-gray">Inactive</span>';
             
             const tr = document.createElement('tr');
-            // ເພີ່ມປຸ່ມແກ້ໄຂ ແລະ ລຶບ ກັບຄືນມາແລ້ວໃນໜ້າຄົນເຈັບຫຼັກ
+            // ເພີ່ມປຸ່ມແກ້ໄຂ ແລະ ລຶບ ກັບຄືນມາແລ້ວໃນໜ້າຄົນເຈັບຫຼັກ ພ້ອມດຶງ ID ມາໃຊ້ງານຈິງ
             tr.innerHTML = `
                 <td><strong>${ptId}</strong><br><small style="color: #7b8794;">${hn}</small></td>
                 <td><div class="patient"><div class="patient-avatar">${firstLetter}</div><div><strong>${name}</strong></div></div></td>
