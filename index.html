@@ -422,8 +422,6 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
                     <input type="date" class="filter-input">
                     <select class="filter-input">
                         <option value="">👨‍⚕️ ເລືອກແພດທັງໝົດ</option>
-                        <option>ດຣ. ສົມພອນ</option>
-                        <option>ດຣ. ໃຈດີ</option>
                     </select>
                     <select class="filter-input">
                         <option value="">📊 ສະຖານະທັງໝົດ</option>
@@ -483,9 +481,6 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
                     <input type="date" class="filter-input">
                     <select class="filter-input">
                         <option value="">👨‍⚕️ ແພດທັງໝົດ</option>
-                        <option>ດຣ. ສົມພອນ</option>
-                        <option>ດຣ. ໃຈດີ</option>
-                        <option>ດຣ. ວິໄລ</option>
                     </select>
                     <select class="filter-input">
                         <option value="">📌 ສະຖານະທັງໝົດ</option>
@@ -777,9 +772,6 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
                     <input type="date" class="filter-input">
                     <select class="filter-input">
                         <option value="">👨‍⚕️ ແພດທັງໝົດ</option>
-                        <option>ດຣ. ສົມພອນ</option>
-                        <option>ດຣ. ໃຈດີ</option>
-                        <option>ດຣ. ວິໄລ</option>
                     </select>
                     <select class="filter-input">
                         <option value="">💊 ສະຖານະທັງໝົດ</option>
@@ -908,8 +900,6 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
                     <input type="date" class="filter-input">
                     <select class="filter-input">
                         <option value="">👨‍⚕️ ແພດທັງໝົດ</option>
-                        <option>ດຣ. ສົມພອນ</option>
-                        <option>ດຣ. ໃຈດີ</option>
                     </select>
                     <select class="filter-input">
                         <option value="">📌 ສະຖານະທັງໝົດ</option>
@@ -1056,7 +1046,17 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
             <div class="form-group"><label>ເບີໂທຕິດຕໍ່ (Auto)</label><input type="text" id="apt_phone" placeholder="020 xxxx xxxx"></div>
             <div class="form-group"><label>📅 ວັນທີນັດ *</label><input type="date" id="apt_date"></div>
             <div class="form-group"><label>🕐 ເວລາ *</label><input type="time" id="apt_time"></div>
-            <div class="form-group"><label>👨‍⚕️ ແພດຜູ້ກວດ</label><select id="apt_doctor"><option value="">-- ເລືອກແພດ --</option><option value="ດຣ. ສົມພອນ">ດຣ. ສົມພອນ</option><option value="ດຣ. ໃຈດີ">ດຣ. ໃຈດີ</option><option value="ດຣ. ວິໄລ">ດຣ. ວິໄລ</option></select></div>
+
+            <div class="form-group">
+                <label style="display: flex; justify-content: space-between; align-items: center;">
+                    👨‍⚕️ ແພດຜູ້ກວດ 
+                    <button type="button" style="background: #e3f2fd; color: #1976d2; border: 1px solid #90caf9; border-radius: 4px; padding: 2px 6px; font-size: 11px; cursor: pointer; font-weight: bold;" onclick="openAddDoctorModal()">+ ເພີ່ມແພດໃໝ່</button>
+                </label>
+                <select id="apt_doctor" class="dynamic-doctor-select">
+                    <option value="">-- ເລືອກແພດ --</option>
+                </select>
+            </div>
+        
             <div class="form-group"><label>🏥 ພະແນກ/ຫ້ອງ</label><select id="apt_department"><option value="ຫ້ອງກວດທົ່ວໄປ (Room 1)">ຫ້ອງກວດທົ່ວໄປ (Room 1)</option><option value="ຫ້ອງທັນຕະກຳ (Room 2)">ຫ້ອງທັນຕະກຳ (Room 2)</option><option value="ຫ້ອງກວດພິເສດ (Room 3)">ຫ້ອງກວດພິເສດ (Room 3)</option></select></div>
         </div>
         <div class="form-group" style="margin-top: 15px;"><label>ເຫດຜົນການນັດ</label><input type="text" id="apt_reason" placeholder="ຕົວຢ່າງ: ກວດທົ່ວໄປ, ນັດຕິດຕາມອາການ, ຕັດໄໝ..."></div>
@@ -1071,7 +1071,17 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
         <div class="form-group"><label>🔍 ຄົ້ນຫາ/ເລືອກ ຄົນເຈັບ *</label><select id="cst1_patient" onchange="autoFillConsultationPatient()"><option value="">-- ເລືອກຄົນເຈັບ --</option></select></div>
         <div class="info-box" id="cst1_patient_info"><p>ເລກຄົນເຈັບ: <span id="cst1_pt_code">-</span></p><p>ຊື່: <span id="cst1_pt_name">-</span></p><p>ອາຍຸ: <span id="cst1_pt_age">-</span> / ເພດ: <span id="cst1_pt_gender">-</span></p></div>
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;"><div class="form-group"><label>📅 ວັນທີກວດ</label><input type="date" id="cst1_date" readonly style="background: #f4f7fb;"></div><div class="form-group"><label>🕐 ເວລາ</label><input type="time" id="cst1_time" readonly style="background: #f4f7fb;"></div></div>
-        <div class="form-group"><label>👨‍⚕️ ແພດຜູ້ກວດ *</label><select id="cst1_doctor"><option value="">-- ເລືອກແພດ --</option><option value="ດຣ. ສົມພອນ">ດຣ. ສົມພອນ</option><option value="ດຣ. ໃຈດີ">ດຣ. ໃຈດີ</option><option value="ດຣ. ວິໄລ">ດຣ. ວິໄລ</option></select></div>
+
+        <div class="form-group">
+            <label style="display: flex; justify-content: space-between; align-items: center;">
+                👨‍⚕️ ແພດຜູ້ກວດ *
+                <button type="button" style="background: #e3f2fd; color: #1976d2; border: 1px solid #90caf9; border-radius: 4px; padding: 2px 6px; font-size: 11px; cursor: pointer; font-weight: bold;" onclick="openAddDoctorModal()">+ ເພີ່ມແພດໃໝ່</button>
+            </label>
+            <select id="cst1_doctor" class="dynamic-doctor-select">
+                <option value="">-- ເລືອກແພດ --</option>
+            </select>
+        </div>
+
         <div class="modal-actions"><button class="btn-cancel" id="btnCloseCst1Modal">ຍົກເລີກ</button><button class="btn-submit" id="btnProceedCst1">🩺 ເປີດການກວດ</button></div>
     </div>
 </div>
@@ -1357,9 +1367,35 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
         <h3>📊 ເລືອກເງື່ອນໄຂລາຍງານ</h3>
         <div class="form-group"><label>ປະເພດລາຍງານ *</label><select id="rep_type"><option value="consultation">🩺 ລາຍງານການກວດ</option><option value="patient">👥 ລາຍງານຄົນເຈັບ</option><option value="appointment">📅 ລາຍງານນັດໝາຍ</option><option value="pharmacy">💊 ລາຍງານການຈ່າຍຢາ</option><option value="revenue">💰 ລາຍງານລາຍຮັບ (Mockup)</option><option value="pos">🧾 ລາຍງານຮອບ POS</option></select></div>
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;"><div class="form-group"><label>ຈາກວັນທີ</label><input type="date" id="rep_start_date"></div><div class="form-group"><label>ເຖິງວັນທີ</label><input type="date" id="rep_end_date"></div></div>
-        <div class="form-group"><label>ແພດຜູ້ກວດ / ຜູ້ສັ່ງ</label><select id="rep_doctor"><option value="">-- ທັງໝົດ --</option><option value="ດຣ. ສົມພອນ">ດຣ. ສົມພອນ</option><option value="ດຣ. ໃຈດີ">ດຣ. ໃຈດີ</option><option value="ດຣ. ວິໄລ">ດຣ. ວິໄລ</option></select></div>
+
+        <div class="form-group">
+            <label>ແພດຜູ້ກວດ / ຜູ້ສັ່ງ</label>
+            <select id="rep_doctor" class="dynamic-doctor-select">
+                <option value="">-- ແພດທັງໝົດ --</option>
+            </select>
+        </div>
+
         <div class="form-group"><label>ສະຖານະ</label><select id="rep_status"><option value="">-- ທັງໝົດ --</option><option value="ສຳເລັດ">ສຳເລັດ / ປິດຮອບແລ້ວ</option><option value="ລໍຖ້າ">ລໍຖ້າ / ກຳລັງດຳເນີນການ</option><option value="ຍົກເລີກ">ຍົກເລີກ</option></select></div>
         <div class="modal-actions"><button class="btn-cancel" id="btnCloseRepConfigModal">ຍົກເລີກ</button><button class="btn-submit" id="btnShowReport">📊 ສະແດງລາຍງານ</button></div>
+    </div>
+</div>
+
+<!-- ================= ADD DOCTOR MODAL (ເພີ່ມໃໝ່) ================= -->
+<div class="modal-overlay" id="addDoctorModal">
+    <div class="modal-card" style="width: 400px;">
+        <h3>👨‍⚕️ ເພີ່ມລາຍຊື່ແພດໃໝ່</h3>
+        <div class="form-group">
+            <label>ຊື່ ແລະ ນາມສະກຸນແພດ *</label>
+            <input type="text" id="new_doctor_name" placeholder="ຕົວຢ່າງ: ດຣ. ສົມໃຈ ນາມມະວົງ">
+        </div>
+        <div class="form-group">
+            <label>ຊ່ຽວຊານ/ພະແນກ (ທາງເລືອກ)</label>
+            <input type="text" id="new_doctor_specialty" placeholder="ຕົວຢ່າງ: ກວດພະຍາດທົ່ວໄປ">
+        </div>
+        <div class="modal-actions">
+            <button class="btn-cancel" onclick="document.getElementById('addDoctorModal').style.display='none'">ຍົກເລີກ</button>
+            <button class="btn-submit" onclick="saveNewDoctor()" style="background: #1976d2;">💾 ບັນທຶກລາຍຊື່</button>
+        </div>
     </div>
 </div>
 
