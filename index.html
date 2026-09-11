@@ -2295,6 +2295,147 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
         if(cstDoctorSelect) cstDoctorSelect.value = name;
     };
 
+    // ================= REPORT MODULE (ລະບົບລາຍງານ) ================= //
+    // 1. ປັບປຸງຟັງຊັນ handleShowReport ເພື່ອໃຫ້ຮຽກໃຊ້ງານການປະມວນຜົນລາຍງານ
+    window.handleShowReport = function() {
+        document.getElementById('reportConfigModal').style.display = 'none';
+        window.showCustomAlert('ກຳລັງສະຫຼຸບຂໍ້ມູນລາຍງານ...', 'ລາຍງານ', '📊', () => {
+            // ເປີດໜ້າລາຍງານ ແລະ ປະມວນຜົນ
+            document.querySelector('.menu-item[data-page="reports"]').click();
+            window.renderReportsPage(); 
+        });
+    };
+
+    // 2. ຟັງຊັນຫຼັກໃນການດຶງຂໍ້ມູນມາສະແດງໃນໜ້າລາຍງານ
+    window.renderReportsPage = function() {
+        // ດຶງຄ່າຈາກຟອມເງື່ອນໄຂ
+        const repType = document.getElementById('rep_type').value;
+        const startDate = document.getElementById('rep_start_date').value;
+        const endDate = document.getElementById('rep_end_date').value;
+        const doctorFilter = document.getElementById('rep_doctor').value;
+        const statusFilter = document.getElementById('rep_status').value;
+
+        // ອັບເດດຫົວຂໍ້ໜ້າລາຍງານ
+        const typeSelect = document.getElementById('rep_type');
+        document.getElementById('rep_title_display').innerText = `📊 ລາຍງານ: ${typeSelect.options[typeSelect.selectedIndex].text}`;
+        
+        let dateDisplay = 'ຂໍ້ມູນທັງໝົດ (ບໍ່ໄດ້ກຳນົດວັນທີ)';
+        if (startDate && endDate) dateDisplay = `ຕັ້ງແຕ່ວັນທີ: ${startDate} ຫາ ${endDate}`;
+        else if (startDate) dateDisplay = `ຕັ້ງແຕ່ວັນທີ: ${startDate} ເປັນຕົ້ນໄປ`;
+        else if (endDate) dateDisplay = `ຈົນເຖິງວັນທີ: ${endDate}`;
+        document.getElementById('rep_date_display').innerText = dateDisplay;
+
+        // ດຶງຂໍ້ມູນທັງໝົດຈາກ LocalStorage
+        let patients = JSON.parse(localStorage.getItem('clinic_local_patients')) || globalPatientsList || [];
+        let visits = JSON.parse(localStorage.getItem('clinic_visits')) || [];
+        let appointments = JSON.parse(localStorage.getItem('clinic_appointments')) || [];
+        let rxs = JSON.parse(localStorage.getItem('clinic_prescriptions')) || [];
+        let payments = JSON.parse(localStorage.getItem('clinic_payments')) || []; // Mockup ລາຍຮັບ
+        
+        // ອັບເດດ Stats ລວມດ້ານເທິງ (ຄິດໄລ່ສະເພາະຊ່ວງວັນທີທີ່ເລືອກ)
+        const isDateInRange = (dateStr) => {
+            if (!dateStr) return false;
+            let d = new Date(dateStr).getTime();
+            let s = startDate ? new Date(startDate).getTime() : 0;
+            let e = endDate ? new Date(endDate).getTime() : Infinity;
+            return d >= s && d <= e;
+        };
+
+        let statPats = patients.length; 
+        let statVisits = visits.filter(v => (!startDate && !endDate) || isDateInRange(v.date)).length;
+        let statApts = appointments.filter(a => (!startDate && !endDate) || isDateInRange(a.appointment_date)).length;
+        let statRxs = rxs.filter(r => (!startDate && !endDate) || isDateInRange(r.date)).length;
+        
+        // ສົມມຸດຕິຖານລາຍຮັບ: ເອົາຈາກ payments ບວກກັບການຈ່າຍຢາ (ສົມມຸດບິນລະ 50,000 ກີບ ສຳລັບຂໍ້ມູນ Mockup)
+        let statRev = payments.reduce((sum, p) => sum + Number(p.amount || 0), 0);
+        statRev += (statRxs * 50000); 
+
+        document.getElementById('rep-stat-patients').innerText = statPats.toLocaleString();
+        document.getElementById('rep-stat-consults').innerText = statVisits.toLocaleString();
+        document.getElementById('rep-stat-apts').innerText = statApts.toLocaleString();
+        document.getElementById('rep-stat-rxs').innerText = statRxs.toLocaleString();
+        document.getElementById('rep-stat-revenue').innerText = statRev.toLocaleString() + ' ₭';
+
+        // ກະກຽມຕາຕະລາງ
+        const thead = document.getElementById('report-thead-tr');
+        const tbody = document.getElementById('report-tbody');
+        thead.innerHTML = '';
+        tbody.innerHTML = '';
+
+        let filteredData = [];
+
+        // ----------------------------------------------------
+        // ແຍກການປະມວນຜົນຕາມປະເພດລາຍງານ
+        // ----------------------------------------------------
+        
+        if (repType === 'consultation') {
+            thead.innerHTML = `<th>Visit ID</th><th>ວັນທີ</th><th>ຄົນເຈັບ</th><th>ແພດຜູ້ກວດ</th><th>ການວິນິດໄສ</th><th>ສະຖານະ</th>`;
+            filteredData = visits.filter(v => {
+                let mDate = (!startDate && !endDate) || isDateInRange(v.date);
+                let mDoc = !doctorFilter || v.doctor === doctorFilter;
+                let mStat = !statusFilter || v.status.includes(statusFilter);
+                return mDate && mDoc && mStat;
+            });
+            if (filteredData.length === 0) tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;">ບໍ່ພົບຂໍ້ມູນການກວດໃນເງື່ອນໄຂນີ້</td></tr>`;
+            filteredData.forEach(v => {
+                let tr = document.createElement('tr');
+                tr.innerHTML = `<td><strong>${v.visit_id}</strong></td><td>${v.date}</td><td>${v.patient_name}</td><td>${v.doctor}</td><td>${v.diagnosis || v.symptoms || '-'}</td><td><span class="badge ${v.status.includes('ສຳເລັດ') ? 'badge-green' : 'badge-yellow'}">${v.status}</span></td>`;
+                tbody.appendChild(tr);
+            });
+        } 
+        
+        else if (repType === 'pharmacy') {
+            thead.innerHTML = `<th>ເລກໃບຢາ</th><th>ວັນທີ</th><th>ຄົນເຈັບ</th><th>ແພດຜູ້ສັ່ງ</th><th>ຈຳນວນລາຍການຢາ</th><th>ສະຖານະ</th>`;
+            filteredData = rxs.filter(r => {
+                let mDate = (!startDate && !endDate) || isDateInRange(r.date);
+                let mDoc = !doctorFilter || r.doctor === doctorFilter;
+                let mStat = !statusFilter || r.status.includes(statusFilter);
+                return mDate && mDoc && mStat;
+            });
+            if (filteredData.length === 0) tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;">ບໍ່ພົບຂໍ້ມູນການຈ່າຍຢາໃນເງື່ອນໄຂນີ້</td></tr>`;
+            filteredData.forEach(r => {
+                let tr = document.createElement('tr');
+                let itemsCount = r.items ? r.items.length : 0;
+                tr.innerHTML = `<td><strong>${r.rx_no}</strong></td><td>${r.date}</td><td>${r.patient_name}</td><td>${r.doctor}</td><td style="text-align:center; font-weight:bold;">${itemsCount}</td><td><span class="badge ${r.status.includes('ສຳເລັດ') || r.status.includes('ຈ່າຍແລ້ວ') ? 'badge-green' : 'badge-yellow'}">${r.status}</span></td>`;
+                tbody.appendChild(tr);
+            });
+        }
+
+        else if (repType === 'revenue') {
+            thead.innerHTML = `<th>ວັນທີ / ເວລາ</th><th>ລາຍການ / ລາຍລະອຽດ</th><th>Visit ID ອ້າງອີງ</th><th>ຈຳນວນເງິນ (ກີບ)</th>`;
+            // Mockup Revenue data integration
+            filteredData = payments; // In real system, this would filter by date
+            if (filteredData.length === 0) tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;">ບໍ່ພົບຂໍ້ມູນລາຍຮັບໃນເງື່ອນໄຂນີ້</td></tr>`;
+            let totalTableRev = 0;
+            filteredData.forEach(p => {
+                totalTableRev += Number(p.amount);
+                let tr = document.createElement('tr');
+                tr.innerHTML = `<td>${new Date().toLocaleDateString('en-GB')}</td><td>${p.desc || 'ບໍລິການ/ຄ່າຢາ'}</td><td>${p.visit_id || '-'}</td><td style="color:#16864b; font-weight:bold; text-align:right;">${Number(p.amount).toLocaleString()} ₭</td>`;
+                tbody.appendChild(tr);
+            });
+            // ແຖວສະຫຼຸບຍອດລວມ
+            let trTotal = document.createElement('tr');
+            trTotal.style.background = '#e3f2fd';
+            trTotal.innerHTML = `<td colspan="3" style="text-align:right; font-weight:bold;">ລວມລາຍຮັບທັງໝົດໃນຕາຕະລາງ:</td><td style="color:#1976d2; font-weight:bold; text-align:right; font-size:16px;">${totalTableRev.toLocaleString()} ₭</td>`;
+            tbody.appendChild(trTotal);
+        }
+
+        else if (repType === 'patient') {
+            thead.innerHTML = `<th>Patient ID</th><th>ຊື່ ແລະ ນາມສະກຸນ</th><th>ເພດ</th><th>ເບີໂທ</th><th>ທີ່ຢູ່</th><th>ສະຖານະ</th>`;
+            filteredData = patients;
+            if (filteredData.length === 0) tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;">ບໍ່ພົບຂໍ້ມູນຄົນເຈັບ</td></tr>`;
+            filteredData.forEach(p => {
+                let tr = document.createElement('tr');
+                tr.innerHTML = `<td><strong>${p.patient_code || ('ID-'+p.id)}</strong></td><td>${p.fullname}</td><td>${p.gender}</td><td>${p.phone}</td><td>${p.address}</td><td><span class="badge ${p.status === 'Active' ? 'badge-green' : 'badge-gray'}">${p.status}</span></td>`;
+                tbody.appendChild(tr);
+            });
+        }
+        
+        else {
+            // Default Fallback
+            tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:20px;">ເລືອກເງື່ອນໄຂແລ້ວກົດ "ສະແດງລາຍງານ" ເພື່ອເບິ່ງຂໍ້ມູນ</td></tr>`;
+        }
+    };
 </script>
 </body>
 </html>
