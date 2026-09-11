@@ -1740,7 +1740,29 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
     });
 
     // ================= OTHER UNCHANGED FUNCTIONS ================= //
-    function updateDistricts() { const provSelect = document.getElementById('pt_province'); const distSelect = document.getElementById('pt_district'); const selectedProv = provSelect.value; distSelect.innerHTML = '<option value="">-- ເລືອກເມືອງ --</option>'; if (selectedProv && districtsByProvince[selectedProv]) { districtsByProvince[selectedProv].forEach(dist => { const option = document.createElement('option'); option.value = dist; option.textContent = dist; distSelect.appendChild(option); }); } }
+    // ປະກາດຂໍ້ມູນແຂວງ ແລະ ເມືອງ
+    const districtsByProvince = {
+        "ນະຄອນຫຼວງວຽງຈັນ": ["ຈັນທະບູລີ", "ສີໂຄດຕະບອງ", "ໄຊເສດຖາ", "ສີສັດຕະນາກ", "ນາຊາຍທອງ", "ໄຊທານີ", "ຫາດຊາຍຟອງ", "ສັງທອງ", "ປາກງື່ມ"],
+        "ໄຊຍະບູລີ": ["ໄຊຍະບູລີ", "ຄອບ", "ຫົງສາ", "ເງິນ", "ຊຽງຮ່ອນ", "ພຽງ", "ປາກລາຍ", "ແກ່ນທ້າວ", "ບໍ່ແຕນ", "ທົ່ງມີໄຊ", "ໄຊສະຖານ"]
+    };
+
+    // ຟັງຊັນອັບເດດເມືອງ
+    function updateDistricts() { 
+        const provSelect = document.getElementById('pt_province'); 
+        const distSelect = document.getElementById('pt_district'); 
+        const selectedProv = provSelect.value; 
+        
+        distSelect.innerHTML = '<option value="">-- ເລືອກເມືອງ --</option>'; 
+        
+        if (selectedProv && districtsByProvince[selectedProv]) { 
+            districtsByProvince[selectedProv].forEach(dist => { 
+                const option = document.createElement('option'); 
+                option.value = dist; 
+                option.textContent = dist; 
+                distSelect.appendChild(option); 
+            }); 
+        } 
+    }
     function autoFillPhone() { const selectedPatient = document.getElementById('apt_patient').value; const phoneInput = document.getElementById('apt_phone'); phoneInput.value = ''; if(selectedPatient) { const patient = globalPatientsList.find(p => p.fullname === selectedPatient); if(patient && patient.phone) { phoneInput.value = patient.phone; } } }
     function calculateAge(dobString) { if(!dobString) return 'ບໍ່ລະບຸ'; const dob = new Date(dobString); if(isNaN(dob.getTime())) return 'ບໍ່ລະບຸ'; return Math.abs(new Date(Date.now() - dob.getTime()).getUTCFullYear() - 1970) + ' ປີ'; }
     function populateConsultationPatientDropdown() { const cstSelect = document.getElementById('cst1_patient'); cstSelect.innerHTML = '<option value="">-- ເລືອກຄົນເຈັບ --</option>'; globalPatientsList.forEach(p => { cstSelect.innerHTML += `<option value="${p.fullname}">${p.fullname} (${p.patient_code || 'ID-'+p.id})</option>`; }); }
