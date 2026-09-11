@@ -268,7 +268,7 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
                 <div>
                     <div class="stat-label">ລາຍຮັບມື້ນີ້</div>
                     <div class="stat-number" id="total-revenue">0 ₭</div>
-                    <div class="stat-growth up">▲ ຈາກ LocalStorage</div>
+                    <div class="stat-growth up">▲ ຈາກການປ້ອນຂໍ້ມູນເອງ</div>
                 </div>
                 <div class="stat-icon" style="background:#f1eaff;">💰</div>
             </div>
@@ -334,11 +334,14 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
                 <div class="card-header">
                     <h3>💵 ລາຍຮັບມື້ນີ້</h3><button onclick="showCustomAlert('ເປີດໜ້າລາຍງານການເງິນ', 'ລາຍຮັບ', '💵')">ເບິ່ງລາຍລະອຽດ</button>
                 </div>
-                <div class="revenue-box">
-                    <div class="revenue-label">ລາຍຮັບລວມຈາກ LocalStorage</div>
-                    <div class="revenue-number" id="revenue-box-display">0 ₭</div>
-                    <div class="revenue-label">ຄ່າກວດ + ຢາ + Lab + ບໍລິການ</div>
+            <div class="revenue-box">
+                <div class="revenue-label">ປ້ອນລາຍຮັບມື້ນີ້ (ກີບ)</div>
+                <div style="margin: 10px 0;">
+                    <input type="number" id="manual-revenue-input" placeholder="0" style="font-size: 22px; font-weight: 800; color: #1976d2; text-align: center; padding: 10px; border: 1px solid #ccc; border-radius: 8px; width: 100%; box-sizing: border-box; font-family: inherit;">
                 </div>
+                <button class="btn-submit" style="width: 100%; margin-bottom: 10px; font-size: 15px; padding: 10px;" onclick="saveManualRevenue()">💾 ບັນທຶກລາຍຮັບ</button>
+                <div class="revenue-label">ຄ່າກວດ + ຢາ + Lab + ບໍລິການ</div>
+            </div>
             </div>
         </div>
     </section>
@@ -2284,10 +2287,10 @@ window.showCustomAlert = function(message, title = "ແຈ້ງເຕືອນ"
             let appointments = JSON.parse(localStorage.getItem('clinic_appointments')) || []; 
             if(document.getElementById('total-appointments')) document.getElementById('total-appointments').innerText = appointments.length;
             
-            let payments = JSON.parse(localStorage.getItem('clinic_payments')) || []; 
-            let totalRevenue = payments.reduce((sum, item) => sum + Number(item.amount || 0), 0);
-            if(document.getElementById('total-revenue')) document.getElementById('total-revenue').innerText = totalRevenue.toLocaleString() + ' ₭'; 
-            if(document.getElementById('revenue-box-display')) document.getElementById('revenue-box-display').innerText = totalRevenue.toLocaleString() + ' ₭';
+            // ດຶງຄ່າລາຍຮັບທີ່ປ້ອນເອງຈາກ LocalStorage (ເອົາລະບົບຄິດໄລ່ອັດຕະໂນມັດອອກຕາມຮ້ອງຂໍ)
+            let manualRevenue = localStorage.getItem('manual_today_revenue') || 0; 
+            if(document.getElementById('total-revenue')) document.getElementById('total-revenue').innerText = Number(manualRevenue).toLocaleString() + ' ₭';
+            if(document.getElementById('manual-revenue-input')) document.getElementById('manual-revenue-input').value = manualRevenue;
             
             if(typeof renderAppointmentsPage === 'function') renderAppointmentsPage(); 
             if(typeof renderConsultationsPage === 'function') renderConsultationsPage(); 
@@ -2454,6 +2457,23 @@ window.showCustomAlert = function(message, title = "ແຈ້ງເຕືອນ"
         loadDashboardData();
         checkInventoryAlerts(); 
     });
+
+    // ຟັງຊັນສຳລັບບັນທຶກລາຍຮັບທີ່ປ້ອນເອງ
+    window.saveManualRevenue = function() {
+        let inputVal = document.getElementById('manual-revenue-input').value;
+        let revenue = Number(inputVal) || 0;
+        
+        // ບັນທຶກລົງໃນ LocalStorage
+        localStorage.setItem('manual_today_revenue', revenue);
+        
+        // ອັບເດດຕົວເລກໄປສະແດງຢູ່ກ່ອງດ້ານເທິງຂວາ
+        if(document.getElementById('total-revenue')) {
+            document.getElementById('total-revenue').innerText = revenue.toLocaleString() + ' ₭';
+        }
+        
+        // ສະແດງຂໍ້ຄວາມແຈ້ງເຕືອນວ່າສຳເລັດ
+        window.showCustomAlert('ບັນທຶກຍອດລາຍຮັບມື້ນີ້ ສຳເລັດແລ້ວ!', 'ສຳເລັດ', '✅');
+    };
 
     // ================= INVENTORY LOGIC ================= //
     function checkInventoryAlerts() {
