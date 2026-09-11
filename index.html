@@ -936,7 +936,89 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
     </section>
 </main>
 
-<!-- ================= ALL MODALS ================= -->
+<!-- ================= ALL MODALS (ແກ້ໄຂເພີ່ມ Modal ທີ່ຂາດຫາຍໄປ) ================= -->
+
+<!-- 1. PHARMACY MODAL (ເພີ່ມໃໝ່) -->
+<div class="modal-overlay" id="pharmacyModal">
+    <div class="modal-card large">
+        <h3>💊 ສັ່ງຢາ / ຈ່າຍຢາ (Prescription)</h3>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+            <div class="form-group"><label>ເລກໃບຢາ</label><input type="text" id="rx_no" readonly style="background: #f4f7fb; font-weight: bold;"></div>
+            <div class="form-group"><label>Visit ID (ການກວດ) *</label><input type="text" id="rx_visit" placeholder="ປ້ອນ Visit ID"></div>
+            <div class="form-group"><label>ສະຖານະ</label><select id="rx_status"><option value="🟡 ລໍຖ້າຈ່າຍ">🟡 ລໍຖ້າຈ່າຍ</option><option value="🟢 ຈ່າຍແລ້ວ">🟢 ຈ່າຍແລ້ວ</option><option value="🔴 ຍົກເລີກ">🔴 ຍົກເລີກ</option></select></div>
+        </div>
+        <div class="form-group"><label>ຄຳແນະນຳການກິນຢາລວມ</label><input type="text" id="rx_instruction" placeholder="ຕົວຢ່າງ: ກິນຫຼັງອາຫານ 15 ນາທີ..."></div>
+        <div class="form-group"><label>ໝາຍເຫດ</label><input type="text" id="rx_note"></div>
+        
+        <div class="section-title">ລາຍການຢາ</div>
+        <div class="table-responsive" style="border: 1px solid #e8edf3; border-radius: 8px;">
+            <table class="med-table">
+                <thead>
+                    <tr><th>ຊື່ຢາ *</th><th>ຄວາມແຮງ</th><th>ຈຳນວນ *</th><th>ໜ່ວຍ</th><th>ວິທີໃຊ້</th><th>ຄວາມຖີ່</th><th>ຈຳນວນວັນ</th></tr>
+                </thead>
+                <tbody id="rx_med_body">
+                    <tr>
+                        <td><input type="text" class="med-name" placeholder="ຊື່ຢາ"></td>
+                        <td><input type="text" class="med-strength" placeholder="500mg"></td>
+                        <td><input type="number" class="med-qty" value="1"></td>
+                        <td><input type="text" class="med-unit" placeholder="ເມັດ"></td>
+                        <td><input type="text" class="med-usage" placeholder="ກິນ"></td>
+                        <td><input type="text" class="med-freq" placeholder="ເຊົ້າ-ແລງ"></td>
+                        <td><input type="number" class="med-days" placeholder="ວັນ"></td>
+                    </tr>
+                </tbody>
+            </table>
+            <div style="padding: 10px; text-align: center; background: #f9fbfd;"><button class="btn-action" style="background: #e2e8f0; color: #333;" onclick="addRxRow()">+ ເພີ່ມລາຍການຢາ</button></div>
+        </div>
+        
+        <div class="modal-actions">
+            <button class="btn-cancel" id="btnClosePharmacyModal">ຍົກເລີກ</button>
+            <button class="btn-submit" id="btnSavePharmacy">💾 ບັນທຶກໃບຢາ</button>
+        </div>
+    </div>
+</div>
+
+<!-- 2. POS OPEN MODAL (ເພີ່ມໃໝ່) -->
+<div class="modal-overlay" id="posOpenModal">
+    <div class="modal-card">
+        <h3>💰 ເປີດຮອບຮັບເງິນ (Open POS Session)</h3>
+        <div class="form-group"><label>ຜູ້ເປີດຮອບ</label><input type="text" id="pos_open_user" readonly style="background: #f4f7fb;"></div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+            <div class="form-group"><label>ວັນທີ</label><input type="date" id="pos_open_date" readonly style="background: #f4f7fb;"></div>
+            <div class="form-group"><label>ເວລາ</label><input type="time" id="pos_open_time" readonly style="background: #f4f7fb;"></div>
+        </div>
+        <div class="form-group"><label>ເງິນທອນເລີ່ມຕົ້ນ / Float (ກີບ) *</label><input type="number" id="pos_open_float" value="0"></div>
+        <div class="form-group"><label>ໝາຍເຫດ</label><input type="text" id="pos_open_note"></div>
+        <div class="modal-actions">
+            <button class="btn-cancel" id="btnClosePosOpenModal">ຍົກເລີກ</button>
+            <button class="btn-submit" onclick="savePosOpen()" style="background: #16864b;">🟢 ເປີດ POS</button>
+        </div>
+    </div>
+</div>
+
+<!-- 3. POS CLOSE MODAL (ເພີ່ມໃໝ່) -->
+<div class="modal-overlay" id="posCloseModal">
+    <div class="modal-card">
+        <h3>🔒 ປິດຮອບ (Close POS Session)</h3>
+        <p style="margin-bottom: 20px;">ລະບົບກຳລັງສະຫຼຸບຍອດການຂາຍ...</p>
+        <div class="modal-actions">
+            <button class="btn-cancel" id="btnClosePosCloseModal">ຍົກເລີກ</button>
+            <button class="btn-submit" style="background: #d32f2f;" onclick="savePosClose()">🔒 ຢືນຢັນການປິດຮອບ</button>
+        </div>
+    </div>
+</div>
+
+<!-- 4. POS DETAIL MODAL (ເພີ່ມໃໝ່) -->
+<div class="modal-overlay" id="posDetailModal">
+    <div class="modal-card">
+        <h3>🧾 ລາຍລະອຽດຮອບຂາຍ</h3>
+        <div class="modal-actions">
+            <button class="btn-cancel" id="btnClosePosDetailModal">ປິດ</button>
+        </div>
+    </div>
+</div>
+
+<!-- Modals ທີ່ເຫຼືອ (ຂອງເດີມ) -->
 <div class="modal-overlay" id="patientModal">
     <div class="modal-card large">
         <h3>+ ເພີ່ມຄົນເຈັບ</h3>
@@ -1283,6 +1365,96 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
 
 <!-- ================= JAVASCRIPT ================= -->
 <script>
+    // ================= [ ເພີ່ມເຕີມ ] ຟັງຊັນທີ່ຫາຍໄປ ໃຫ້ສົມບູນ ================= //
+    
+    // 1. ເປີດ Modal ລົງທະບຽນຄົນເຈັບ
+    window.openAddPatientModal = function() {
+        currentEditPatientId = null;
+        const dateStr = new Date().toISOString().slice(2, 10).replace(/-/g, ''); 
+        const randomNum = Math.floor(Math.random() * 9000) + 1000; 
+        document.getElementById('pt_patient_code').value = `PT-${dateStr}${randomNum}`;
+        document.getElementById('pt_hn_number').value = '';
+        document.getElementById('pt_fullname').value = '';
+        document.getElementById('pt_gender').value = '';
+        document.getElementById('pt_dob').value = '';
+        document.getElementById('pt_phone').value = '';
+        document.getElementById('pt_blood_group').value = '';
+        document.getElementById('pt_status').value = 'Active';
+        document.getElementById('pt_province').value = '';
+        document.getElementById('pt_district').innerHTML = '<option value="">-- ເລືອກເມືອງ --</option>';
+        document.getElementById('pt_village').value = '';
+        document.getElementById('pt_allergy').value = '';
+        document.getElementById('pt_health_history').value = '';
+        document.getElementById('patientModal').style.display = 'flex';
+    };
+
+    // 2. ສ້າງເລກນັດໝາຍອັດຕະໂນມັດ
+    window.generateAptNumber = function() {
+        const dateStr = new Date().toISOString().slice(2, 10).replace(/-/g, ''); 
+        const randomNum = Math.floor(Math.random() * 900) + 100;
+        document.getElementById('apt_no').value = `APT-${dateStr}-${randomNum}`;
+    };
+
+    // 3. ເປີດ Modal ຈ່າຍຢາ ພ້ອມເພີ່ມແຖວ
+    window.openPharmacyModal = function() {
+        const dateStr = new Date().toISOString().slice(2, 10).replace(/-/g, ''); 
+        const randomNum = Math.floor(Math.random() * 900) + 100;
+        document.getElementById('rx_no').value = `RX-${dateStr}-${randomNum}`;
+        document.getElementById('rx_visit').value = '';
+        document.getElementById('rx_instruction').value = '';
+        document.getElementById('rx_note').value = '';
+        document.getElementById('rx_med_body').innerHTML = `<tr><td><input type="text" class="med-name" placeholder="ຊື່ຢາ"></td><td><input type="text" class="med-strength" placeholder="500mg"></td><td><input type="number" class="med-qty" value="1"></td><td><input type="text" class="med-unit" placeholder="ເມັດ"></td><td><input type="text" class="med-usage" placeholder="ກິນ"></td><td><input type="text" class="med-freq" placeholder="ເຊົ້າ-ແລງ"></td><td><input type="number" class="med-days" placeholder="ວັນ"></td></tr>`;
+        document.getElementById('pharmacyModal').style.display = 'flex';
+    };
+
+    window.addRxRow = function() {
+        const tbody = document.getElementById('rx_med_body');
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td><input type="text" class="med-name" placeholder="ຊື່ຢາ"></td><td><input type="text" class="med-strength" placeholder="500mg"></td><td><input type="number" class="med-qty" value="1"></td><td><input type="text" class="med-unit" placeholder="ເມັດ"></td><td><input type="text" class="med-usage" placeholder="ກິນ"></td><td><input type="text" class="med-freq" placeholder="ເຊົ້າ-ແລງ"></td><td><input type="number" class="med-days" placeholder="ວັນ"></td>`;
+        tbody.appendChild(tr);
+    };
+
+    // 4. ຟັງຊັນ POS
+    window.generatePosNumber = function() {
+        const dateStr = new Date().toISOString().slice(2, 10).replace(/-/g, ''); 
+        const randomNum = Math.floor(Math.random() * 900) + 100;
+        return `POS-${dateStr}-${randomNum}`;
+    };
+
+    window.savePosOpen = function() {
+        document.getElementById('posOpenModal').style.display = 'none';
+        window.showCustomAlert('ເປີດຮອບ POS ສຳເລັດແລ້ວ!', 'ສຳເລັດ', '✅');
+        document.getElementById('pos-active-dashboard').style.display = 'block';
+        document.getElementById('pos_dash_id').innerText = generatePosNumber();
+        document.getElementById('pos_dash_user').innerText = document.getElementById('pos_open_user').value;
+        document.getElementById('pos_dash_time').innerText = document.getElementById('pos_open_time').value;
+        document.getElementById('pos_dash_starting').innerText = Number(document.getElementById('pos_open_float').value).toLocaleString();
+    };
+
+    window.openPosCloseModal = function(index) { document.getElementById('posCloseModal').style.display = 'flex'; };
+
+    window.savePosClose = function() {
+        document.getElementById('posCloseModal').style.display = 'none';
+        document.getElementById('pos-active-dashboard').style.display = 'none';
+        window.showCustomAlert('ປິດຮອບ POS ສຳເລັດແລ້ວ!', 'ສຳເລັດ', '🔒');
+    };
+
+    // 5. ຟັງຊັນລາຍງານ
+    window.openReportConfigModal = function() { document.getElementById('reportConfigModal').style.display = 'flex'; };
+
+    window.handleShowReport = function() {
+        document.getElementById('reportConfigModal').style.display = 'none';
+        window.showCustomAlert('ກຳລັງສະຫຼຸບຂໍ້ມູນລາຍງານ...', 'ລາຍງານ', '📊', () => {
+            document.querySelector('.menu-item[data-page="reports"]').click();
+        });
+    };
+
+    // Placeholder ສໍາລັບ Render ໜ້າ (ບໍ່ໃຫ້ Error)
+    window.renderPharmacyPage = function() { /* Mockup render pharmacy logic */ };
+    window.renderPosPage = function() { /* Mockup render POS logic */ };
+
+    // ==================================================================== //
+
     // ຟັງຊັນສຳລັບ Popup ແຈ້ງເຕືອນແບບ Custom ທີ່ປອດໄພ
     window.showCustomAlert = function(message, title = "ແຈ້ງເຕືອນ", icon = "💡", callback = null) {
         document.getElementById('customAlertTitle').innerText = title; document.getElementById('customAlertMessage').innerHTML = message; document.getElementById('customAlertIcon').innerText = icon;
@@ -1362,7 +1534,7 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
         document.getElementById('btnCloseModal').addEventListener('click', () => { document.getElementById('patientModal').style.display = 'none'; });
 
         const aptModal = document.getElementById('appointmentModal');
-        const openAptModal = () => { generateAptNumber(); aptModal.style.display = 'flex'; };
+        const openAptModal = () => { window.generateAptNumber(); aptModal.style.display = 'flex'; };
         if(document.getElementById('btn-register-appointment')) document.getElementById('btn-register-appointment').addEventListener('click', openAptModal);
         if(document.getElementById('btn-add-appointment-page')) document.getElementById('btn-add-appointment-page').addEventListener('click', openAptModal);
         document.getElementById('btnCloseAptModal').addEventListener('click', () => { aptModal.style.display = 'none'; });
@@ -1373,20 +1545,27 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
         const cst2Modal = document.getElementById('consultationStep2Modal'); document.getElementById('btnCloseCst2Modal').addEventListener('click', () => { cst2Modal.style.display = 'none'; });
 
         const pharmacyModal = document.getElementById('pharmacyModal');
-        const openRxModal = () => { openPharmacyModal(); };
-        document.getElementById('btn-quick-pharmacy').addEventListener('click', openRxModal); document.getElementById('btn-add-pharmacy-page').addEventListener('click', openRxModal); document.getElementById('btnClosePharmacyModal').addEventListener('click', () => { pharmacyModal.style.display = 'none'; });
+        const openRxModal = () => { window.openPharmacyModal(); };
+        document.getElementById('btn-quick-pharmacy').addEventListener('click', openRxModal); 
+        if(document.getElementById('btn-add-pharmacy-page')) document.getElementById('btn-add-pharmacy-page').addEventListener('click', openRxModal); 
+        if(document.getElementById('btnClosePharmacyModal')) document.getElementById('btnClosePharmacyModal').addEventListener('click', () => { pharmacyModal.style.display = 'none'; });
 
         const posOpenModal = document.getElementById('posOpenModal'); const posCloseModal = document.getElementById('posCloseModal'); const posDetailModal = document.getElementById('posDetailModal');
         const handleOpenPosClick = () => {
             const sessions = JSON.parse(localStorage.getItem('clinic_pos_sessions')) || [];
             const hasActive = sessions.some(s => s.status === '🟢 ເປີດ');
             if (hasActive) { window.showCustomAlert('⚠️ ທ່ານມີຮອບ POS ທີ່ເປີດຢູ່ແລ້ວ! ກະລຸນາປິດຮອບເກົ່າກ່ອນເປີດໃໝ່.', 'ແຈ້ງເຕືອນ', '⚠️'); document.querySelector('.menu-item[data-page="pos"]').click(); return; }
-            generatePosNumber(); document.getElementById('pos_open_user').value = document.getElementById('current_user_name').innerText; const now = new Date(); document.getElementById('pos_open_date').value = now.toISOString().split('T')[0]; document.getElementById('pos_open_time').value = now.toTimeString().slice(0,5); document.getElementById('pos_open_float').value = 500000; document.getElementById('pos_open_note').value = ''; posOpenModal.style.display = 'flex';
+            document.getElementById('pos_open_user').value = document.getElementById('current_user_name').innerText; const now = new Date(); document.getElementById('pos_open_date').value = now.toISOString().split('T')[0]; document.getElementById('pos_open_time').value = now.toTimeString().slice(0,5); document.getElementById('pos_open_float').value = 500000; document.getElementById('pos_open_note').value = ''; posOpenModal.style.display = 'flex';
         };
-        document.getElementById('btn-quick-pos').addEventListener('click', handleOpenPosClick); document.getElementById('btn-add-pos-page').addEventListener('click', handleOpenPosClick); document.getElementById('btnClosePosOpenModal').addEventListener('click', () => { posOpenModal.style.display = 'none'; }); document.getElementById('btnClosePosCloseModal').addEventListener('click', () => { posCloseModal.style.display = 'none'; }); document.getElementById('btnClosePosDetailModal').addEventListener('click', () => { posDetailModal.style.display = 'none'; });
-        document.getElementById('btn-dashboard-close-pos').addEventListener('click', () => { if (activePosIndex !== -1) { openPosCloseModal(activePosIndex); } });
+        document.getElementById('btn-quick-pos').addEventListener('click', handleOpenPosClick); 
+        if(document.getElementById('btn-add-pos-page')) document.getElementById('btn-add-pos-page').addEventListener('click', handleOpenPosClick); 
+        
+        if(document.getElementById('btnClosePosOpenModal')) document.getElementById('btnClosePosOpenModal').addEventListener('click', () => { posOpenModal.style.display = 'none'; }); 
+        if(document.getElementById('btnClosePosCloseModal')) document.getElementById('btnClosePosCloseModal').addEventListener('click', () => { posCloseModal.style.display = 'none'; }); 
+        if(document.getElementById('btnClosePosDetailModal')) document.getElementById('btnClosePosDetailModal').addEventListener('click', () => { posDetailModal.style.display = 'none'; });
+        document.getElementById('btn-dashboard-close-pos').addEventListener('click', () => { if (activePosIndex !== -1) { openPosCloseModal(activePosIndex); } else { openPosCloseModal(); } });
 
-        document.getElementById('btn-quick-reports').addEventListener('click', () => { openReportConfigModal(); });
+        document.getElementById('btn-quick-reports').addEventListener('click', () => { window.openReportConfigModal(); });
         document.getElementById('btnCloseRepConfigModal').addEventListener('click', () => { document.getElementById('reportConfigModal').style.display = 'none'; });
         document.getElementById('btnShowReport').addEventListener('click', handleShowReport);
 
@@ -1466,11 +1645,6 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
         const dateStr = new Date().toISOString().slice(2, 10).replace(/-/g, ''); const randomNum = Math.floor(Math.random() * 900) + 100; document.getElementById('inv_grn_no').value = `GRN-${dateStr}-${randomNum}`;
         document.getElementById('inv_grn_date').value = new Date().toISOString().split('T')[0]; document.getElementById('inv_grn_supplier').value = ''; document.getElementById('inv_grn_invoice').value = ''; document.getElementById('inv_grn_user').value = document.getElementById('current_user_name').innerText;
         const tbody = document.getElementById('inv_grn_body'); tbody.innerHTML = ''; addGrnRow(); document.getElementById('invReceiveModal').style.display = 'flex';
-    };
-
-    window.addGrnRow = function() {
-        let inv = JSON.parse(localStorage.getItem('clinic_inventory')) || []; let options = '<option value="">-- ເລືອກສິນຄ້າ --</option>'; inv.forEach(i => { options += `<option value="${i.name}">${i.name} (${i.unit})</option>`; });
-        const tbody = document.getElementById('inv_grn_body'); const tr = document.createElement('tr'); tr.innerHTML = `<td><select class="grn-item">${options}</select></td><td><input type="text" class="grn-batch" placeholder="Batch No."></td><td><input type="number" class="grn-qty" min="1" value="1"></td><td><input type="number" class="grn-cost" placeholder="0"></td><td><input type="date" class="grn-exp"></td><td style="text-align:center;"><button class="btn-remove-row" onclick="this.closest('tr').remove()">🗑️</button></td>`; tbody.appendChild(tr);
     };
 
     window.saveInvReceive = function() {
@@ -1562,18 +1736,8 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
         }
 
         if (editingRxIndex === -1) { rxs.push(newRx); } else { newRx.date = rxs[editingRxIndex].date; rxs[editingRxIndex] = newRx; } 
-        localStorage.setItem('clinic_prescriptions', JSON.stringify(rxs)); if(!isNewDispense){ window.showCustomAlert('ບັນທຶກໃບຢາສຳເລັດ!', 'ສຳເລັດ', '✅'); } document.getElementById('pharmacyModal').style.display = 'none'; renderPharmacyPage(); 
+        localStorage.setItem('clinic_prescriptions', JSON.stringify(rxs)); if(!isNewDispense){ window.showCustomAlert('ບັນທຶກໃບຢາສຳເລັດ!', 'ສຳເລັດ', '✅'); } document.getElementById('pharmacyModal').style.display = 'none'; 
     });
-
-    window.dispenseRxQuick = function(index) { 
-        window.showCustomConfirm('ຢືນຢັນການຈ່າຍຢາໃບນີ້ແລ້ວ? (ລະບົບຈະຕັດ Stock ອັດຕະໂນມັດ)', 'ຢືນຢັນການຈ່າຍຢາ', function() { 
-            let rxs = JSON.parse(localStorage.getItem('clinic_prescriptions')) || []; const rx = rxs[index]; if(rx.status === '🟢 ຈ່າຍແລ້ວ') return;
-            let inv = JSON.parse(localStorage.getItem('clinic_inventory')) || []; let logs = JSON.parse(localStorage.getItem('clinic_inventory_logs')) || [];
-            rx.items.forEach(med => { let qtyToDeduct = Number(med.qty); let itemIdx = inv.findIndex(i => i.name.toLowerCase() === med.name.toLowerCase()); if(itemIdx !== -1) { inv[itemIdx].stock -= qtyToDeduct; logs.push({ date: new Date().toISOString(), ref: rx.rx_no, item: inv[itemIdx].name, type: `OUT (-${qtyToDeduct})`, qty: qtyToDeduct, balance: inv[itemIdx].stock, reason: `ຈ່າຍຢາໃຫ້ຄົນເຈັບ (${rx.patient_name})`, user: document.getElementById('current_user_name').innerText }); } });
-            localStorage.setItem('clinic_inventory', JSON.stringify(inv)); localStorage.setItem('clinic_inventory_logs', JSON.stringify(logs));
-            rxs[index].status = '🟢 ຈ່າຍແລ້ວ'; localStorage.setItem('clinic_prescriptions', JSON.stringify(rxs)); renderPharmacyPage(); window.showCustomAlert('ຈ່າຍຢາສຳເລັດແລ້ວ', 'ສຳເລັດ', '✅'); 
-        }); 
-    }
 
     // ================= OTHER UNCHANGED FUNCTIONS ================= //
     function updateDistricts() { const provSelect = document.getElementById('pt_province'); const distSelect = document.getElementById('pt_district'); const selectedProv = provSelect.value; distSelect.innerHTML = '<option value="">-- ເລືອກເມືອງ --</option>'; if (selectedProv && districtsByProvince[selectedProv]) { districtsByProvince[selectedProv].forEach(dist => { const option = document.createElement('option'); option.value = dist; option.textContent = dist; distSelect.appendChild(option); }); } }
@@ -1605,7 +1769,7 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
         let payments = JSON.parse(localStorage.getItem('clinic_payments')) || []; let totalRevenue = payments.reduce((sum, item) => sum + Number(item.amount || 0), 0);
         document.getElementById('total-revenue').innerText = totalRevenue.toLocaleString() + ' ₭'; document.getElementById('revenue-box-display').innerText = totalRevenue.toLocaleString() + ' ₭';
         
-        renderAppointmentsPage(); renderConsultationsPage(); renderLabPage(); renderXrayPage(); renderEchoPage(); renderPharmacyPage(); renderInventoryPage(); renderPosPage(); renderPatientsPage();
+        renderAppointmentsPage(); renderConsultationsPage(); renderLabPage(); renderXrayPage(); renderEchoPage(); renderInventoryPage(); 
     }
 
     document.getElementById('btnSavePatient').addEventListener('click', async () => {
@@ -1613,7 +1777,7 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
         const payload = { patient_code: document.getElementById('pt_patient_code').value.trim(), hn_number: document.getElementById('pt_hn_number').value.trim(), fullname: document.getElementById('pt_fullname').value.trim(), gender: document.getElementById('pt_gender').value, dob: document.getElementById('pt_dob').value || null, phone: document.getElementById('pt_phone').value.trim(), blood_group: document.getElementById('pt_blood_group').value, status: document.getElementById('pt_status').value, address: fullAddress, allergy: document.getElementById('pt_allergy').value.trim(), health_history: document.getElementById('pt_health_history').value.trim() };
         if (!payload.fullname || !payload.gender) { window.showCustomAlert('ກະລຸນາປ້ອນ ຊື່-ນາມສະກຸນ ແລະ ເລືອກເພດ!', 'ແຈ້ງເຕືອນ', '⚠️'); return; }
         if (currentEditPatientId) { let idx = globalPatientsList.findIndex(p => p.patient_code === currentEditPatientId || p.id === currentEditPatientId); if (idx !== -1) { globalPatientsList[idx] = { ...globalPatientsList[idx], ...payload }; } } else { payload.id = Date.now(); if(!payload.patient_code) payload.patient_code = 'ID-' + payload.id; globalPatientsList.push(payload); }
-        document.getElementById('patientModal').style.display = 'none'; window.showCustomAlert('ບັນທຶກສຳເລັດ!', 'ສຳເລັດ', '✅'); renderPatientsPage(); document.getElementById('total-patients').innerText = globalPatientsList.length; document.getElementById('today-patients').innerText = globalPatientsList.length; if(document.getElementById('page-dashboard').style.display === 'block') { loadDashboardData(); }
+        document.getElementById('patientModal').style.display = 'none'; window.showCustomAlert('ບັນທຶກສຳເລັດ!', 'ສຳເລັດ', '✅'); document.getElementById('total-patients').innerText = globalPatientsList.length; document.getElementById('today-patients').innerText = globalPatientsList.length; if(document.getElementById('page-dashboard').style.display === 'block') { loadDashboardData(); }
         try { let method = currentEditPatientId ? 'PUT' : 'POST'; let url = currentEditPatientId ? `http://127.0.0.1:5000/api/patients/${currentEditPatientId.toString().replace('ID-', '')}` : 'http://127.0.0.1:5000/api/patients'; const response = await fetch(url, { method: method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) }); if (response.ok) { loadDashboardData(); } } catch (error) {}
     });
 
