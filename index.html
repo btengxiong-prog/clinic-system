@@ -1364,7 +1364,24 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
             <div class="form-group"><label>ອຸນຫະພູມ (°C)</label><input type="number" id="cst2_temp" placeholder="36.5" step="0.1"></div><div class="form-group"><label>ຄວາມດັນ (mmHg)</label><input type="text" id="cst2_bp" placeholder="120/80"></div><div class="form-group"><label>ຊີບຈອນ (bpm)</label><input type="number" id="cst2_pulse" placeholder="80"></div><div class="form-group"><label>SpO2 (%)</label><input type="number" id="cst2_spo2" placeholder="98"></div><div class="form-group"><label>ນ້ຳໜັກ (kg)</label><input type="number" id="cst2_weight" placeholder="60" step="0.1"></div><div class="form-group"><label>ສ່ວນສູງ (cm)</label><input type="number" id="cst2_height" placeholder="165"></div>
         </div>
         <div class="section-title">🔬 ການກວດ ແລະ ການວິນິດໄສ</div>
-        <div class="form-group"><label>ການກວດຮ່າງກາຍ (Physical Examination)</label><textarea id="cst2_physical_exam" rows="2"></textarea></div><div class="form-group"><label>ຜົນກວດ Lab / ອື່ນໆ (ຖ້າມີ)</label><textarea id="cst2_lab_result" rows="2"></textarea></div><div class="form-group"><label style="color: #b42318; font-weight: bold;">ການວິນິດໄສເບື້ອງຕົ້ນ (Diagnosis) *</label><textarea id="cst2_diagnosis" rows="2"></textarea></div>
+        
+        <div class="form-group">
+            <label style="display: flex; justify-content: space-between; align-items: center;">
+                ການກວດຮ່າງກາຍ (Physical Examination)
+                <select id="cst2_pe_template" onchange="insertPETemplate()" style="width: auto; padding: 3px 8px; font-size: 13px; border-radius: 6px; border: 1px solid #ccc; background: #e3f2fd; color: #1976d2; font-weight: bold; cursor: pointer;">
+                    <option value="">+ ເລືອກແມ່ແບບອາການ...</option>
+                    <option value="ປົກກະຕິ (Normal): ຄົນເຈັບຮູ້ສຶກຕົວດີ, ຕາບໍ່ເຫຼືອງ ບໍ່ຈືດມ່ານ. ຟັງປອດໃສດີທັງສອງຂ້າງ, ຫົວໃຈເຕັ້ນປົກກະຕິ. ທ້ອງອ່ອນ ບໍ່ກົດເຈັບ, ຕັບມ້າມບໍ່ໂຕ.">🟢 ປົກກະຕິທົ່ວໄປ (Normal)</option>
+                    <option value="HEENT: ຄໍແດງອັກເສບ (Pharyngitis), ຕ່ອມທອນຊິນໂຕມີໜອງ, ຕ່ອມນ້ຳເຫຼືອງໃຫຍ່.">👀 ຫູ, ຕາ, ຄໍ, ດັງ (HEENT)</option>
+                    <option value="ລະບົບຫາຍໃຈຜິດປົກກະຕິ: ຫາຍໃຈຫອບອິດເມື່ອຍ, ຟັງປອດໄດ້ຍິນສຽງ Wheezing/Crepitation, ບໍ່ມີຂາບວມ.">🫁 ລະບົບຫາຍໃຈ (Respiratory)</option>
+                    <option value="ລະບົບຫົວໃຈຜິດປົກກະຕິ: ຈັງຫວະຫົວໃຈເຕັ້ນຜິດປົກກະຕິ, ໄດ້ຍິນສຽງຟູ່ (Murmur), ຂາບວມ.">❤️ ລະບົບຫົວໃຈ (Cardio)</option>
+                    <option value="ລະບົບຊ່ອງທ້ອງຜິດປົກກະຕິ: ທ້ອງອືດ, ກົດເຈັບ (Tenderness) ບໍລິເວນ..., ມີອາການ Rebound tenderness, ຟັງສຽງລຳໄສ້ເຮັດວຽກຫຼຸດລົງ.">🫃 ລະບົບຊ່ອງທ້ອງ (Abdomen)</option>
+                    <option value="ລະບົບປະສາດ: ອາການຊາ, ກຳລັງກ້າມຊີ້ນຫຼຸດລົງ (Motor weakness), Reflex ຜິດປົກກະຕິ.">🧠 ລະບົບປະສາດ (Neuro)</option>
+                    <option value="ຜິວໜັງ/ກ້າມຊີ້ນ: ພົບຜື່ນແດງ (Rash), ຂໍ້ບວມແດງຮ້ອນ, ກົດເຈັບບໍລິເວນກ້າມຊີ້ນ.">🧴 ຜິວໜັງ ແລະ ກ້າມຊີ້ນ</option>
+                </select>
+            </label>
+            <textarea id="cst2_physical_exam" rows="3" placeholder="ພິມອາການທີ່ກວດພົບ ຫຼື ເລືອກຈາກແມ່ແບບດ້ານເທິງ..."></textarea>
+        </div>
+
         <div class="section-title">💊 ການຮັກສາ ແລະ ສັ່ງຢາ</div>
         <div class="form-group"><label>ວິທີການຮັກສາ / ຫັດຖະການ</label><textarea id="cst2_treatment" rows="2"></textarea></div><div class="form-group"><label>ລາຍການຢາ (Prescription)</label><textarea id="cst2_medicine" rows="2"></textarea></div>
         <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 15px;"><div class="form-group"><label>ຄຳແນະນຳເພີ່ມເຕີມ</label><textarea id="cst2_advice" rows="2"></textarea></div><div class="form-group"><label>ນັດຄັ້ງຕໍ່ໄປ (ຖ້າມີ)</label><input type="date" id="cst2_next_apt"></div></div>
@@ -4049,6 +4066,23 @@ window.importToInventory = function(catIndex, itemName) {
     } catch (error) {
         console.error("ເກີດຂໍ້ຜິດພາດໃນການດຶງຂໍ້ມູນ:", error);
         window.showCustomAlert('ມີບາງຢ່າງຜິດພາດ ກະລຸນາກວດສອບ Console', 'ແຈ້ງເຕືອນ', '❌');
+    }
+};
+
+// ຟັງຊັນສຳລັບດຶງຂໍ້ຄວາມຈາກ Dropdown ມາໃສ່ຊ່ອງການກວດຮ່າງກາຍ
+window.insertPETemplate = function() {
+    const select = document.getElementById('cst2_pe_template');
+    const textarea = document.getElementById('cst2_physical_exam');
+    
+    if(select.value) {
+        // ຖ້າໃນກ່ອງມີຂໍ້ຄວາມຢູ່ແລ້ວ ໃຫ້ຍະຫວ່າງແຖວແລ້ວຕໍ່ທ້າຍ, ຖ້າບໍ່ມີໃຫ້ເອົາໃສ່ເລີຍ
+        if(textarea.value.trim() !== '') {
+            textarea.value += '\n' + select.value;
+        } else {
+            textarea.value = select.value;
+        }
+        // ເຄຼຍຄ່າ Dropdown ກັບໄປທີ່ຄ່າເລີ່ມຕົ້ນ ເພື່ອໃຫ້ກົດເລືອກອັນອື່ນເພີ່ມໄດ້ອີກ
+        select.value = ''; 
     }
 };
 
