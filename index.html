@@ -1363,6 +1363,7 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
         <div class="vital-signs-grid">
             <div class="form-group"><label>ອຸນຫະພູມ (°C)</label><input type="number" id="cst2_temp" placeholder="36.5" step="0.1"></div><div class="form-group"><label>ຄວາມດັນ (mmHg)</label><input type="text" id="cst2_bp" placeholder="120/80"></div><div class="form-group"><label>ຊີບຈອນ (bpm)</label><input type="number" id="cst2_pulse" placeholder="80"></div><div class="form-group"><label>SpO2 (%)</label><input type="number" id="cst2_spo2" placeholder="98"></div><div class="form-group"><label>ນ້ຳໜັກ (kg)</label><input type="number" id="cst2_weight" placeholder="60" step="0.1"></div><div class="form-group"><label>ສ່ວນສູງ (cm)</label><input type="number" id="cst2_height" placeholder="165"></div>
         </div>
+        
         <div class="section-title">🔬 ການກວດ ແລະ ການວິນິດໄສ</div>
         
         <div class="form-group">
@@ -1381,6 +1382,10 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
             </label>
             <textarea id="cst2_physical_exam" rows="3" placeholder="ພິມອາການທີ່ກວດພົບ ຫຼື ເລືອກຈາກແມ່ແບບດ້ານເທິງ..."></textarea>
         </div>
+
+        <!-- 2 ຊ່ອງນີ້ແມ່ນອັນທີ່ຖືກລຶບໄປ ຂ້າພະເຈົ້າດຶງກັບມາໃສ່ຄືນໃຫ້ແລ້ວ -->
+        <div class="form-group"><label>ຜົນກວດ Lab / ອື່ນໆ (ຖ້າມີ)</label><textarea id="cst2_lab_result" rows="2"></textarea></div>
+        <div class="form-group"><label style="color: #b42318; font-weight: bold;">ການວິນິດໄສເບື້ອງຕົ້ນ (Diagnosis) *</label><textarea id="cst2_diagnosis" rows="2"></textarea></div>
 
         <div class="section-title">💊 ການຮັກສາ ແລະ ສັ່ງຢາ</div>
         <div class="form-group"><label>ວິທີການຮັກສາ / ຫັດຖະການ</label><textarea id="cst2_treatment" rows="2"></textarea></div><div class="form-group"><label>ລາຍການຢາ (Prescription)</label><textarea id="cst2_medicine" rows="2"></textarea></div>
