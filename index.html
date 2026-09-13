@@ -1733,16 +1733,48 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
 <div class="modal-overlay" id="invAdjustModal">
     <div class="modal-card">
         <h3>🛠️ ປັບຍອດສາງ (Stock Adjustment)</h3>
-        <div class="form-group"><label>ເລືອກສິນຄ້າ (Item) *</label><select id="inv_adj_item" onchange="autoFillAdjustStock()"><option value="">-- ເລືອກສິນຄ້າ --</option></select></div>
-        <div class="info-box" style="margin-bottom: 15px;">
-            <div style="display: flex; justify-content: space-between;"><strong>Batch No:</strong> <span id="inv_adj_batch">-</span></div>
-            <div style="display: flex; justify-content: space-between;"><strong>Stock ໃນລະບົບ:</strong> <span id="inv_adj_current_stock" style="font-weight: bold; color: #1976d2;">0</span></div>
-            <div style="display: flex; justify-content: space-between;"><strong>ຫົວໜ່ວຍ:</strong> <span id="inv_adj_unit">-</span></div>
+        <div class="form-group">
+            <label>ເລືອກສິນຄ້າ (Item) *</label>
+            <select id="inv_adj_item" onchange="autoFillAdjustStock()">
+                <option value="">-- ເລືອກສິນຄ້າ --</option>
+            </select>
         </div>
-        <div class="form-group"><label style="color: #b42318; font-weight: bold;">ຈຳນວນນັບຈິງ (Actual Stock) *</label><input type="number" id="inv_adj_actual" placeholder="ປ້ອນຈຳນວນທີ່ນັບໄດ້ຈິງ..." style="font-size: 18px; font-weight: bold;" oninput="calcAdjustDiff()"></div>
-        <div class="form-group"><label>ຜົນຕ່າງ (Difference)</label><input type="text" id="inv_adj_diff" readonly style="background: #f4f7fb; font-weight: bold;"></div>
-        <div class="form-group"><label>ເຫດຜົນການປັບຍອດ (Reason) *</label><select id="inv_adj_reason"><option value="ນັບ Stock ຈິງ (Physical Count)">ນັບ Stock ຈິງ (Physical Count)</option><option value="ສິນຄ້າເປ່ເພ / ເສຍຫາຍ (Damaged)">ສິນຄ້າເປ່ເພ / ເສຍຫາຍ (Damaged)</option><option value="ສິນຄ້າໝົດອາຍຸ (Expired)">ສິນຄ້າໝົດອາຍຸ (Expired)</option><option value="ປ້ອນຜິດພາດ (Data Entry Error)">ປ້ອນຜິດພາດ (Data Entry Error)</option><option value="ອື່ນໆ (Other)">ອື່ນໆ (Other)</option></select></div>
-        <div class="modal-actions"><button class="btn-cancel" onclick="document.getElementById('invAdjustModal').style.display='none'">ຍົກເລີກ</button><button class="btn-action" style="background: #102a43; color: white;" onclick="saveInvAdjust()">🛠️ ຢືນຢັນການປັບຍອດ</button></div>
+        <div class="info-box" style="margin-bottom: 15px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                <strong>Batch No:</strong> <span id="inv_adj_batch">-</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                <strong>Stock ໃນລະບົບ:</strong> 
+                <!-- ປ່ຽນຈາກ span ເປັນ input type="text" ແລະ ໃສ່ format ອັດຕະໂນມັດ -->
+                <input type="text" id="inv_adj_current_stock" value="0" style="width: 120px; text-align: right; font-weight: bold; color: #1976d2; padding: 4px 8px; border: 1px solid #ccc; border-radius: 4px; font-family: inherit; font-size: 15px;" oninput="formatInputNumber(this); calcAdjustDiff();">
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <strong>ຫົວໜ່ວຍ:</strong> <span id="inv_adj_unit">-</span>
+            </div>
+        </div>
+        <div class="form-group">
+            <label style="color: #b42318; font-weight: bold;">ຈຳນວນນັບຈິງ (Actual Stock) *</label>
+            <!-- ປ່ຽນເປັນ type="text" ເພື່ອໃຫ້ຮອງຮັບການໃສ່ເຄື່ອງໝາຍ , (ຈຸດ) -->
+            <input type="text" id="inv_adj_actual" placeholder="ປ້ອນຈຳນວນທີ່ນັບໄດ້ຈິງ..." style="font-size: 18px; font-weight: bold;" oninput="formatInputNumber(this); calcAdjustDiff()">
+        </div>
+        <div class="form-group">
+            <label>ຜົນຕ່າງ (Difference)</label>
+            <input type="text" id="inv_adj_diff" readonly style="background: #f4f7fb; font-weight: bold; font-size: 16px;">
+        </div>
+        <div class="form-group">
+            <label>ເຫດຜົນການປັບຍອດ (Reason) *</label>
+            <select id="inv_adj_reason">
+                <option value="ນັບ Stock ຈິງ (Physical Count)">ນັບ Stock ຈິງ (Physical Count)</option>
+                <option value="ສິນຄ້າເປ່ເພ / ເສຍຫາຍ (Damaged)">ສິນຄ້າເປ່ເພ / ເສຍຫາຍ (Damaged)</option>
+                <option value="ສິນຄ້າໝົດອາຍຸ (Expired)">ສິນຄ້າໝົດອາຍຸ (Expired)</option>
+                <option value="ປ້ອນຜິດພາດ (Data Entry Error)">ປ້ອນຜິດພາດ (Data Entry Error)</option>
+                <option value="ອື່ນໆ (Other)">ອື່ນໆ (Other)</option>
+            </select>
+        </div>
+        <div class="modal-actions">
+            <button class="btn-cancel" onclick="document.getElementById('invAdjustModal').style.display='none'">ຍົກເລີກ</button>
+            <button class="btn-action" style="background: #102a43; color: white;" onclick="saveInvAdjust()">🛠️ ຢືນຢັນການປັບຍອດ</button>
+        </div>
     </div>
 </div>
 
@@ -2990,30 +3022,116 @@ function renderDashboardTable(patients) {
         localStorage.setItem('clinic_inventory', JSON.stringify(inv)); localStorage.setItem('clinic_inventory_logs', JSON.stringify(logs)); document.getElementById('invReceiveModal').style.display = 'none'; window.showCustomAlert('ຮັບສິນຄ້າເຂົ້າສາງສຳເລັດແລ້ວ! Stock ຖືກອັບເດດແລ້ວ.', 'ສຳເລັດ', '✅'); renderInventoryPage();
     };
 
+// ຟັງຊັນໃໝ່ສຳລັບການ Format ຕົວເລກເວລາພິມໃຫ້ເປັນ #,##0
+    window.formatInputNumber = function(input) {
+        // ເອົາຕົວອັກສອນທີ່ບໍ່ແມ່ນຕົວເລກອອກ (ຮອງຮັບເຄື່ອງໝາຍລົບ)
+        let value = input.value.replace(/[^\d-]/g, '');
+        if (value === '' || value === '-') return;
+        // ຈັດ Format ເປັນ #,##0 
+        input.value = Number(value).toLocaleString('en-US');
+    };
+
     window.openInvAdjustmentModal = function() {
-        let inv = JSON.parse(localStorage.getItem('clinic_inventory')) || []; const sel = document.getElementById('inv_adj_item'); sel.innerHTML = '<option value="">-- ເລືອກສິນຄ້າ --</option>'; inv.forEach(i => { sel.innerHTML += `<option value="${i.name}">${i.name}</option>`; });
-        document.getElementById('inv_adj_batch').innerText = '-'; document.getElementById('inv_adj_current_stock').innerText = '0'; document.getElementById('inv_adj_unit').innerText = '-'; document.getElementById('inv_adj_actual').value = ''; document.getElementById('inv_adj_diff').value = ''; document.getElementById('invAdjustModal').style.display = 'flex';
+        let inv = JSON.parse(localStorage.getItem('clinic_inventory')) || []; 
+        const sel = document.getElementById('inv_adj_item'); 
+        sel.innerHTML = '<option value="">-- ເລືອກສິນຄ້າ --</option>'; 
+        inv.forEach(i => { sel.innerHTML += `<option value="${i.name}">${i.name}</option>`; });
+        
+        document.getElementById('inv_adj_batch').innerText = '-'; 
+        document.getElementById('inv_adj_current_stock').value = '0'; // ປ່ຽນມາເປັນ .value ແທນ innerText
+        document.getElementById('inv_adj_unit').innerText = '-'; 
+        document.getElementById('inv_adj_actual').value = ''; 
+        document.getElementById('inv_adj_diff').value = ''; 
+        document.getElementById('invAdjustModal').style.display = 'flex';
     };
 
     window.autoFillAdjustStock = function() {
-        const itemName = document.getElementById('inv_adj_item').value; let inv = JSON.parse(localStorage.getItem('clinic_inventory')) || []; const item = inv.find(i => i.name === itemName);
-        if(item) { document.getElementById('inv_adj_batch').innerText = item.batch || '-'; document.getElementById('inv_adj_current_stock').innerText = item.stock; document.getElementById('inv_adj_unit').innerText = item.unit; window.calcAdjustDiff(); } else { document.getElementById('inv_adj_batch').innerText = '-'; document.getElementById('inv_adj_current_stock').innerText = '0'; document.getElementById('inv_adj_unit').innerText = '-'; document.getElementById('inv_adj_diff').value = ''; }
+        const itemName = document.getElementById('inv_adj_item').value; 
+        let inv = JSON.parse(localStorage.getItem('clinic_inventory')) || []; 
+        const item = inv.find(i => i.name === itemName);
+        
+        if(item) { 
+            document.getElementById('inv_adj_batch').innerText = item.batch || '-'; 
+            // ໃສ່ Format ໃຫ້ Stock ໃນລະບົບຕອນດຶງມາສະແດງ
+            document.getElementById('inv_adj_current_stock').value = Number(item.stock).toLocaleString('en-US'); 
+            document.getElementById('inv_adj_unit').innerText = item.unit; 
+            window.calcAdjustDiff(); 
+        } else { 
+            document.getElementById('inv_adj_batch').innerText = '-'; 
+            document.getElementById('inv_adj_current_stock').value = '0'; 
+            document.getElementById('inv_adj_unit').innerText = '-'; 
+            document.getElementById('inv_adj_diff').value = ''; 
+        }
     };
 
     window.calcAdjustDiff = function() {
-        const current = Number(document.getElementById('inv_adj_current_stock').innerText); const actualInput = document.getElementById('inv_adj_actual').value; if(actualInput === '') { document.getElementById('inv_adj_diff').value = ''; return; }
-        const actual = Number(actualInput); const diff = actual - current; const diffEl = document.getElementById('inv_adj_diff'); diffEl.value = (diff > 0 ? '+' : '') + diff; diffEl.style.color = diff < 0 ? '#d32f2f' : (diff > 0 ? '#16864b' : '#333');
+        // ລຶບເຄື່ອງໝາຍ , ອອກກ່ອນຄຳນວນ
+        const currentStr = document.getElementById('inv_adj_current_stock').value.replace(/,/g, '') || '0';
+        const actualStr = document.getElementById('inv_adj_actual').value.replace(/,/g, '');
+        
+        const current = Number(currentStr); 
+        if(actualStr === '') { 
+            document.getElementById('inv_adj_diff').value = ''; 
+            return; 
+        }
+        
+        const actual = Number(actualStr); 
+        const diff = actual - current; 
+        const diffEl = document.getElementById('inv_adj_diff'); 
+        
+        // ສະແດງຜົນຕ່າງພ້ອມເຄື່ອງໝາຍ ແລະ Format
+        diffEl.value = (diff > 0 ? '+' : '') + diff.toLocaleString('en-US'); 
+        diffEl.style.color = diff < 0 ? '#d32f2f' : (diff > 0 ? '#16864b' : '#333');
     };
 
     window.saveInvAdjust = function() {
-        const itemName = document.getElementById('inv_adj_item').value; const actualInput = document.getElementById('inv_adj_actual').value; const reason = document.getElementById('inv_adj_reason').value;
-        if(!itemName || actualInput === '') { window.showCustomAlert('ກະລຸນາເລືອກສິນຄ້າ ແລະ ປ້ອນຈຳນວນນັບຈິງ!', 'ແຈ້ງເຕືອນ', '⚠️'); return; }
-        const actual = Number(actualInput); let inv = JSON.parse(localStorage.getItem('clinic_inventory')) || []; let logs = JSON.parse(localStorage.getItem('clinic_inventory_logs')) || []; let itemIdx = inv.findIndex(i => i.name === itemName);
+        const itemName = document.getElementById('inv_adj_item').value; 
+        // ດຶງຄ່າທີ່ລຶບເຄື່ອງໝາຍ , ອອກແລ້ວໄປບັນທຶກ
+        const actualInput = document.getElementById('inv_adj_actual').value.replace(/,/g, ''); 
+        const currentInput = document.getElementById('inv_adj_current_stock').value.replace(/,/g, ''); 
+        const reason = document.getElementById('inv_adj_reason').value;
+        
+        if(!itemName || actualInput === '') { 
+            window.showCustomAlert('ກະລຸນາເລືອກສິນຄ້າ ແລະ ປ້ອນຈຳນວນນັບຈິງ!', 'ແຈ້ງເຕືອນ', '⚠️'); 
+            return; 
+        }
+        
+        const actual = Number(actualInput); 
+        const current = Number(currentInput);
+        let inv = JSON.parse(localStorage.getItem('clinic_inventory')) || []; 
+        let logs = JSON.parse(localStorage.getItem('clinic_inventory_logs')) || []; 
+        let itemIdx = inv.findIndex(i => i.name === itemName);
+        
         if(itemIdx !== -1) {
-            let prevStock = inv[itemIdx].stock; let diff = actual - prevStock; if(diff === 0) { window.showCustomAlert('ບໍ່ມີຜົນຕ່າງໃນການປັບຍອດ.', 'ແຈ້ງເຕືອນ', '💡'); return; }
-            inv[itemIdx].stock = actual; const dateStr = new Date().toISOString().slice(2, 10).replace(/-/g, ''); const randomNum = Math.floor(Math.random() * 900) + 100; const adjNo = `ADJ-${dateStr}-${randomNum}`;
-            logs.push({ date: new Date().toISOString(), ref: adjNo, item: itemName, type: diff > 0 ? `ADJ (+${diff})` : `ADJ (${diff})`, qty: Math.abs(diff), balance: actual, reason: `ປັບຍອດ: ${reason}`, user: document.getElementById('current_user_name').innerText });
-            localStorage.setItem('clinic_inventory', JSON.stringify(inv)); localStorage.setItem('clinic_inventory_logs', JSON.stringify(logs)); document.getElementById('invAdjustModal').style.display = 'none'; window.showCustomAlert('ປັບຍອດ Stock ສຳເລັດແລ້ວ!', 'ສຳເລັດ', '✅'); renderInventoryPage();
+            let prevStock = inv[itemIdx].stock; 
+            let diff = actual - current; // ໄລ່ຜົນຕ່າງຈາກຄ່າທີ່ເຮົາປ້ອນ
+            
+            if(diff === 0 && actual === prevStock) { 
+                window.showCustomAlert('ບໍ່ມີຜົນຕ່າງໃນການປັບຍອດ.', 'ແຈ້ງເຕືອນ', '💡'); 
+                return; 
+            }
+            
+            inv[itemIdx].stock = actual; 
+            const dateStr = new Date().toISOString().slice(2, 10).replace(/-/g, ''); 
+            const randomNum = Math.floor(Math.random() * 900) + 100; 
+            const adjNo = `ADJ-${dateStr}-${randomNum}`;
+            
+            logs.push({ 
+                date: new Date().toISOString(), 
+                ref: adjNo, 
+                item: itemName, 
+                type: diff > 0 ? `ADJ (+${diff})` : `ADJ (${diff})`, 
+                qty: Math.abs(diff), 
+                balance: actual, 
+                reason: `ປັບຍອດ: ${reason} (ປ່ຽນຈາກ ${current} ເປັນ ${actual})`, 
+                user: document.getElementById('current_user_name').innerText 
+            });
+            
+            localStorage.setItem('clinic_inventory', JSON.stringify(inv)); 
+            localStorage.setItem('clinic_inventory_logs', JSON.stringify(logs)); 
+            document.getElementById('invAdjustModal').style.display = 'none'; 
+            window.showCustomAlert('ປັບຍອດ Stock ສຳເລັດແລ້ວ!', 'ສຳເລັດ', '✅'); 
+            renderInventoryPage();
         }
     };
 
