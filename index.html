@@ -1575,17 +1575,26 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
     </div>
 </div>
 
-<div class="modal-overlay" id="xrayProcessModal">
-    <div class="modal-card">
-        <h3>☢️ ບັນທຶກການຖ່າຍ X-Ray</h3>
-        <div class="info-box" style="font-size: 14px;"><div style="display: flex; justify-content: space-between;"><strong>X-Ray No:</strong> <span id="xray_proc_no"></span></div><div style="display: flex; justify-content: space-between;"><strong>ຄົນເຈັບ:</strong> <span id="xray_proc_patient"></span></div></div>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;"><div class="form-group"><label>ເວລາເລີ່ມ</label><input type="time" id="xray_proc_time_start"></div><div class="form-group"><label>ເວລາສຳເລັດ</label><input type="time" id="xray_proc_time_end"></div></div>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;"><div class="form-group"><label>ຈຳນວນຮູບ</label><input type="number" id="xray_proc_images" value="1"></div><div class="form-group"><label>ຄຸນນະພາບຮູບ</label><select id="xray_proc_quality"><option value="ດີ (Good)">ດີ (Good)</option><option value="ປານກາງ (Fair)">ປານກາງ (Fair)</option><option value="ຕ້ອງຖ່າຍຊ້ຳ">ຕ້ອງຖ່າຍຊ້ຳ</option></select></div></div>
-        <div class="form-group"><label>ຜູ້ຖ່າຍ (Technician)</label><input type="text" id="xray_proc_technician"></div>
-        <div class="form-group"><label>ສະຖານະການຖ່າຍ</label><select id="xray_proc_status"><option value="🟡 ລໍຖ້າຖ່າຍ">🟡 ລໍຖ້າຖ່າຍ</option><option value="🔵 ລໍຖ້າອ່ານຜົນ">🔵 ຖ່າຍແລ້ວ</option></select></div>
-        <div class="modal-actions"><button class="btn-cancel" onclick="document.getElementById('xrayProcessModal').style.display='none'">ຍົກເລີກ</button><button class="btn-submit" onclick="saveXrayProcess()" style="background: #102a43;">💾 ບັນທຶກການຖ່າຍ</button></div>
-    </div>
-</div>
+        <div class="modal-overlay" id="xrayProcessModal">
+            <div class="modal-card">
+                <h3>☢️ ບັນທຶກການຖ່າຍ X-Ray</h3>
+                <div class="info-box" style="font-size: 14px;"><div style="display: flex; justify-content: space-between;"><strong>X-Ray No:</strong> <span id="xray_proc_no"></span></div><div style="display: flex; justify-content: space-between;"><strong>ຄົນເຈັບ:</strong> <span id="xray_proc_patient"></span></div></div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;"><div class="form-group"><label>ເວລາເລີ່ມ</label><input type="time" id="xray_proc_time_start"></div><div class="form-group"><label>ເວລາສຳເລັດ</label><input type="time" id="xray_proc_time_end"></div></div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;"><div class="form-group"><label>ຈຳນວນຮູບ</label><input type="number" id="xray_proc_images" value="1"></div><div class="form-group"><label>ຄຸນນະພາບຮູບ</label><select id="xray_proc_quality"><option value="ດີ (Good)">ດີ (Good)</option><option value="ປານກາງ (Fair)">ປານກາງ (Fair)</option><option value="ຕ້ອງຖ່າຍຊ້ຳ">ຕ້ອງຖ່າຍຊ້ຳ</option></select></div></div>
+                <div class="form-group"><label>ຜູ້ຖ່າຍ (Technician)</label><input type="text" id="xray_proc_technician"></div>
+                
+                <!-- ສ່ວນທີ່ເພີ່ມໃໝ່: ອັບໂຫຼດຮູບພາບ X-Ray -->
+                <div class="section-title">📎 ອັບໂຫຼດຮູບພາບ X-Ray (Attachments)</div>
+                <div style="background: #f9fbfd; padding: 15px; border: 1px dashed #ccc; border-radius: 8px; margin-bottom: 15px;">
+                    <input type="file" id="xray_file_upload" accept=".pdf, image/jpeg, image/png" style="display: none;" onchange="handleXrayFileUpload(event)">
+                    <button class="btn-action" style="background: #102a43; color: white;" onclick="document.getElementById('xray_file_upload').click()">📎 ເລືອກໄຟລ໌ຮູບ (JPG / PNG)</button>
+                    <div id="xray_attachments_list" style="margin-top: 10px; display: flex; flex-direction: column; gap: 5px;"></div>
+                </div>
+
+                <div class="form-group"><label>ສະຖານະການຖ່າຍ</label><select id="xray_proc_status"><option value="🟡 ລໍຖ້າຖ່າຍ">🟡 ລໍຖ້າຖ່າຍ</option><option value="🔵 ລໍຖ້າອ່ານຜົນ">🔵 ຖ່າຍແລ້ວ</option></select></div>
+                <div class="modal-actions"><button class="btn-cancel" onclick="document.getElementById('xrayProcessModal').style.display='none'">ຍົກເລີກ</button><button class="btn-submit" onclick="saveXrayProcess()" style="background: #102a43;">💾 ບັນທຶກການຖ່າຍ</button></div>
+            </div>
+        </div>
 
 <div class="modal-overlay" id="xrayReadModal">
     <div class="modal-card large">
@@ -1635,6 +1644,14 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
         <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;"><div class="form-group"><label>LVEF (%)</label><input type="text" id="echo_m_lvef"></div><div class="form-group"><label>LV Dimensions (mm)</label><input type="text" id="echo_m_lv"></div><div class="form-group"><label>LA Size (mm)</label><input type="text" id="echo_m_la"></div><div class="form-group"><label>Aortic Root (mm)</label><input type="text" id="echo_m_ao"></div><div class="form-group"><label>RV Size (mm)</label><input type="text" id="echo_m_rv"></div><div class="form-group"><label>ອື່ນໆ (Other)</label><input type="text" id="echo_m_other"></div></div>
         <div class="section-title">❤️ B. Heart Valves & C. Chamber/Structure</div>
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;"><div class="form-group"><label>Mitral & Aortic Valve</label><textarea id="echo_v_left" rows="2"></textarea></div><div class="form-group"><label>Tricuspid & Pulmonary Valve</label><textarea id="echo_v_right" rows="2"></textarea></div><div class="form-group"><label>Left Ventricle / Atrium</label><textarea id="echo_c_left" rows="2"></textarea></div><div class="form-group"><label>Right Ventricle / Atrium & Septum</label><textarea id="echo_c_right" rows="2"></textarea></div><div class="form-group" style="grid-column: span 2;"><label>Pericardium / Others</label><input type="text" id="echo_c_pericardium"></div></div>
+        <!-- ສ່ວນທີ່ເພີ່ມໃໝ່: ອັບໂຫຼດຮູບພາບ Echo -->
+        <div class="section-title">🖼️ ອັບໂຫຼດຮູບພາບປະກອບ (Echo Images)</div>
+        <div style="background: #f9fbfd; padding: 15px; border: 1px dashed #ccc; border-radius: 8px; margin-bottom: 15px;">
+            <input type="file" id="echo_file_upload" accept=".pdf, image/jpeg, image/png" style="display: none;" onchange="handleEchoFileUpload(event)">
+            <button class="btn-action" style="background: #6a1b9a; color: white;" onclick="document.getElementById('echo_file_upload').click()">📎 ເລືອກໄຟລ໌ຮູບ (JPG / PNG)</button>
+            <div id="echo_attachments_list" style="margin-top: 10px; display: flex; flex-direction: column; gap: 5px;"></div>
+        </div>
+
         <div class="section-title">📝 D. ບົດລາຍງານ (Echo Report)</div>
         <div class="form-group"><label>Findings (ລາຍລະອຽດທີ່ພົບ)</label><textarea id="echo_r_findings" rows="3"></textarea></div><div class="form-group"><label style="color: #6a1b9a; font-weight: bold;">Impression / Conclusion *</label><textarea id="echo_r_impression" rows="3"></textarea></div><div class="form-group"><label>Recommendation (ຄຳແນະນຳ)</label><textarea id="echo_r_recommendation" rows="2"></textarea></div>
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; border-top: 1px solid #eee; padding-top: 15px;"><div class="form-group"><label>ຜູ້ກວດ/ອ່ານຜົນ</label><input type="text" id="echo_r_doctor"></div><div class="form-group"><label>ສະຖານະ</label><select id="echo_proc_status"><option value="🟡 ລໍຖ້າກວດ">🟡 ລໍຖ້າກວດ</option><option value="🔵 ກຳລັງກວດ">🔵 ກຳລັງກວດ</option><option value="🟠 ລໍຖ້າລາຍງານ">🟠 ຖ່າຍແລ້ວ / ລໍຖ້າລາຍງານ</option><option value="🟣 ລໍຖ້າຢືນຢັນ">🟣 ລໍຖ້າຢືນຢັນ (Verify)</option><option value="🟢 ສຳເລັດ">🟢 ສຳເລັດ (ສົ່ງຜົນໃຫ້ແພດ)</option></select></div></div>
@@ -2321,6 +2338,68 @@ window.showCustomAlert = function(message, title = "ແຈ້ງເຕືອນ"
                     </div>
                 </div>
             `;
+        });
+    };
+
+// ================== ເພີ່ມໃໝ່: ຈັດການໄຟລ໌ X-Ray ==================
+    window.currentXrayAttachments = [];
+    window.handleXrayFileUpload = function(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        if (file.size > 2 * 1024 * 1024) { window.showCustomAlert('ໄຟລ໌ໃຫຍ່ເກີນໄປ! (ບໍ່ເກີນ 2MB)', 'ແຈ້ງເຕືອນ', '⚠️'); return; }
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            window.currentXrayAttachments.push({ name: file.name, type: file.type, data: e.target.result });
+            renderXrayAttachments();
+        };
+        reader.readAsDataURL(file);
+        event.target.value = '';
+    };
+    window.renderXrayAttachments = function() {
+        const listContainer = document.getElementById('xray_attachments_list');
+        listContainer.innerHTML = '';
+        if (window.currentXrayAttachments.length === 0) { listContainer.innerHTML = '<span style="font-size: 13px; color: #7b8794;">ຍັງບໍ່ມີເອກະສານແນບຕິດ</span>'; return; }
+        window.currentXrayAttachments.forEach((file, index) => {
+            const icon = file.type.includes('pdf') ? '📄' : '🖼️';
+            listContainer.innerHTML += `
+                <div style="display: flex; justify-content: space-between; align-items: center; background: #fff; border: 1px solid #ccc; padding: 5px 10px; border-radius: 4px;">
+                    <span style="font-size: 13px;">${icon} ${file.name}</span>
+                    <div>
+                        <a href="${file.data}" target="_blank" style="text-decoration: none; font-size: 14px; margin-right: 10px;" title="ເປີດເບິ່ງ">👁️</a>
+                        <button style="border: none; background: transparent; color: #d32f2f; cursor: pointer;" onclick="window.currentXrayAttachments.splice(${index}, 1); renderXrayAttachments();">🗑️</button>
+                    </div>
+                </div>`;
+        });
+    };
+
+    // ================== ເພີ່ມໃໝ່: ຈັດການໄຟລ໌ Echo ==================
+    window.currentEchoAttachments = [];
+    window.handleEchoFileUpload = function(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        if (file.size > 2 * 1024 * 1024) { window.showCustomAlert('ໄຟລ໌ໃຫຍ່ເກີນໄປ! (ບໍ່ເກີນ 2MB)', 'ແຈ້ງເຕືອນ', '⚠️'); return; }
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            window.currentEchoAttachments.push({ name: file.name, type: file.type, data: e.target.result });
+            renderEchoAttachments();
+        };
+        reader.readAsDataURL(file);
+        event.target.value = '';
+    };
+    window.renderEchoAttachments = function() {
+        const listContainer = document.getElementById('echo_attachments_list');
+        listContainer.innerHTML = '';
+        if (window.currentEchoAttachments.length === 0) { listContainer.innerHTML = '<span style="font-size: 13px; color: #7b8794;">ຍັງບໍ່ມີເອກະສານແນບຕິດ</span>'; return; }
+        window.currentEchoAttachments.forEach((file, index) => {
+            const icon = file.type.includes('pdf') ? '📄' : '🖼️';
+            listContainer.innerHTML += `
+                <div style="display: flex; justify-content: space-between; align-items: center; background: #fff; border: 1px solid #ccc; padding: 5px 10px; border-radius: 4px;">
+                    <span style="font-size: 13px;">${icon} ${file.name}</span>
+                    <div>
+                        <a href="${file.data}" target="_blank" style="text-decoration: none; font-size: 14px; margin-right: 10px;" title="ເປີດເບິ່ງ">👁️</a>
+                        <button style="border: none; background: transparent; color: #d32f2f; cursor: pointer;" onclick="window.currentEchoAttachments.splice(${index}, 1); renderEchoAttachments();">🗑️</button>
+                    </div>
+                </div>`;
         });
     };
 
@@ -3438,9 +3517,65 @@ window.toggleFollowUpFields = function() {
     window.renderDoctorXrayOrdersList = function(visitId) {
         let xrayOrders = JSON.parse(localStorage.getItem('clinic_xray_orders')) || []; let myXr = xrayOrders.filter(l => l.visit_id === visitId); const container = document.getElementById('cst2_xray_orders_list'); container.innerHTML = '';
         if(myXr.length === 0) { container.innerHTML = 'ຍັງບໍ່ມີການສັ່ງ X-Ray ສຳລັບ Visit ນີ້'; return; }
-        myXr.forEach((xr) => { let badgeColor = xr.status.includes('ສຳເລັດ') ? 'badge-green' : (xr.status.includes('ອ່ານຜົນ') ? 'badge-blue' : 'badge-yellow'); let viewBtn = xr.status.includes('ສຳເລັດ') ? `<button onclick="printXrayReport('${xr.xray_no}')" style="background:transparent; border:none; color:#1976d2; cursor:pointer;">👁️ ເບິ່ງຜົນ</button>` : ''; container.innerHTML += `<div style="display:flex; justify-content:space-between; margin-bottom: 4px; padding: 4px; background: #fff; border-radius: 4px;"><span><strong>${xr.xray_no}</strong>: ${xr.type}</span><span><span class="badge ${badgeColor}">${xr.status}</span> ${viewBtn}</span></div>`; });
+        myXr.forEach((xr) => { 
+            let badgeColor = xr.status.includes('ສຳເລັດ') ? 'badge-green' : (xr.status.includes('ອ່ານຜົນ') ? 'badge-blue' : 'badge-yellow'); 
+            let viewBtn = xr.status.includes('ສຳເລັດ') ? `<button type="button" onclick="printXrayReport('${xr.xray_no}')" style="background:transparent; border:none; color:#1976d2; cursor:pointer;">👁️ ເບິ່ງຜົນ</button>` : ''; 
+            
+            let attachmentsHtml = '';
+            if (xr.attachments && xr.attachments.length > 0) {
+                attachmentsHtml = `<div style="margin-top: 5px; padding-top: 5px; border-top: 1px dashed #ccc;">`;
+                xr.attachments.forEach(file => {
+                    attachmentsHtml += `
+                        <div style="display:inline-block; background:#e3f2fd; padding:3px 8px; border-radius:4px; margin-right:5px; font-size:12px; margin-bottom: 3px;">
+                            🖼️ ${file.name} 
+                            <a href="${file.data}" target="_blank" style="text-decoration:none; margin-left:5px; color:#1976d2; font-weight:bold;" title="ເປີດເບິ່ງໄຟລ໌">👁️ ເປີດຮູບ</a>
+                        </div>`;
+                });
+                attachmentsHtml += `</div>`;
+            }
+
+            container.innerHTML += `
+                <div style="display:flex; flex-direction:column; margin-bottom: 4px; padding: 6px; background: #fff; border: 1px solid #eee; border-radius: 4px;">
+                    <div style="display:flex; justify-content:space-between;">
+                        <span><strong>${xr.xray_no}</strong>: ${xr.type}</span>
+                        <span><span class="badge ${badgeColor}">${xr.status}</span> ${viewBtn}</span>
+                    </div>
+                    ${attachmentsHtml}
+                </div>`; 
+        });
     }
-window.openXrayProcessModal = function(index) {
+
+    window.renderDoctorEchoOrdersList = function(visitId) {
+        let echoOrders = JSON.parse(localStorage.getItem('clinic_echo_orders')) || []; let myEcho = echoOrders.filter(l => l.visit_id === visitId); const container = document.getElementById('cst2_echo_orders_list'); container.innerHTML = '';
+        if(myEcho.length === 0) { container.innerHTML = 'ຍັງບໍ່ມີການສັ່ງ Echo ສຳລັບ Visit ນີ້'; return; }
+        myEcho.forEach((ec) => { 
+            let badgeColor = ec.status.includes('ສຳເລັດ') ? 'badge-green' : 'badge-purple'; 
+            let viewBtn = ec.status.includes('ສຳເລັດ') ? `<button type="button" onclick="printEchoReport('${ec.echo_no}')" style="background:transparent; border:none; color:#6a1b9a; cursor:pointer;">👁️ ເບິ່ງຜົນ</button>` : ''; 
+            
+            let attachmentsHtml = '';
+            if (ec.attachments && ec.attachments.length > 0) {
+                attachmentsHtml = `<div style="margin-top: 5px; padding-top: 5px; border-top: 1px dashed #ccc;">`;
+                ec.attachments.forEach(file => {
+                    attachmentsHtml += `
+                        <div style="display:inline-block; background:#f3e5f5; padding:3px 8px; border-radius:4px; margin-right:5px; font-size:12px; margin-bottom: 3px;">
+                            🖼️ ${file.name} 
+                            <a href="${file.data}" target="_blank" style="text-decoration:none; margin-left:5px; color:#6a1b9a; font-weight:bold;" title="ເປີດເບິ່ງໄຟລ໌">👁️ ເປີດຮູບ</a>
+                        </div>`;
+                });
+                attachmentsHtml += `</div>`;
+            }
+
+            container.innerHTML += `
+                <div style="display:flex; flex-direction:column; margin-bottom: 4px; padding: 6px; background: #fff; border: 1px solid #eee; border-radius: 4px;">
+                    <div style="display:flex; justify-content:space-between;">
+                        <span><strong>${ec.echo_no}</strong>: ${ec.type}</span>
+                        <span><span class="badge ${badgeColor}">${ec.status}</span> ${viewBtn}</span>
+                    </div>
+                    ${attachmentsHtml}
+                </div>`; 
+        });
+    };
+    window.openXrayProcessModal = function(index) {
         let xrayOrders = JSON.parse(localStorage.getItem('clinic_xray_orders')) || []; 
         if(index < 0 || index >= xrayOrders.length) return; 
         const xr = xrayOrders[index]; 
@@ -3530,11 +3665,49 @@ window.openXrayProcessModal = function(index) {
         
         document.getElementById('echoProcessModal').style.display = 'flex';
     };
+    window.openXrayProcessModal = function(index) {
+        let xrayOrders = JSON.parse(localStorage.getItem('clinic_xray_orders')) || []; 
+        if(index < 0 || index >= xrayOrders.length) return; 
+        const xr = xrayOrders[index]; 
+        editingXrayIndex = index;
+        
+        const elNo = document.getElementById('xray_proc_no'); if(elNo) elNo.innerText = xr.xray_no; 
+        const elPt = document.getElementById('xray_proc_patient'); if(elPt) elPt.innerText = xr.patient_name; 
+        const elType = document.getElementById('xray_proc_type'); if(elType) elType.innerText = xr.type; 
+        const elReg = document.getElementById('xray_proc_region'); if(elReg) elReg.innerText = `${xr.region || '-'} / ${xr.side}`;
+        
+        const elStart = document.getElementById('xray_proc_time_start'); if(elStart) elStart.value = xr.process?.time_start || ''; 
+        const elEnd = document.getElementById('xray_proc_time_end'); if(elEnd) elEnd.value = xr.process?.time_end || ''; 
+        const elImg = document.getElementById('xray_proc_images'); if(elImg) elImg.value = xr.process?.images || 1; 
+        const elQual = document.getElementById('xray_proc_quality'); if(elQual) elQual.value = xr.process?.quality || 'ດີ (Good)'; 
+        const elTech = document.getElementById('xray_proc_technician'); if(elTech) elTech.value = xr.process?.tech || ''; 
+        const elNotes = document.getElementById('xray_proc_notes'); if(elNotes) elNotes.value = xr.process?.notes || '';
+        
+        const elStatus = document.getElementById('xray_proc_status');
+        if(elStatus) {
+            if(xr.status === '🟡 ລໍຖ້າຖ່າຍ') elStatus.value = '🔵 ລໍຖ້າອ່ານຜົນ'; 
+            else elStatus.value = xr.status;
+        }
+
+        window.currentXrayAttachments = xr.attachments ? [...xr.attachments] : [];
+        window.renderXrayAttachments();
+        
+        document.getElementById('xrayProcessModal').style.display = 'flex';
+    };
+
     window.saveXrayProcess = function() {
         if(editingXrayIndex === -1) return; let xrayOrders = JSON.parse(localStorage.getItem('clinic_xray_orders')) || []; let xr = xrayOrders[editingXrayIndex];
-        xr.process = { time_start: document.getElementById('xray_proc_time_start').value, time_end: document.getElementById('xray_proc_time_end').value, images: document.getElementById('xray_proc_images').value, quality: document.getElementById('xray_proc_quality').value, tech: document.getElementById('xray_proc_technician').value, notes: document.getElementById('xray_proc_notes').value }; xr.status = document.getElementById('xray_proc_status').value;
+        xr.process = { time_start: document.getElementById('xray_proc_time_start').value, time_end: document.getElementById('xray_proc_time_end').value, images: document.getElementById('xray_proc_images').value, quality: document.getElementById('xray_proc_quality').value, tech: document.getElementById('xray_proc_technician').value, notes: document.getElementById('xray_proc_notes')?.value || '' }; 
+        xr.status = document.getElementById('xray_proc_status').value;
+        xr.attachments = window.currentXrayAttachments; // ບັນທຶກຮູບລົງໃນ Object
+
         xrayOrders[editingXrayIndex] = xr; localStorage.setItem('clinic_xray_orders', JSON.stringify(xrayOrders));
         document.getElementById('xrayProcessModal').style.display = 'none'; window.showCustomAlert('ບັນທຶກການຖ່າຍຮູບສຳເລັດ!', 'ສຳເລັດ', '✅'); renderXrayPage();
+        
+        // ອັບເດດໜ້າຈໍທ່ານໝໍຖ້າເປີດຢູ່
+        if(document.getElementById('consultationStep2Modal').style.display === 'flex') {
+            renderDoctorXrayOrdersList(xr.visit_id);
+        }
     }
     window.openXrayReadModal = function(index) {
         let xrayOrders = JSON.parse(localStorage.getItem('clinic_xray_orders')) || []; if(index < 0 || index >= xrayOrders.length) return; const xr = xrayOrders[index]; editingXrayIndex = index;
@@ -3650,12 +3823,60 @@ window.openXrayProcessModal = function(index) {
         if(myEcho.length === 0) { container.innerHTML = 'ຍັງບໍ່ມີການສັ່ງ Echo ສຳລັບ Visit ນີ້'; return; }
         myEcho.forEach((ec) => { let badgeColor = ec.status.includes('ສຳເລັດ') ? 'badge-green' : 'badge-purple'; let viewBtn = ec.status.includes('ສຳເລັດ') ? `<button onclick="printEchoReport('${ec.echo_no}')" style="background:transparent; border:none; color:#6a1b9a; cursor:pointer;">👁️ ເບິ່ງຜົນ</button>` : ''; container.innerHTML += `<div style="display:flex; justify-content:space-between; margin-bottom: 4px; padding: 4px; background: #fff; border-radius: 4px;"><span><strong>${ec.echo_no}</strong>: ${ec.type}</span><span><span class="badge ${badgeColor}">${ec.status}</span> ${viewBtn}</span></div>`; });
     };
+window.openEchoProcessModal = function(index) {
+        let echoOrders = JSON.parse(localStorage.getItem('clinic_echo_orders')) || []; 
+        if(index < 0 || index >= echoOrders.length) return; 
+        const ec = echoOrders[index]; 
+        editingEchoIndex = index;
+        
+        const elNo = document.getElementById('echo_proc_no'); if(elNo) elNo.innerText = ec.echo_no; 
+        const elPt = document.getElementById('echo_proc_patient'); if(elPt) elPt.innerText = ec.patient_name; 
+        const elType = document.getElementById('echo_proc_type'); if(elType) elType.innerText = ec.type; 
+        const elInd = document.getElementById('echo_proc_indication'); if(elInd) elInd.innerText = ec.indication;
+        
+        const m_lvef = document.getElementById('echo_m_lvef'); if(m_lvef) m_lvef.value = ec.measurements?.lvef || ''; 
+        const m_lv = document.getElementById('echo_m_lv'); if(m_lv) m_lv.value = ec.measurements?.lv || ''; 
+        const m_la = document.getElementById('echo_m_la'); if(m_la) m_la.value = ec.measurements?.la || ''; 
+        const m_ao = document.getElementById('echo_m_ao'); if(m_ao) m_ao.value = ec.measurements?.ao || ''; 
+        const m_rv = document.getElementById('echo_m_rv'); if(m_rv) m_rv.value = ec.measurements?.rv || ''; 
+        const m_oth = document.getElementById('echo_m_other'); if(m_oth) m_oth.value = ec.measurements?.other || '';
+        
+        const v_left = document.getElementById('echo_v_left'); if(v_left) v_left.value = ec.valves?.left || ''; 
+        const v_right = document.getElementById('echo_v_right'); if(v_right) v_right.value = ec.valves?.right || ''; 
+        const c_left = document.getElementById('echo_c_left'); if(c_left) c_left.value = ec.chambers?.left || ''; 
+        const c_right = document.getElementById('echo_c_right'); if(c_right) c_right.value = ec.chambers?.right || ''; 
+        const c_peri = document.getElementById('echo_c_pericardium'); if(c_peri) c_peri.value = ec.chambers?.peri || '';
+        
+        const r_find = document.getElementById('echo_r_findings'); if(r_find) r_find.value = ec.report?.findings || ''; 
+        const r_imp = document.getElementById('echo_r_impression'); if(r_imp) r_imp.value = ec.report?.impression || ''; 
+        const r_rec = document.getElementById('echo_r_recommendation'); if(r_rec) r_rec.value = ec.report?.recommendation || ''; 
+        const r_doc = document.getElementById('echo_r_doctor'); if(r_doc) r_doc.value = ec.report?.doc_name || '';
+        
+        const elStatus = document.getElementById('echo_proc_status');
+        if(elStatus) {
+            if(ec.status === '🟡 ລໍຖ້າກວດ') elStatus.value = '🔵 ກຳລັງກວດ'; 
+            else elStatus.value = ec.status;
+        }
+
+        window.currentEchoAttachments = ec.attachments ? [...ec.attachments] : [];
+        window.renderEchoAttachments();
+        
+        document.getElementById('echoProcessModal').style.display = 'flex';
+    };
+
     window.saveEchoProcess = function() {
         if(editingEchoIndex === -1) return; let echoOrders = JSON.parse(localStorage.getItem('clinic_echo_orders')) || []; let ec = echoOrders[editingEchoIndex];
         ec.measurements = { lvef: document.getElementById('echo_m_lvef').value, lv: document.getElementById('echo_m_lv').value, la: document.getElementById('echo_m_la').value, ao: document.getElementById('echo_m_ao').value, rv: document.getElementById('echo_m_rv').value, other: document.getElementById('echo_m_other').value };
         ec.valves = { left: document.getElementById('echo_v_left').value, right: document.getElementById('echo_v_right').value }; ec.chambers = { left: document.getElementById('echo_c_left').value, right: document.getElementById('echo_c_right').value, peri: document.getElementById('echo_c_pericardium').value };
-        ec.report = { findings: document.getElementById('echo_r_findings').value, impression: document.getElementById('echo_r_impression').value, recommendation: document.getElementById('echo_r_recommendation').value, doc_name: document.getElementById('echo_r_doctor').value }; ec.status = document.getElementById('echo_proc_status').value;
+        ec.report = { findings: document.getElementById('echo_r_findings').value, impression: document.getElementById('echo_r_impression').value, recommendation: document.getElementById('echo_r_recommendation').value, doc_name: document.getElementById('echo_r_doctor').value }; 
+        ec.status = document.getElementById('echo_proc_status').value;
+        ec.attachments = window.currentEchoAttachments; // ບັນທຶກຮູບ
+
         echoOrders[editingEchoIndex] = ec; localStorage.setItem('clinic_echo_orders', JSON.stringify(echoOrders)); document.getElementById('echoProcessModal').style.display = 'none'; window.showCustomAlert('ບັນທຶກຜົນກວດ Echo ສຳເລັດ!', 'ສຳເລັດ', '✅'); renderEchoPage();
+        
+        if(document.getElementById('consultationStep2Modal').style.display === 'flex') {
+            renderDoctorEchoOrdersList(ec.visit_id);
+        }
     };
     window.printEchoReport = function(echoNo) {
         let echoOrders = JSON.parse(localStorage.getItem('clinic_echo_orders')) || []; const ec = echoOrders.find(e => e.echo_no === echoNo); if(!ec) return;
