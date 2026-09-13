@@ -3158,7 +3158,7 @@ window.toggleFollowUpFields = function() {
         renderConsultationsPage(); 
     });
     
-    window.renderConsultationsPage = function() { 
+window.renderConsultationsPage = function() { 
         const visits = JSON.parse(localStorage.getItem('clinic_visits')) || []; 
         const todayDate = new Date().toISOString().split('T')[0]; 
         let countToday = 0; let countProgress = 0; let countCompleted = 0; let countWaiting = 0; 
@@ -3211,7 +3211,19 @@ window.toggleFollowUpFields = function() {
                 tbody.appendChild(tr); 
             }); 
         } 
-    }
+    };
+
+    window.deleteConsultation = function(index) {
+        window.showCustomConfirm('ທ່ານຕ້ອງການລຶບຂໍ້ມູນການກວດນີ້ ແທ້ຫຼືບໍ່? (ເໝາະສຳລັບລຶບຂໍ້ມູນທົດລອງ)', 'ຢືນຢັນການລຶບ', function() {
+            let visits = JSON.parse(localStorage.getItem('clinic_visits')) || [];
+            if (index >= 0 && index < visits.length) {
+                visits.splice(index, 1);
+                localStorage.setItem('clinic_visits', JSON.stringify(visits));
+                if(typeof renderConsultationsPage === 'function') renderConsultationsPage();
+                window.showCustomAlert('ລຶບຂໍ້ມູນການກວດສຳເລັດແລ້ວ', 'ສຳເລັດ', '✅');
+            }
+        });
+    };
         const tr = document.createElement('tr'); 
         tr.innerHTML = `<td><strong>${v.visit_id}</strong></td><td>${v.patient_name}</td><td>${displayDate}</td><td style="font-weight:bold;">${v.time}</td><td>${v.doctor}</td><td>${displaySymDiag}</td><td><span class="badge ${badgeClass}">${v.status}</span></td><td style="text-align: center;"><span class="action-icon" title="ບັນທຶກຜົນການກວດ / ແກ້ໄຂ" onclick="openConsultationStep2(${trueIndex})">✏️</span></td>`; 
         tbody.appendChild(tr); }); } }
