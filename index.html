@@ -2148,17 +2148,15 @@ window.showCustomAlert = function(message, title = "ແຈ້ງເຕືອນ"
     window.deletePatient = function(ptId) {
         let patients = JSON.parse(localStorage.getItem('clinic_local_patients')) || globalPatientsList || [];
         
-        // ຄົ້ນຫາ Index ຂອງຄົນເຈັບ ໂດຍຮອງຮັບທຸກກໍລະນີ ID (ລວມທັງ undefined)
         let patientIndex = patients.findIndex(p => {
             let generatedId = p.patient_code || ('ID-' + p.id);
             return String(p.patient_code) === String(ptId) || 
                    String(p.id) === String(ptId) || 
                    String(generatedId) === String(ptId) ||
-                   p.fullname === "ທ. ສົມດີ ໄຊສົມພານ"; // ດັກຈັບຕາມຊື່ໂດຍກົງກໍລະນີ ID ເສຍຫາຍ
+                   p.fullname === "ທ. ສົມດີ ໄຊສົມພານ";
         });
         
         if (patientIndex === -1) {
-            // ຖ້າຫາໃນ LocalStorage ບໍ່ພົບ ແຕ່ຍັງເຫັນໃນໜ້າຈໍ ໃຫ້ບັງຄັບລຶບອອກຈາກໜ້າຈໍທັນທີ
             let tbody = document.getElementById('patient-table-body');
             if(tbody) tbody.innerHTML = `<tr><td colspan="12" style="text-align:center; color:#7b8794; padding: 20px;">ຍັງບໍ່ມີຂໍ້ມູນຄົນເຈັບໃນລະບົບ</td></tr>`;
             window.showCustomAlert('ລຶບຂໍ້ມູນອອກຈາກໜ້າຈໍສຳເລັດແລ້ວ', 'ສຳເລັດ', '✅');
@@ -2167,7 +2165,6 @@ window.showCustomAlert = function(message, title = "ແຈ້ງເຕືອນ"
         
         const patient = patients[patientIndex];
         
-        // ກວດສອບປະຫວັດ
         let visits = JSON.parse(localStorage.getItem('clinic_visits')) || [];
         let appointments = JSON.parse(localStorage.getItem('clinic_appointments')) || [];
         
@@ -2177,16 +2174,14 @@ window.showCustomAlert = function(message, title = "ແຈ້ງເຕືອນ"
         let confirmMessage = `ທ່ານຕ້ອງການລຶບຂໍ້ມູນຄົນເຈັບ: <strong>${patient.fullname || 'ຄົນນີ້'}</strong> ແທ້ຫຼືບໍ່?`;
         
         if (hasVisits || hasAppointments) {
-            confirmMessage = `⚠️ <strong>ຄຳເຕືອນ:</strong> ຄົນເຈັບນີ້ມີປະຫວັດນັດໝາຍ ຫຼື ການກວດແລ້ວ!<br><br>ການລຶບຈະເຮັດໃຫ້ <strong>ປະຫວັດທັງໝົດຂອງຄົນເຈັບນີ້ຖືກລຶບໄປພ້ອມກັນ!</strong> (ເໝາະສຳລັບການລຶບຂໍ້ມູນທົດລອງ)<br><br>ທ່ານຍັງຕ້ອງການລຶບຖິ້ມແທ້ຫຼືບໍ່?`;
+            confirmMessage = `⚠️ <strong>ຄຳເຕືອນ:</strong> ຄົນເຈັບນີ້ມີປະຫວັດນັດໝາຍ ຫຼື ການກວດແລ້ວ!<br><br>ການລຶບຈະເຮັດໃຫ້ <strong>ປະຫວັດທັງໝົດຂອງຄົນເຈັບນີ້ຖືກລຶບໄປພ້ອມກັນ!</strong><br><br>ທ່ານຍັງຕ້ອງການລຶບຖິ້ມແທ້ຫຼືບໍ່?`;
         }
         
         window.showCustomConfirm(confirmMessage, 'ຢືນຢັນການລຶບຂັ້ນເດັດຂາດ', async function() {
-            // 1. ລຶບອອກຈາກ Array LocalStorage
             patients.splice(patientIndex, 1);
             localStorage.setItem('clinic_local_patients', JSON.stringify(patients));
             globalPatientsList = patients;
             
-            // 2. ທຳຄວາມສະອາດປະຫວັດເກົ່າ
             if (hasVisits) {
                 visits = visits.filter(v => v.patient_name !== patient.fullname);
                 localStorage.setItem('clinic_visits', JSON.stringify(visits));
@@ -2196,7 +2191,6 @@ window.showCustomAlert = function(message, title = "ແຈ້ງເຕືອນ"
                 localStorage.setItem('clinic_appointments', JSON.stringify(appointments));
             }
             
-            // 3. ລຶບອອກຈາກ Firebase Firestore ຢ່າງເດັດຂາດ (ລວມທັງ Doc ID ທີ່ອາດຈະເປັນ undefined)
             try {
                 if (typeof db !== 'undefined') {
                     let docIdsToDelete = [String(ptId), String(patient.patient_code), String(patient.id), "undefined", "ID-undefined", "null"];
@@ -2205,24 +2199,18 @@ window.showCustomAlert = function(message, title = "ແຈ້ງເຕືອນ"
                             await db.collection("patients").doc(docId).delete().catch(() => {});
                         }
                     }
-                    
-                    // ຄົ້ນຫາຕາມຊື່ໃນ Firebase ແລ້ວລຶບຖິ້ມ
                     let snapshot = await db.collection("patients").where("fullname", "==", patient.fullname).get();
                     snapshot.forEach(async (doc) => {
                         await doc.ref.delete();
                     });
-                    
-                    console.log("✅ ລຶບຂໍ້ມູນອອກຈາກ Firebase ສຳເລັດ!");
                 }
             } catch (error) {
-                console.error("❌ ເກີດຂໍ້ຜິດພາດໃນການລຶບ Firebase:", error);
+                console.error("❌ ເກີດຜິດພາດໃນການລຶບ Firebase:", error);
             }
             
-            // 4. ອັບເດດໜ້າຈໍ Dashboard ແລະ Patients ໃຫ້ສະອາດທັນທີ
             renderDashboardTable(patients);
             if(typeof renderPatientsPage === 'function') renderPatientsPage();
-            
-            window.showCustomAlert('ລຶບຂໍ້ມູນຄົນເຈັບອອກຈາກລະບົບ (ທັງເຄື່ອງ ແລະ Cloud) ສຳເລັດແລ້ວ!', 'ສຳເລັດ', '✅');
+            window.showCustomAlert('ລຶບຂໍ້ມູນຄົນເຈັບອອກຈາກລະບົບສຳເລັດແລ້ວ!', 'ສຳເລັດ', '✅');
         });
     };
 
@@ -2409,10 +2397,7 @@ window.showCustomAlert = function(message, title = "ແຈ້ງເຕືອນ"
             const aptPatientSelect = document.getElementById('apt_patient');
             if (!aptPatientSelect) return;
             
-            // ລ້າງຄ່າເກົ່າອອກກ່ອນ
             aptPatientSelect.innerHTML = '<option value="">-- ເລືອກຄົນເຈັບ --</option>';
-            
-            // ດຶງຂໍ້ມູນຈາກ globalPatientsList ມາສະແດງ
             if (globalPatientsList && globalPatientsList.length > 0) {
                 globalPatientsList.forEach(p => {
                     const ptId = p.patient_code || ('ID-' + p.id);
@@ -2560,7 +2545,6 @@ window.showCustomAlert = function(message, title = "ແຈ້ງເຕືອນ"
     }
 
         async function loadDashboardData() {
-            // ດຶງຂໍ້ມູນຈາກ LocalStorage ມາກ່ອນສະເໝີ ປ້ອງກັນ API ຫຼັງບ້ານລຶບຂໍ້ມູນ
             let localPatients = JSON.parse(localStorage.getItem('clinic_local_patients'));
             if (!Array.isArray(localPatients)) localPatients = [];
             
@@ -2577,8 +2561,6 @@ window.showCustomAlert = function(message, title = "ແຈ້ງເຕືອນ"
             }
 
             globalPatientsList = patients; 
-            
-            // ແຕ້ມຕາຕະລາງ Dashboard ທັນທີ
             renderDashboardTable(patients);
 
             const aptPatientSelect = document.getElementById('apt_patient'); 
@@ -2592,7 +2574,6 @@ window.showCustomAlert = function(message, title = "ແຈ້ງເຕືອນ"
             let appointments = JSON.parse(localStorage.getItem('clinic_appointments')) || []; 
             if(document.getElementById('total-appointments')) document.getElementById('total-appointments').innerText = appointments.length;
             
-            // ດຶງຄ່າລາຍຮັບທີ່ປ້ອນເອງຈາກ LocalStorage (ເອົາລະບົບຄິດໄລ່ອັດຕະໂນມັດອອກຕາມຮ້ອງຂໍ)
             let manualRevenue = localStorage.getItem('manual_today_revenue') || 0; 
             if(document.getElementById('total-revenue')) document.getElementById('total-revenue').innerText = Number(manualRevenue).toLocaleString() + ' ₭';
             if(document.getElementById('manual-revenue-input')) document.getElementById('manual-revenue-input').value = manualRevenue;
@@ -2654,7 +2635,6 @@ window.showCustomAlert = function(message, title = "ແຈ້ງເຕືອນ"
                 localPatients.unshift(payload); 
             }
             
-            // ເຊຟລົງເຄື່ອງແລ້ວໃຫ້ອັບເດດຕາຕະລາງທັນທີ 100%
             localStorage.setItem('clinic_local_patients', JSON.stringify(localPatients));
             globalPatientsList = localPatients;
             
@@ -2664,30 +2644,18 @@ window.showCustomAlert = function(message, title = "ແຈ້ງເຕືອນ"
             document.getElementById('patientModal').style.display = 'none'; 
             window.showCustomAlert('ບັນທຶກຂໍ້ມູນຄົນເຈັບສຳເລັດແລ້ວ!', 'ສຳເລັດ', '✅');
 
-            // ================= ສົ່ງຂໍ້ມູນເຂົ້າ FIREBASE (ແກ້ໄຂໃຫ້ເຫຼືອຊຸດດຽວ) ================= //
             try {
                 if (typeof db !== 'undefined') {
-                    // ໃຊ້ patient_code ເປັນ ID ເພື່ອບໍ່ໃຫ້ຊ້ຳກັນ
                     const docId = payload.patient_code || Date.now().toString();
                     await db.collection("patients").doc(docId).set(payload);
                     console.log("✅ ບັນທຶກລົງ Firebase ສຳເລັດ!");
                 }
             } catch (error) {
-                console.error("❌ ເກີດຂໍ້ຜິດພາດໃນການບັນທຶກລົງ Firebase:", error);
-            }
-            // ================= ສິ້ນສຸດການສົ່ງເຂົ້າ FIREBASE ================= //
-
-            try { 
-                let method = currentEditPatientId ? 'PUT' : 'POST'; 
-                let url = currentEditPatientId ? `http://127.0.0.1:5000/api/patients/${currentEditPatientId}` : 'http://127.0.0.1:5000/api/patients'; 
-                await fetch(url, { method: method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) }); 
-            } catch (error) { 
-                console.log("Saved to local storage only."); 
+                console.error("❌ ເກີດຜິດພາດໃນການບັນທຶກລົງ Firebase:", error);
             }
         });
     }
 
-    // ================= EVENT LISTENERS ================= //
     document.addEventListener('DOMContentLoaded', () => {
         const timeDisplay = document.getElementById('current-time');
         const updateTime = () => { timeDisplay.innerText = new Date().toLocaleTimeString('lo-LA', { hour: '2-digit', minute: '2-digit' }); };
@@ -2695,7 +2663,7 @@ window.showCustomAlert = function(message, title = "ແຈ້ງເຕືອນ"
         
         setupInitialInventory();
         initSavePatient();
-        window.loadDoctorsList(); // ໂຫຼດລາຍຊື່ແພດທັນທີເມື່ອໜ້າເວັບພ້ອມ
+        window.loadDoctorsList();
 
         const menuItems = document.querySelectorAll('.menu-item');
         menuItems.forEach(item => {
@@ -2732,9 +2700,9 @@ window.showCustomAlert = function(message, title = "ແຈ້ງເຕືອນ"
         const aptModal = document.getElementById('appointmentModal');
         const openAptModal = () => { 
             window.generateAptNumber(); 
-            window.populateAppointmentPatientDropdown(); // ເອີ້ນຟັງຊັນດຶງລາຍຊື່ຄົນເຈັບໃໝ່ທຸກຄັ້ງທີ່ເປີດ
-            document.getElementById('apt_patient').value = ''; // Reset ຄ່າ Dropdown
-            document.getElementById('apt_phone').value = ''; // Reset ເບີໂທ
+            window.populateAppointmentPatientDropdown(); 
+            document.getElementById('apt_patient').value = ''; 
+            document.getElementById('apt_phone').value = ''; 
             aptModal.style.display = 'flex'; 
         };
 
@@ -2776,24 +2744,16 @@ window.showCustomAlert = function(message, title = "ແຈ້ງເຕືອນ"
         checkInventoryAlerts(); 
     });
 
-    // ຟັງຊັນສຳລັບບັນທຶກລາຍຮັບທີ່ປ້ອນເອງ
     window.saveManualRevenue = function() {
         let inputVal = document.getElementById('manual-revenue-input').value;
         let revenue = Number(inputVal) || 0;
-        
-        // ບັນທຶກລົງໃນ LocalStorage
         localStorage.setItem('manual_today_revenue', revenue);
-        
-        // ອັບເດດຕົວເລກໄປສະແດງຢູ່ກ່ອງດ້ານເທິງຂວາ
         if(document.getElementById('total-revenue')) {
             document.getElementById('total-revenue').innerText = revenue.toLocaleString() + ' ₭';
         }
-        
-        // ສະແດງຂໍ້ຄວາມແຈ້ງເຕືອນວ່າສຳເລັດ
         window.showCustomAlert('ບັນທຶກຍອດລາຍຮັບມື້ນີ້ ສຳເລັດແລ້ວ!', 'ສຳເລັດ', '✅');
     };
 
-    // ================= INVENTORY LOGIC ================= //
     function checkInventoryAlerts() {
         let inv = JSON.parse(localStorage.getItem('clinic_inventory')) || [];
         let expCount = 0; let expiringCount = 0; let lowCount = 0;
@@ -2811,12 +2771,6 @@ window.showCustomAlert = function(message, title = "ແຈ້ງເຕືອນ"
             item.status = itemStatus;
         });
         localStorage.setItem('clinic_inventory', JSON.stringify(inv));
-        const alertExpired = document.getElementById('alert-expired'); const alertExpiring = document.getElementById('alert-expiring'); const alertStock = document.getElementById('alert-stock'); const alertEmpty = document.getElementById('alert-empty');
-        let hasAlert = false;
-        if(expCount > 0) { document.getElementById('num-expired').innerText = expCount; alertExpired.style.display = 'flex'; hasAlert = true; } else { alertExpired.style.display = 'none'; }
-        if(expiringCount > 0) { document.getElementById('num-expiring').innerText = expiringCount; alertExpiring.style.display = 'flex'; hasAlert = true; } else { alertExpiring.style.display = 'none'; }
-        if(lowCount > 0) { document.getElementById('num-stock').innerText = lowCount; alertStock.style.display = 'flex'; hasAlert = true; } else { alertStock.style.display = 'none'; }
-        if(!hasAlert) alertEmpty.style.display = 'block'; else alertEmpty.style.display = 'none';
     }
 
     window.renderInventoryPage = function() {
@@ -2924,7 +2878,6 @@ window.showCustomAlert = function(message, title = "ແຈ້ງເຕືອນ"
         document.getElementById('invMovementModal').style.display = 'flex';
     };
 
-    // ================= PHARMACY (AUTO-DEDUCT) ================= //
     document.getElementById('btnSavePharmacy').addEventListener('click', () => { 
         const rxNo = document.getElementById('rx_no').value; const visitId = document.getElementById('rx_visit').value; const status = document.getElementById('rx_status').value; const instruction = document.getElementById('rx_instruction').value; const note = document.getElementById('rx_note').value; 
         if (!visitId) { window.showCustomAlert('ກະລຸນາເລືອກ Visit ID (ການກວດ)!', 'ແຈ້ງເຕືອນ', '⚠️'); return; } 
@@ -2959,7 +2912,6 @@ window.showCustomAlert = function(message, title = "ແຈ້ງເຕືອນ"
         localStorage.setItem('clinic_prescriptions', JSON.stringify(rxs)); if(!isNewDispense){ window.showCustomAlert('ບັນທຶກໃບຢາສຳເລັດ!', 'ສຳເລັດ', '✅'); } document.getElementById('pharmacyModal').style.display = 'none'; 
     });
 
-    // ================= OTHER MODULES (APPOINTMENT, CONSULT, LAB, XRAY, ECHO) ================= //
     function renderAppointmentsPage() { 
         const appointments = JSON.parse(localStorage.getItem('clinic_appointments')) || []; const todayDate = new Date().toISOString().split('T')[0]; let countToday = 0; let countPending = 0; let countConfirmed = 0; let countCompleted = 0;
         appointments.forEach(a => { if(a.appointment_date === todayDate) countToday++; if(a.status.includes('ລໍຖ້າ')) countPending++; if(a.status.includes('ຢືນຢັນ')) countConfirmed++; if(a.status.includes('ສຳເລັດ')) countCompleted++; });
@@ -3015,28 +2967,24 @@ window.toggleFollowUpFields = function() {
         document.getElementById('cst2_temp').value = visit.temp || ''; document.getElementById('cst2_bp').value = visit.bp || ''; document.getElementById('cst2_pulse').value = visit.pulse || ''; document.getElementById('cst2_spo2').value = visit.spo2 || ''; document.getElementById('cst2_weight').value = visit.weight || ''; document.getElementById('cst2_height').value = visit.height || ''; document.getElementById('cst2_bmi').value = visit.bmi || ''; document.getElementById('cst2_pain').value = visit.pain || ''; 
         document.getElementById('cst2_pe_general').value = visit.pe_general || ''; document.getElementById('cst2_pe_heent').value = visit.pe_heent || ''; document.getElementById('cst2_pe_rs').value = visit.pe_rs || ''; document.getElementById('cst2_pe_cvs').value = visit.pe_cvs || ''; document.getElementById('cst2_pe_gi').value = visit.pe_gi || ''; document.getElementById('cst2_pe_neuro').value = visit.pe_neuro || ''; document.getElementById('cst2_physical_exam').value = visit.physical_exam || ''; 
         
-        // ໂຫຼດຂໍ້ມູນໂຄງສ້າງໃໝ່
         document.getElementById('cst2_assessment').value = visit.assessment || '';
         document.getElementById('cst2_diag_primary').value = visit.diagnosis || ''; 
         document.getElementById('cst2_diag_secondary').value = visit.diag_secondary || ''; 
         document.getElementById('cst2_treatment_plan').value = visit.treatment || '';
         
-        // ໂຫຼດລາຍການຫັດຖະການ
         const procList = document.getElementById('cst2_procedure_list');
         procList.innerHTML = '';
         if(visit.procedures && Array.isArray(visit.procedures)) {
             visit.procedures.forEach(p => addProcedureRow(p));
         }
 
-        // ໂຫຼດລາຍການຢາ
         const rxBody = document.getElementById('cst2_prescription_body');
         rxBody.innerHTML = '';
         if(visit.prescriptions && Array.isArray(visit.prescriptions) && visit.prescriptions.length > 0) {
             visit.prescriptions.forEach(rx => addConsultRxRow(rx.name, rx.qty, rx.usage));
         } else {
-            addConsultRxRow(); // ເພີ່ມແຖວວ່າງໄວ້ 1 ແຖວສະເໝີ
+            addConsultRxRow(); 
             if(visit.medicine && typeof visit.medicine === 'string') {
-                // ສະໜັບສະໜູນຂໍ້ມູນເກົ່າທີ່ເປັນ text ທຳມະດາ
                 document.querySelector('.cst-med-name').value = visit.medicine;
             }
         }
@@ -3044,7 +2992,6 @@ window.toggleFollowUpFields = function() {
         document.getElementById('cst2_advice').value = visit.advice || ''; 
         document.getElementById('cst2_warning_signs').value = visit.warning_signs || ''; 
 
-        // ໂຫຼດນັດໝາຍ
         if(visit.next_apt || visit.fu_time || visit.fu_reason) {
             document.getElementById('cst2_require_followup').checked = true;
             document.getElementById('cst2_fu_date').value = visit.next_apt || '';
@@ -3072,13 +3019,11 @@ window.toggleFollowUpFields = function() {
             return; 
         } 
 
-        // ຮວບຮວມ ຫັດຖະການ
         let procedures = [];
         document.querySelectorAll('#cst2_procedure_list li').forEach(li => {
             procedures.push(li.getAttribute('data-proc'));
         });
 
-        // ຮວບຮວມ ລາຍການຢາ
         let prescriptions = [];
         document.querySelectorAll('#cst2_prescription_body tr').forEach(tr => {
             let name = tr.querySelector('.cst-med-name').value.trim();
@@ -3114,7 +3059,6 @@ window.toggleFollowUpFields = function() {
             pe_neuro: document.getElementById('cst2_pe_neuro').value, 
             physical_exam: document.getElementById('cst2_physical_exam').value, 
             
-            // ສ່ວນທີ່ອັບເດດໃໝ່
             assessment: document.getElementById('cst2_assessment').value,
             diagnosis: diagnosis, 
             diag_secondary: document.getElementById('cst2_diag_secondary').value, 
@@ -3132,10 +3076,8 @@ window.toggleFollowUpFields = function() {
         localStorage.setItem('clinic_visits', JSON.stringify(visits)); 
         window.showCustomAlert('ບັນທຶກຂໍ້ມູນການວິນິດໄສ ແລະ ສັ່ງຢາ ສຳເລັດ!', 'ສຳເລັດ', '✅'); 
         
-        // ຖ້າມີການສັ່ງຢາ ແລະ ໝໍກົດສຳເລັດ, ໃຫ້ສົ່ງໄປຫ້ອງຈ່າຍຢາແບບອັດຕະໂນມັດ
         if(prescriptions.length > 0 && document.getElementById('cst2_status').value === '🟢 ສຳເລັດ') {
             let rxs = JSON.parse(localStorage.getItem('clinic_prescriptions')) || [];
-            // ກວດສອບວ່າເຄີຍສົ່ງໄປແລ້ວຫຼືຍັງ ສຳລັບ Visit ນີ້ ເພື່ອບໍ່ໃຫ້ສົ່ງຊ້ຳ
             let existingRx = rxs.find(r => r.visit_id === visits[editingVisitIndex].visit_id);
             
             if (!existingRx) {
@@ -3172,7 +3114,72 @@ window.toggleFollowUpFields = function() {
         renderConsultationsPage(); 
     });
     
-    window.renderConsultationsPage = function() { const visits = JSON.parse(localStorage.getItem('clinic_visits')) || []; const todayDate = new Date().toISOString().split('T')[0]; let countToday = 0; let countProgress = 0; let countCompleted = 0; let countWaiting = 0; visits.forEach(v => { if(v.date === todayDate) countToday++; if(v.status.includes('ກຳລັງກວດ')) countProgress++; if(v.status.includes('ສຳເລັດ')) countCompleted++; if(v.status.includes('ລໍຖ້າ')) countWaiting++; }); document.getElementById('cst-stat-today').innerText = countToday + ' ຄັ້ງ'; document.getElementById('cst-stat-progress').innerText = countProgress + ' ຄົນ'; document.getElementById('cst-stat-completed').innerText = countCompleted + ' ຄົນ'; document.getElementById('cst-stat-waiting').innerText = countWaiting + ' ຄົນ'; const tbody = document.getElementById('consultation-table-body'); tbody.innerHTML = ''; if(visits.length === 0) { tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding: 20px;">ຍັງບໍ່ມີຂໍ້ມູນການກວດ</td></tr>'; } else { visits.sort((a,b) => (b.date + b.time).localeCompare(a.date + a.time)); visits.forEach((v, index) => { const dArr = v.date.split('-'); const displayDate = dArr.length === 3 ? `${dArr[2]}/${dArr[1]}/${dArr[0]}` : v.date; let badgeClass = 'badge-gray'; if(v.status.includes('ກຳລັງກວດ')) badgeClass = 'badge-yellow'; else if(v.status.includes('ສຳເລັດ')) badgeClass = 'badge-green'; else if(v.status.includes('ລໍຖ້າ')) badgeClass = 'badge-blue'; const displaySymDiag = (v.diagnosis) ? `<strong>${v.diagnosis}</strong>` : (v.symptoms || '-'); const originalVisits = JSON.parse(localStorage.getItem('clinic_visits')) || []; const trueIndex = originalVisits.findIndex(ov => ov.visit_id === v.visit_id); const tr = document.createElement('tr'); tr.innerHTML = `<td><strong>${v.visit_id}</strong></td><td>${v.patient_name}</td><td>${displayDate}</td><td style="font-weight:bold;">${v.time}</td><td>${v.doctor}</td><td>${displaySymDiag}</td><td><span class="badge ${badgeClass}">${v.status}</span></td><td style="text-align: center; white-space: nowrap;"><span class="action-icon" title="ບັນທຶກຜົນການກວດ / ແກ້ໄຂ" onclick="openConsultationStep2(${trueIndex})">✏️</span> <span class="action-icon" title="ລຶບຂໍ້ມູນການກວດ" onclick="deleteConsultation(${trueIndex})" style="color: #d32f2f;">🗑️</span></td>`; tbody.appendChild(tr); }); } }; window.deleteConsultation = function(index) { window.showCustomConfirm('ທ່ານຕ້ອງການລຶບຂໍ້ມູນການກວດນີ້ ແທ້ຫຼືບໍ່? (ເໝາະສຳລັບລຶບຂໍ້ມູນທົດລອງ)', 'ຢືນຢັນການລຶບ', function() { let visits = JSON.parse(localStorage.getItem('clinic_visits')) || []; if (index >= 0 && index < visits.length) { visits.splice(index, 1); localStorage.setItem('clinic_visits', JSON.stringify(visits)); if(typeof window.renderConsultationsPage === 'function') window.renderConsultationsPage(); window.showCustomAlert('ລຶບຂໍ້ມູນການກວດສຳເລັດແລ້ວ', 'ສຳເລັດ', '✅'); } }); };
+    window.renderConsultationsPage = function() { 
+        const visits = JSON.parse(localStorage.getItem('clinic_visits')) || []; 
+        const todayDate = new Date().toISOString().split('T')[0]; 
+        let countToday = 0; let countProgress = 0; let countCompleted = 0; let countWaiting = 0; 
+        
+        visits.forEach(v => { 
+            if(v.date === todayDate) countToday++; 
+            if(v.status.includes('ກຳລັງກວດ')) countProgress++; 
+            if(v.status.includes('ສຳເລັດ')) countCompleted++; 
+            if(v.status.includes('ລໍຖ້າ')) countWaiting++; 
+        }); 
+        
+        document.getElementById('cst-stat-today').innerText = countToday + ' ຄັ້ງ'; 
+        document.getElementById('cst-stat-progress').innerText = countProgress + ' ຄົນ'; 
+        document.getElementById('cst-stat-completed').innerText = countCompleted + ' ຄົນ'; 
+        document.getElementById('cst-stat-waiting').innerText = countWaiting + ' ຄົນ'; 
+        
+        const tbody = document.getElementById('consultation-table-body'); 
+        tbody.innerHTML = ''; 
+        
+        if(visits.length === 0) { 
+            tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding: 20px;">ຍັງບໍ່ມີຂໍ້ມູນການກວດ</td></tr>'; 
+        } else { 
+            visits.sort((a,b) => (b.date + b.time).localeCompare(a.date + a.time)); 
+            visits.forEach((v, index) => { 
+                const dArr = v.date.split('-'); 
+                const displayDate = dArr.length === 3 ? `${dArr[2]}/${dArr[1]}/${dArr[0]}` : v.date; 
+                let badgeClass = 'badge-gray'; 
+                if(v.status.includes('ກຳລັງກວດ')) badgeClass = 'badge-yellow'; 
+                else if(v.status.includes('ສຳເລັດ')) badgeClass = 'badge-green'; 
+                else if(v.status.includes('ລໍຖ້າ')) badgeClass = 'badge-blue'; 
+                
+                const displaySymDiag = (v.diagnosis) ? `<strong>${v.diagnosis}</strong>` : (v.symptoms || '-'); 
+                const originalVisits = JSON.parse(localStorage.getItem('clinic_visits')) || []; 
+                const trueIndex = originalVisits.findIndex(ov => ov.visit_id === v.visit_id); 
+                
+                const tr = document.createElement('tr'); 
+                tr.innerHTML = `
+                    <td><strong>${v.visit_id}</strong></td>
+                    <td>${v.patient_name}</td>
+                    <td>${displayDate}</td>
+                    <td style="font-weight:bold;">${v.time}</td>
+                    <td>${v.doctor}</td>
+                    <td>${displaySymDiag}</td>
+                    <td><span class="badge ${badgeClass}">${v.status}</span></td>
+                    <td style="text-align: center; white-space: nowrap;">
+                        <span class="action-icon" title="ບັນທຶກຜົນການກວດ / ແກ້ໄຂ" onclick="openConsultationStep2(${trueIndex})">✏️</span>
+                        <span class="action-icon" title="ລຶບຂໍ້ມູນການກວດ" onclick="deleteConsultation(${trueIndex})" style="color: #d32f2f;">🗑️</span>
+                    </td>
+                `; 
+                tbody.appendChild(tr); 
+            }); 
+        } 
+    };
+
+    window.deleteConsultation = function(index) {
+        window.showCustomConfirm('ທ່ານຕ້ອງການລຶບຂໍ້ມູນການກວດນີ້ ແທ້ຫຼືບໍ່? (ເໝາະສຳລັບລຶບຂໍ້ມູນທົດລອງ)', 'ຢືນຢັນການລຶບ', function() {
+            let visits = JSON.parse(localStorage.getItem('clinic_visits')) || [];
+            if (index >= 0 && index < visits.length) {
+                visits.splice(index, 1);
+                localStorage.setItem('clinic_visits', JSON.stringify(visits));
+                if(typeof window.renderConsultationsPage === 'function') window.renderConsultationsPage();
+                window.showCustomAlert('ລຶບຂໍ້ມູນການກວດສຳເລັດແລ້ວ', 'ສຳເລັດ', '✅');
+            }
+        });
+    };
 
     window.openLabOrderModal = function() { document.querySelectorAll('.lab-order-cb').forEach(cb => cb.checked = false); document.getElementById('lab_order_other').value = ''; document.getElementById('labOrderModal').style.display = 'flex'; };
     window.saveLabOrder = function() {
@@ -3197,11 +3204,8 @@ window.toggleFollowUpFields = function() {
 
         myLabs.forEach((lab) => { 
             let badgeColor = lab.status.includes('ສຳເລັດ') ? 'badge-green' : (lab.status.includes('ຮັບຕົວຢ່າງ') ? 'badge-gray' : 'badge-yellow'); 
-            
-            // ປຸ່ມເບິ່ງຜົນແບບ Structured Data (ຕາຕະລາງເດີມ)
             let viewBtn = lab.status.includes('ສຳເລັດ') ? `<button onclick="printLabReport('${lab.lab_no}')" style="background:transparent; border:none; color:#1976d2; cursor:pointer; font-weight:bold; margin-left:10px;">👁️ ເບິ່ງຕາຕະລາງຜົນ</button>` : ''; 
             
-            // ສ້າງລາຍການໄຟລ໌ແນບຕິດ (PDF/ຮູບພາບ)
             let attachmentsHtml = '';
             if (lab.attachments && lab.attachments.length > 0) {
                 attachmentsHtml = `<div style="margin-top: 5px; padding-top: 5px; border-top: 1px dashed #ccc;">`;
@@ -3237,7 +3241,6 @@ window.toggleFollowUpFields = function() {
             if(tbody.innerHTML === '') addLabResultRow(); 
         }
 
-        // ໂຫຼດໄຟລ໌ທີ່ເຄີຍແນບໄວ້ມາສະແດງ
         window.currentLabAttachments = lab.attachments ? [...lab.attachments] : [];
         window.renderLabAttachments();
 
@@ -3251,7 +3254,7 @@ window.toggleFollowUpFields = function() {
     rows.forEach(row => { const name = row.querySelector('.lr-name').value.trim(); if(name) { results.push({ name: name, res: row.querySelector('.lr-res').value.trim(), unit: row.querySelector('.lr-unit').value.trim(), ref: row.querySelector('.lr-ref').value.trim(), flag: row.querySelector('.lr-flag').value }); } });
         
         lab.results = results; 
-        lab.attachments = window.currentLabAttachments; // ບັນທຶກໄຟລ໌ແນບຕິດ
+        lab.attachments = window.currentLabAttachments; 
 
         labOrders[editingLabIndex] = lab; 
         localStorage.setItem('clinic_lab_orders', JSON.stringify(labOrders));
@@ -3259,7 +3262,6 @@ window.toggleFollowUpFields = function() {
         window.showCustomAlert('ບັນທຶກຂໍ້ມູນ Lab ແລະ ເອກະສານສຳເລັດ!', 'ສຳເລັດ', '✅'); 
         renderLabPage();
         
-        // ອັບເດດໜ້າຈໍຫ້ອງກວດຂອງໝໍໃຫ້ເຫັນໄຟລ໌ທັນທີ (ຖ້າເປີດຢູ່)
         if(document.getElementById('consultationStep2Modal').style.display === 'flex') {
             renderDoctorLabOrdersList(lab.visit_id);
         }
@@ -3286,14 +3288,13 @@ window.toggleFollowUpFields = function() {
     window.saveXrayOrder = function() {
         const visitId = document.getElementById('cst2_visit_id').innerText; const patientName = document.getElementById('cst2_pt_name').innerText; const doctor = document.getElementById('cst2_doctor').innerText;
         const type = document.getElementById('xray_order_type').value; const indication = document.getElementById('xray_order_indication').value.trim();
-        const price = Number(document.getElementById('xray_order_price').value) || 0; // ດຶງລາຄາຈາກຊ່ອງປ້ອນ
+        const price = Number(document.getElementById('xray_order_price').value) || 0; 
         
         if(!type || !indication) { window.showCustomAlert('ກະລຸນາເລືອກປະເພດການກວດ ແລະ ລະບຸເຫດຜົນ!', 'ແຈ້ງເຕືອນ', '⚠️'); return; }
         const dateStr = new Date().toISOString().slice(2, 10).replace(/-/g, ''); const randomNum = Math.floor(Math.random() * 900) + 100; const xrayNo = `XR-${dateStr}-${randomNum}`;
         const newOrder = { xray_no: xrayNo, visit_id: visitId, patient_name: patientName, doctor: doctor, date: new Date().toISOString().split('T')[0], type: type, region: document.getElementById('xray_order_region').value.trim(), side: document.getElementById('xray_order_side').value, price: price, indication: indication, instruction: document.getElementById('xray_order_instruction').value.trim(), status: '🟡 ລໍຖ້າຖ່າຍ', process: { time_start: '', time_end: '', images: 1, quality: 'ດີ (Good)', tech: '', notes: '' }, report: { findings: '', impression: '', recommendation: '', radiologist: '' } };
         let xrayOrders = JSON.parse(localStorage.getItem('clinic_xray_orders')) || []; xrayOrders.push(newOrder); localStorage.setItem('clinic_xray_orders', JSON.stringify(xrayOrders));
         
-        // ບັນທຶກລາຍຮັບຕາມລາຄາທີ່ປ້ອນ (ເອົາ 150000 ທີ່ຝັງໄວ້ອອກແລ້ວ)
         if(price > 0) {
             let posPayments = JSON.parse(localStorage.getItem('clinic_payments')) || []; posPayments.push({ amount: price, desc: `X-Ray Service: ${type}`, visit_id: visitId }); localStorage.setItem('clinic_payments', JSON.stringify(posPayments));
         }
@@ -3365,14 +3366,13 @@ window.toggleFollowUpFields = function() {
     window.saveEchoOrder = function() {
         const visitId = document.getElementById('cst2_visit_id').innerText; const patientName = document.getElementById('cst2_pt_name').innerText; const doctor = document.getElementById('cst2_doctor').innerText;
         const type = document.getElementById('echo_order_type').value; const indication = document.getElementById('echo_order_indication').value.trim();
-        const price = Number(document.getElementById('echo_order_price').value) || 0; // ດຶງລາຄາຈາກຊ່ອງປ້ອນ
+        const price = Number(document.getElementById('echo_order_price').value) || 0; 
 
         if(!type || !indication) { window.showCustomAlert('ກະລຸນາເລືອກປະເພດການກວດ ແລະ ລະບຸເຫດຜົນ!', 'ແຈ້ງເຕືອນ', '⚠️'); return; }
         const dateStr = new Date().toISOString().slice(2, 10).replace(/-/g, ''); const randomNum = Math.floor(Math.random() * 900) + 100; const echoNo = `ECHO-${dateStr}-${randomNum}`;
         const newOrder = { echo_no: echoNo, visit_id: visitId, patient_name: patientName, doctor: doctor, date: new Date().toISOString().split('T')[0], type: type, price: price, indication: indication, instruction: document.getElementById('echo_order_instruction').value.trim(), status: '🟡 ລໍຖ້າກວດ', measurements: { lvef:'', lv:'', la:'', ao:'', rv:'', other:'' }, valves: { left:'', right:'' }, chambers: { left:'', right:'', peri:'' }, report: { findings:'', impression:'', recommendation:'', doc_name:'' } };
         let echoOrders = JSON.parse(localStorage.getItem('clinic_echo_orders')) || []; echoOrders.push(newOrder); localStorage.setItem('clinic_echo_orders', JSON.stringify(echoOrders));
         
-        // ບັນທຶກລາຍຮັບຕາມລາຄາທີ່ປ້ອນ (ເອົາ 300000 ທີ່ຝັງໄວ້ອອກແລ້ວ)
         if(price > 0) {
             let posPayments = JSON.parse(localStorage.getItem('clinic_payments')) || []; posPayments.push({ amount: price, desc: `Echo Service: ${type}`, visit_id: visitId }); localStorage.setItem('clinic_payments', JSON.stringify(posPayments));
         }
@@ -3420,8 +3420,8 @@ window.toggleFollowUpFields = function() {
             if(e.status.includes('ສຳເລັດ')) { cComp++; totalRev += Number(e.price || 0); } 
         });
         document.getElementById('echo-stat-waiting').innerText = cWait; document.getElementById('echo-stat-progress').innerText = cProg; document.getElementById('echo-stat-report').innerText = cRep; document.getElementById('echo-stat-completed').innerText = cComp; 
-        document.getElementById('echo-stat-revenue').innerText = totalRev.toLocaleString() + ' ₭'; // ດຶງຈາກລາຄາທີ່ປ້ອນຈິງ
-        // ... (ສ່ວນທີ່ເຫຼືອຂອງ renderEchoPage ຄືເກົ່າທັງໝົດ)
+        document.getElementById('echo-stat-revenue').innerText = totalRev.toLocaleString() + ' ₭'; 
+        
         const tbody = document.getElementById('echo-table-body'); tbody.innerHTML = '';
         if(list.length === 0) { tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding: 20px; color:#7b8794;">ຍັງບໍ່ມີຄຳສັ່ງກວດ Echo</td></tr>'; } else {
             list.sort((a,b) => b.echo_no.localeCompare(a.echo_no));
@@ -3434,13 +3434,8 @@ window.toggleFollowUpFields = function() {
         }
     }
 
-    // ================= DOCTOR MANAGEMENT SYSTEM (ລະບົບຈັດການແພດ) ================= //
-    
-    // ຟັງຊັນສຳລັບໂຫຼດລາຍຊື່ແພດເຂົ້າໄປໃນທຸກ Dropdown ອັດຕະໂນມັດ
     window.loadDoctorsList = function() {
         let doctors = JSON.parse(localStorage.getItem('clinic_doctors')) || [];
-        
-        // 1. ອັບເດດ Dropdown ຫຼັກທີ່ມີ Class .dynamic-doctor-select
         const mainSelects = document.querySelectorAll('.dynamic-doctor-select');
         mainSelects.forEach(select => {
             const firstOption = select.options.length > 0 ? select.options[0].outerHTML : '<option value="">-- ເລືອກແພດ --</option>';
@@ -3450,7 +3445,6 @@ window.toggleFollowUpFields = function() {
             });
         });
 
-        // 2. ອັບເດດ Dropdown ໃນແຖບ Filter ຕ່າງໆ
         const allSelects = document.querySelectorAll('select.filter-input');
         allSelects.forEach(select => {
             if (select.options.length > 0 && select.options[0].text.includes('ແພດ')) {
@@ -3463,15 +3457,13 @@ window.toggleFollowUpFields = function() {
         });
     };
 
-    // ເປີດປ໋ອບອັບເພີ່ມແພດ
     window.openAddDoctorModal = function() {
         document.getElementById('new_doctor_name').value = '';
         document.getElementById('new_doctor_specialty').value = '';
-        document.getElementById('addDoctorModal').style.zIndex = '3000'; // ເຮັດໃຫ້ມັນລອຍຂຶ້ນມາຢູ່ທາງໜ້າປ໋ອບອັບອື່ນໆ
+        document.getElementById('addDoctorModal').style.zIndex = '3000'; 
         document.getElementById('addDoctorModal').style.display = 'flex';
     };
 
-    // ບັນທຶກແພດໃໝ່
     window.saveNewDoctor = function() {
         const name = document.getElementById('new_doctor_name').value.trim();
         const specialty = document.getElementById('new_doctor_specialty').value.trim();
@@ -3482,7 +3474,6 @@ window.toggleFollowUpFields = function() {
         }
 
         let doctors = JSON.parse(localStorage.getItem('clinic_doctors')) || [];
-        // ກວດສອບຊື່ຊ້ຳກັນ
         if (doctors.find(d => d.name === name)) {
             window.showCustomAlert('ມີຊື່ແພດນີ້ໃນລະບົບແລ້ວ!', 'ແຈ້ງເຕືອນ', '⚠️');
             return;
@@ -3500,38 +3491,29 @@ window.toggleFollowUpFields = function() {
         
         document.getElementById('addDoctorModal').style.display = 'none';
         window.showCustomAlert('ເພີ່ມລາຍຊື່ແພດໃໝ່ສຳເລັດແລ້ວ!', 'ສຳເລັດ', '✅');
-        
-        // ອັບເດດລາຍຊື່ທັນທີຫຼັງຈາກບັນທຶກ
         window.loadDoctorsList();
         
-        // ດຶງຊື່ເຂົ້າໄປໃສ່ກ່ອງອັດຕະໂນມັດ ຖ້າກຳລັງເປີດໜ້າເພີ່ມນັດໝາຍ ຫຼື ເປີດການກວດຢູ່
         const aptDoctorSelect = document.getElementById('apt_doctor');
         if(aptDoctorSelect) aptDoctorSelect.value = name;
         const cstDoctorSelect = document.getElementById('cst1_doctor');
         if(cstDoctorSelect) cstDoctorSelect.value = name;
     };
 
-    // ================= REPORT MODULE (ລະບົບລາຍງານ) ================= //
-    // 1. ປັບປຸງຟັງຊັນ handleShowReport ເພື່ອໃຫ້ຮຽກໃຊ້ງານການປະມວນຜົນລາຍງານ
     window.handleShowReport = function() {
         document.getElementById('reportConfigModal').style.display = 'none';
         window.showCustomAlert('ກຳລັງສະຫຼຸບຂໍ້ມູນລາຍງານ...', 'ລາຍງານ', '📊', () => {
-            // ເປີດໜ້າລາຍງານ ແລະ ປະມວນຜົນ
             document.querySelector('.menu-item[data-page="reports"]').click();
             window.renderReportsPage(); 
         });
     };
 
-    // 2. ຟັງຊັນຫຼັກໃນການດຶງຂໍ້ມູນມາສະແດງໃນໜ້າລາຍງານ
     window.renderReportsPage = function() {
-        // ດຶງຄ່າຈາກຟອມເງື່ອນໄຂ
         const repType = document.getElementById('rep_type').value;
         const startDate = document.getElementById('rep_start_date').value;
         const endDate = document.getElementById('rep_end_date').value;
         const doctorFilter = document.getElementById('rep_doctor').value;
         const statusFilter = document.getElementById('rep_status').value;
 
-        // ອັບເດດຫົວຂໍ້ໜ້າລາຍງານ
         const typeSelect = document.getElementById('rep_type');
         document.getElementById('rep_title_display').innerText = `📊 ລາຍງານ: ${typeSelect.options[typeSelect.selectedIndex].text}`;
         
@@ -3541,14 +3523,12 @@ window.toggleFollowUpFields = function() {
         else if (endDate) dateDisplay = `ຈົນເຖິງວັນທີ: ${endDate}`;
         document.getElementById('rep_date_display').innerText = dateDisplay;
 
-        // ດຶງຂໍ້ມູນທັງໝົດຈາກ LocalStorage
         let patients = JSON.parse(localStorage.getItem('clinic_local_patients')) || globalPatientsList || [];
         let visits = JSON.parse(localStorage.getItem('clinic_visits')) || [];
         let appointments = JSON.parse(localStorage.getItem('clinic_appointments')) || [];
         let rxs = JSON.parse(localStorage.getItem('clinic_prescriptions')) || [];
-        let payments = JSON.parse(localStorage.getItem('clinic_payments')) || []; // Mockup ລາຍຮັບ
+        let payments = JSON.parse(localStorage.getItem('clinic_payments')) || []; 
         
-        // ອັບເດດ Stats ລວມດ້ານເທິງ (ຄິດໄລ່ສະເພາະຊ່ວງວັນທີທີ່ເລືອກ)
         const isDateInRange = (dateStr) => {
             if (!dateStr) return false;
             let d = new Date(dateStr).getTime();
@@ -3562,7 +3542,6 @@ window.toggleFollowUpFields = function() {
         let statApts = appointments.filter(a => (!startDate && !endDate) || isDateInRange(a.appointment_date)).length;
         let statRxs = rxs.filter(r => (!startDate && !endDate) || isDateInRange(r.date)).length;
         
-    // ຄິດໄລ່ຍອດລວມລາຍຮັບຈາກລະບົບ Payments ຢ່າງດຽວ ບໍ່ຝັງລາຄາຕາຍຕົວ
         let statRev = payments.reduce((sum, p) => sum + Number(p.amount || 0), 0);
         statRev += (statRxs * 50000); 
 
@@ -3572,17 +3551,12 @@ window.toggleFollowUpFields = function() {
         document.getElementById('rep-stat-rxs').innerText = statRxs.toLocaleString();
         document.getElementById('rep-stat-revenue').innerText = statRev.toLocaleString() + ' ₭';
 
-        // ກະກຽມຕາຕະລາງ
         const thead = document.getElementById('report-thead-tr');
         const tbody = document.getElementById('report-tbody');
         thead.innerHTML = '';
         tbody.innerHTML = '';
 
         let filteredData = [];
-
-        // ----------------------------------------------------
-        // ແຍກການປະມວນຜົນຕາມປະເພດລາຍງານ
-        // ----------------------------------------------------
         
         if (repType === 'consultation') {
             thead.innerHTML = `<th>Visit ID</th><th>ວັນທີ</th><th>ຄົນເຈັບ</th><th>ແພດຜູ້ກວດ</th><th>ການວິນິດໄສ</th><th>ສະຖານະ</th>`;
@@ -3599,7 +3573,6 @@ window.toggleFollowUpFields = function() {
                 tbody.appendChild(tr);
             });
         } 
-        
         else if (repType === 'pharmacy') {
             thead.innerHTML = `<th>ເລກໃບຢາ</th><th>ວັນທີ</th><th>ຄົນເຈັບ</th><th>ແພດຜູ້ສັ່ງ</th><th>ຈຳນວນລາຍການຢາ</th><th>ສະຖານະ</th>`;
             filteredData = rxs.filter(r => {
@@ -3616,11 +3589,9 @@ window.toggleFollowUpFields = function() {
                 tbody.appendChild(tr);
             });
         }
-
         else if (repType === 'revenue') {
             thead.innerHTML = `<th>ວັນທີ / ເວລາ</th><th>ລາຍການ / ລາຍລະອຽດ</th><th>Visit ID ອ້າງອີງ</th><th>ຈຳນວນເງິນ (ກີບ)</th>`;
-            // Mockup Revenue data integration
-            filteredData = payments; // In real system, this would filter by date
+            filteredData = payments; 
             if (filteredData.length === 0) tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;">ບໍ່ພົບຂໍ້ມູນລາຍຮັບໃນເງື່ອນໄຂນີ້</td></tr>`;
             let totalTableRev = 0;
             filteredData.forEach(p => {
@@ -3629,13 +3600,11 @@ window.toggleFollowUpFields = function() {
                 tr.innerHTML = `<td>${new Date().toLocaleDateString('en-GB')}</td><td>${p.desc || 'ບໍລິການ/ຄ່າຢາ'}</td><td>${p.visit_id || '-'}</td><td style="color:#16864b; font-weight:bold; text-align:right;">${Number(p.amount).toLocaleString()} ₭</td>`;
                 tbody.appendChild(tr);
             });
-            // ແຖວສະຫຼຸບຍອດລວມ
             let trTotal = document.createElement('tr');
             trTotal.style.background = '#e3f2fd';
             trTotal.innerHTML = `<td colspan="3" style="text-align:right; font-weight:bold;">ລວມລາຍຮັບທັງໝົດໃນຕາຕະລາງ:</td><td style="color:#1976d2; font-weight:bold; text-align:right; font-size:16px;">${totalTableRev.toLocaleString()} ₭</td>`;
             tbody.appendChild(trTotal);
         }
-
         else if (repType === 'patient') {
             thead.innerHTML = `<th>Patient ID</th><th>ຊື່ ແລະ ນາມສະກຸນ</th><th>ເພດ</th><th>ເບີໂທ</th><th>ທີ່ຢູ່</th><th>ສະຖານະ</th>`;
             filteredData = patients;
@@ -3646,16 +3615,11 @@ window.toggleFollowUpFields = function() {
                 tbody.appendChild(tr);
             });
         }
-        
         else {
-            // Default Fallback
             tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:20px;">ເລືອກເງື່ອນໄຂແລ້ວກົດ "ສະແດງລາຍງານ" ເພື່ອເບິ່ງຂໍ້ມູນ</td></tr>`;
         }
     };
 
-// ================= POS SALE / PAYMENT MODULE (ລະບົບຮັບເງິນ ແລະ ພິມບິນ) ================= //
-
-    // ດັກຈັບປຸ່ມ "🛒 ເຂົ້າໜ້າຂາຍ / ຮັບເງິນ" ໃນໜ້າ POS Dashboard ໃຫ້ເປີດ Modal ນີ້ແທນ Alert ເກົ່າ
     document.addEventListener('DOMContentLoaded', () => {
         setTimeout(() => {
             document.querySelectorAll('.btn-sell').forEach(btn => {
@@ -3665,9 +3629,7 @@ window.toggleFollowUpFields = function() {
         }, 1000);
     });
 
-    // ຟັງຊັນເປີດໜ້າຈໍຂາຍ
     window.openPosSaleModal = function() {
-        // ກວດສອບວ່າເປີດຮອບ POS ຢູ່ຫຼືບໍ່
         if (document.getElementById('pos-active-dashboard').style.display === 'none') {
             window.showCustomAlert('ກະລຸນາເປີດຮອບຮັບເງິນ (Open POS) ກ່ອນເປີດໜ້າຈໍຂາຍ!', 'ແຈ້ງເຕືອນ', '⚠️');
             return;
@@ -3676,21 +3638,17 @@ window.toggleFollowUpFields = function() {
         const activeSession = document.getElementById('pos_dash_id') ? document.getElementById('pos_dash_id').innerText : 'POS-TEST';
         document.getElementById('pos_sale_session_id').innerText = activeSession;
         
-        // ລ້າງຂໍ້ມູນເກົ່າ
         document.getElementById('pos_search_visit').value = '';
         document.getElementById('pos_sale_items_body').innerHTML = '';
         document.getElementById('pos_sale_discount').value = 0;
         document.getElementById('pos_sale_received').value = '';
         document.getElementById('pos_sale_method').value = 'Cash';
         
-        // ເພີ່ມແຖວວ່າງເລີ່ມຕົ້ນ 1 ແຖວ
         posAddItemRow(); 
         posCalculateTotal();
-        
         document.getElementById('posSaleModal').style.display = 'flex';
     };
 
-    // ຟັງຊັນເພີ່ມແຖວລາຍການໃໝ່
     window.posAddItemRow = function(name = '', qty = 1, price = 0) {
         const tbody = document.getElementById('pos_sale_items_body');
         const tr = document.createElement('tr');
@@ -3705,7 +3663,6 @@ window.toggleFollowUpFields = function() {
         posCalculateTotal();
     };
 
-// ຟັງຊັນດຶງຂໍ້ມູນຄ່າໃຊ້ຈ່າຍຕົວຈິງ ອັບເດດໃຫ້ຄົ້ນຫາດ້ວຍ PT-, ຊື່ຄົນເຈັບ, ຫຼື Visit ID ໄດ້
     window.posMockLoadData = function() {
         const searchVal = document.getElementById('pos_search_visit').value.trim();
         if (!searchVal) {
@@ -3717,21 +3674,13 @@ window.toggleFollowUpFields = function() {
         const patients = JSON.parse(localStorage.getItem('clinic_local_patients')) || globalPatientsList || [];
         
         let targetVisit = null;
-
-        // 1. ລອງຄົ້ນຫາດ້ວຍ Visit ID (V-...) ໂດຍກົງ
         targetVisit = visits.find(v => v.visit_id === searchVal);
 
-        // 2. ຖ້າບໍ່ພົບ ລອງຄົ້ນຫາດ້ວຍ ລະຫັດຄົນເຈັບ (PT-...) ຫຼື ຊື່ຄົນເຈັບ
         if (!targetVisit) {
-            // ຊອກຫາຂໍ້ມູນຄົນເຈັບກ່ອນ
             const matchedPatient = patients.find(p => p.patient_code === searchVal || p.fullname === searchVal);
-            
             if (matchedPatient) {
-                // ດຶງປະຫວັດການກວດທັງໝົດຂອງຄົນເຈັບຄົນນີ້
                 const patientVisits = visits.filter(v => v.patient_name === matchedPatient.fullname);
-                
                 if (patientVisits.length > 0) {
-                    // ລຽງລຳດັບເພື່ອເອົາ Visit ຫຼ້າສຸດ (ໃໝ່ສຸດ) ມາຄິດໄລ່ເງິນ
                     patientVisits.sort((a, b) => new Date(b.date) - new Date(a.date));
                     targetVisit = patientVisits[0]; 
                 }
@@ -3743,22 +3692,19 @@ window.toggleFollowUpFields = function() {
             return;
         }
 
-        const visitIdToBill = targetVisit.visit_id; // ໃຊ້ Visit ID ນີ້ໃນການກວາດຫາຄ່າໃຊ້ຈ່າຍທັງໝົດ
+        const visitIdToBill = targetVisit.visit_id; 
         document.getElementById('pos_sale_items_body').innerHTML = '';
         let hasItems = false;
         
-        // 1. ຄ່າກວດພະຍາດ (Doctor Fee)
         posAddItemRow('ຄ່າກວດພະຍາດ (Consultation)', 1, 0);
         hasItems = true;
 
-        // 2. ຄ່າຫັດຖະການ (Procedures)
         if(targetVisit.procedures && targetVisit.procedures.length > 0) {
             targetVisit.procedures.forEach(proc => {
                 posAddItemRow(`ຄ່າຫັດຖະການ: ${proc}`, 1, 0);
             });
         }
 
-        // 3. ຄ່າຢາ (Pharmacy)
         const rxs = JSON.parse(localStorage.getItem('clinic_prescriptions')) || [];
         const rx = rxs.find(r => r.visit_id === visitIdToBill);
         if (rx && rx.items && rx.items.length > 0) {
@@ -3771,7 +3717,6 @@ window.toggleFollowUpFields = function() {
             });
         }
 
-        // 4. ຄ່າ Lab
         const labs = JSON.parse(localStorage.getItem('clinic_lab_orders')) || [];
         const myLabs = labs.filter(l => l.visit_id === visitIdToBill);
         myLabs.forEach(lab => {
@@ -3780,14 +3725,12 @@ window.toggleFollowUpFields = function() {
             });
         });
 
-        // 5. ຄ່າ X-Ray
         const xrays = JSON.parse(localStorage.getItem('clinic_xray_orders')) || [];
         const myXrays = xrays.filter(x => x.visit_id === visitIdToBill);
         myXrays.forEach(xr => {
             posAddItemRow(`ຄ່າ X-Ray: ${xr.type}`, 1, xr.price || 0); 
         });
 
-        // 6. ຄ່າ Echo
         const echos = JSON.parse(localStorage.getItem('clinic_echo_orders')) || [];
         const myEchos = echos.filter(e => e.visit_id === visitIdToBill);
         myEchos.forEach(ec => {
@@ -3799,7 +3742,6 @@ window.toggleFollowUpFields = function() {
         }
     };
 
-    // ຟັງຊັນຄິດໄລ່ຍອດເງິນ ແລະ ເງິນທອນ
     window.posCalculateTotal = function() {
         const rows = document.querySelectorAll('#pos_sale_items_body tr');
         let subtotal = 0;
@@ -3821,7 +3763,6 @@ window.toggleFollowUpFields = function() {
         const method = document.getElementById('pos_sale_method').value;
         let received = Number(document.getElementById('pos_sale_received').value) || 0;
         
-        // ຖ້າເປັນການໂອນ ໃຫ້ຍອດຮັບເທົ່າກັບຍອດລວມສະເໝີ
         if (method === 'Transfer') {
             document.getElementById('pos_sale_received').value = finalGrandTotal; 
             received = finalGrandTotal;
@@ -3831,7 +3772,6 @@ window.toggleFollowUpFields = function() {
         document.getElementById('pos_sale_change').value = (change > 0 ? change : 0).toLocaleString();
     };
 
-    // ຟັງຊັນຢືນຢັນການຮັບເງິນ ແລະ ບັນທຶກ
     window.posConfirmPayment = function() {
         const grandTotal = Number(document.getElementById('pos_sale_grand_total').value.replace(/,/g, ''));
         const received = Number(document.getElementById('pos_sale_received').value);
@@ -3847,7 +3787,6 @@ window.toggleFollowUpFields = function() {
             return;
         }
 
-        // ສ້າງເລກບິນ
         const dateStr = new Date().toISOString().slice(2, 10).replace(/-/g, '');
         const randomNum = Math.floor(Math.random() * 9000) + 1000;
         const invoiceNo = `INV-${dateStr}-${randomNum}`;
@@ -3861,12 +3800,10 @@ window.toggleFollowUpFields = function() {
             cashier: document.getElementById('current_user_name').innerText
         };
 
-        // ບັນທຶກລົງ Database ຈຳລອງ
         let payments = JSON.parse(localStorage.getItem('clinic_payments')) || [];
         payments.push(newPayment);
         localStorage.setItem('clinic_payments', JSON.stringify(payments));
 
-        // ອັບເດດໜ້າປັດ Dashboard POS ແບບ Realtime ໂດຍບໍ່ຕ້ອງ Refresh
         let currentCash = Number(document.getElementById('pos_dash_cash').innerText.replace(/,/g, '')) || 0;
         let currentTransfer = Number(document.getElementById('pos_dash_transfer').innerText.replace(/,/g, '')) || 0;
         let currentTickets = Number(document.getElementById('pos_dash_tickets').innerText) || 0;
@@ -3882,12 +3819,10 @@ window.toggleFollowUpFields = function() {
         document.getElementById('pos_dash_tickets').innerText = currentTickets.toLocaleString();
         document.getElementById('pos_dash_total_sales').innerText = currentTotal.toLocaleString();
 
-        // ປິດໜ້າຈໍຂາຍ ແລະ ເປີດໜ້າຈໍພິມບິນ
         document.getElementById('posSaleModal').style.display = 'none';
         printPosReceipt(invoiceNo, newPayment.date, grandTotal, method, received);
     };
 
-    // ຟັງຊັນສ້າງຂໍ້ມູນບິນຮັບເງິນ
     window.printPosReceipt = function(invoiceNo, dateStr, grandTotal, method, received) {
         document.getElementById('receipt_no').innerText = invoiceNo;
         
@@ -3900,7 +3835,6 @@ window.toggleFollowUpFields = function() {
         const tbody = document.getElementById('receipt_items_body');
         tbody.innerHTML = '';
         
-        // ດຶງລາຍການຈາກຕາຕະລາງໜ້າຈໍຂາຍມາໃສ່ບິນ
         const rows = document.querySelectorAll('#pos_sale_items_body tr');
         rows.forEach(row => {
             const name = row.querySelector('.pos-item-name').value;
@@ -3928,29 +3862,22 @@ window.toggleFollowUpFields = function() {
         document.getElementById('posReceiptModal').style.display = 'flex';
     };
 
-// ================= FINANCE & EMPLOYEES MODULES ================= //
-
-    // 1. ດັກຈັບການກົດເມນູ ເພື່ອສະແດງໜ້າການເງິນ ແລະ ພະນັກງານ (ໂດຍບໍ່ກະທົບໂຄດເກົ່າ)
     document.addEventListener('DOMContentLoaded', () => {
         document.querySelectorAll('.menu-item').forEach(item => {
             item.addEventListener('click', function() {
                 const pageName = this.getAttribute('data-page');
                 if(pageName) {
-                    // ເຊື່ອງໜ້າໃໝ່ທັງສອງໜ້າກ່ອນສະເໝີ ເມື່ອກົດເມນູໃດກໍ່ຕາມ
                     const pFin = document.getElementById('page-finance');
                     const pEmp = document.getElementById('page-employees');
                     if(pFin) pFin.style.display = 'none';
                     if(pEmp) pEmp.style.display = 'none';
 
-                    // ຖ້າກົດເມນູການເງິນ ຫຼື ພະນັກງານ
                     if (pageName === 'finance' || pageName === 'employees') {
-                        // ເຊື່ອງໜ້າເກົ່າທັງໝົດ
                         ['dashboard', 'patients', 'appointments', 'consultations', 'laboratory', 'xray', 'echo', 'pharmacy', 'inventory', 'pos', 'reports'].forEach(id => {
                             let el = document.getElementById('page-' + id);
                             if(el) el.style.display = 'none';
                         });
                         
-                        // ສະແດງໜ້າທີ່ຕ້ອງການ
                         document.getElementById('page-' + pageName).style.display = 'block';
                         document.getElementById('page-header-title').innerText = this.querySelector('span').innerText;
 
@@ -3962,23 +3889,20 @@ window.toggleFollowUpFields = function() {
         });
     });
 
-    // 2. ຟັງຊັນຂອງໜ້າການເງິນ (Finance)
     window.renderFinancePage = function() {
-        let payments = JSON.parse(localStorage.getItem('clinic_payments')) || []; // ລາຍຮັບ
-        let expenses = JSON.parse(localStorage.getItem('clinic_expenses')) || []; // ລາຍຈ່າຍ
+        let payments = JSON.parse(localStorage.getItem('clinic_payments')) || []; 
+        let expenses = JSON.parse(localStorage.getItem('clinic_expenses')) || []; 
         
         const filterMonth = document.getElementById('fin-filter-month').value;
         const filterType = document.getElementById('fin-filter-type').value;
 
         let allTransactions = [];
-        // Map ລາຍຮັບ
         payments.forEach(p => {
             allTransactions.push({
                 date: p.date, ref: p.invoice_no || '-', type: 'INCOME',
                 desc: p.desc || 'ບໍລິການ/ຄ່າຢາ', amount: Number(p.amount), user: p.cashier || '-'
             });
         });
-        // Map ລາຍຈ່າຍ
         expenses.forEach(e => {
             allTransactions.push({
                 date: e.date, ref: e.exp_no || '-', type: 'EXPENSE',
@@ -3986,14 +3910,12 @@ window.toggleFollowUpFields = function() {
             });
         });
 
-        // ຈັດລຽງຕາມວັນທີໃໝ່ລ້າສຸດ
         allTransactions.sort((a,b) => new Date(b.date) - new Date(a.date));
 
-        // Filter ຂໍ້ມູນ
         let filtered = allTransactions.filter(t => {
             let matchMonth = true;
             if(filterMonth) {
-                const tMonth = t.date.substring(0, 7); // yyyy-mm
+                const tMonth = t.date.substring(0, 7); 
                 matchMonth = tMonth === filterMonth;
             }
             let matchType = filterType === '' || t.type === filterType;
@@ -4079,11 +4001,8 @@ window.toggleFollowUpFields = function() {
         renderFinancePage();
     };
 
-    // 3. ຟັງຊັນຂອງໜ້າພະນັກງານ (Employees)
     window.renderEmployeesPage = function() {
-        // ປັບໃຊ້ຖານຂໍ້ມູນ ດຣ (clinic_doctors) ໃຫ້ກາຍເປັນຖານຂໍ້ມູນພະນັກງານລວມ
         let staffList = JSON.parse(localStorage.getItem('clinic_doctors')) || [];
-        
         const search = document.getElementById('emp-search').value.toLowerCase();
         const roleFilter = document.getElementById('emp-filter-role').value;
 
@@ -4158,9 +4077,7 @@ window.toggleFollowUpFields = function() {
         }
 
         let staffList = JSON.parse(localStorage.getItem('clinic_doctors')) || [];
-        
-        let prefix = 'STF-';
-        if(role === 'ແພດ (Doctor)') prefix = 'DR-';
+        let prefix = role === 'ແພດ (Doctor)' ? 'DR-' : 'STF-';
 
         const newStaff = {
             id: prefix + Date.now().toString().slice(-6),
@@ -4177,12 +4094,9 @@ window.toggleFollowUpFields = function() {
         document.getElementById('staffModal').style.display = 'none';
         window.showCustomAlert('ເພີ່ມພະນັກງານໃໝ່ສຳເລັດແລ້ວ!', 'ສຳເລັດ', '✅');
         renderEmployeesPage();
-        window.loadDoctorsList(); // ອັບເດດລາຍຊື່ແພດທົ່ວລະບົບອັດຕະໂນມັດ
+        window.loadDoctorsList(); 
     };
 
-// ================= PRINTING & PHARMACY MODULE ================= //
-
-    // 1. ຟັງຊັນສຳລັບຄວບຄຸມການພິມສະເພາະ Modal ທີ່ເປີດຢູ່ (ບໍ່ໃຫ້ຕິດໜ້າຫຼັກ)
     window.executeCustomPrint = function(type) {
         document.body.classList.add('printing-' + type);
         window.print();
@@ -4191,8 +4105,7 @@ window.toggleFollowUpFields = function() {
         }, 500);
     };
 
-    // 2. ຂຽນຟັງຊັນ renderPharmacyPage ໃຫ້ສົມບູນ 100% (ຈາກເດີມທີ່ເປັນ /* Placeholder */)
-    window.renderPharmacyPage = function() {
+    window.renderPharmacyPage = function() { 
         let rxs = JSON.parse(localStorage.getItem('clinic_prescriptions')) || [];
         const todayDate = new Date().toISOString().split('T')[0];
         let cToday = 0, cPending = 0, cCompleted = 0, cItems = 0;
@@ -4216,7 +4129,6 @@ window.toggleFollowUpFields = function() {
         if (rxs.length === 0) {
             tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding: 20px; color: #7b8794;">ຍັງບໍ່ມີຂໍ້ມູນການສັ່ງຢາ / ຈ່າຍຢາ</td></tr>';
         } else {
-            // ລຽງຈາກລ້າສຸດໄປຫາເກົ່າສຸດ
             rxs.sort((a,b) => b.rx_no.localeCompare(a.rx_no)).forEach((rx, idx) => {
                 let badgeClass = rx.status.includes('ຈ່າຍແລ້ວ') ? 'badge-green' : (rx.status.includes('ຍົກເລີກ') ? 'badge-red' : 'badge-yellow');
                 let itemCount = rx.items ? rx.items.length : 0;
@@ -4241,7 +4153,6 @@ window.toggleFollowUpFields = function() {
         }
     };
 
-    // ຟັງຊັນສຳລັບເປີດໜ້າຈໍແກ້ໄຂ/ຈ່າຍຢາ (ດຶງຂໍ້ມູນເກົ່າມາສະແດງ)
     window.openPharmacyEdit = function(index) {
         let rxs = JSON.parse(localStorage.getItem('clinic_prescriptions')) || [];
         if(index < 0 || index >= rxs.length) return;
@@ -4278,13 +4189,11 @@ window.toggleFollowUpFields = function() {
         document.getElementById('pharmacyModal').style.display = 'flex';
     };
 
-    // 3. ຟັງຊັນການພິມ ໃບສັ່ງຢາ (Prescription)
     window.printPrescription = function(rxNo) {
         let rxs = JSON.parse(localStorage.getItem('clinic_prescriptions')) || [];
         const rx = rxs.find(r => r.rx_no === rxNo);
         if(!rx) return;
 
-        // ຫາຂໍ້ມູນອາຍຸ ແລະ ເພດ ຈາກຄົນເຈັບ
         let gender = '-', age = '-';
         const patient = globalPatientsList.find(p => p.fullname === rx.patient_name);
         if(patient) {
@@ -4322,69 +4231,6 @@ window.toggleFollowUpFields = function() {
         document.getElementById('rxPrintModal').style.display = 'flex';
     };
 
-    // 4. ຂຽນທັບ ຟັງຊັນ renderAppointmentsPage ເພື່ອແຊກປຸ່ມ "🖨️ ພິມໃບນັດ" ເຂົ້າໄປໃນຕາຕະລາງແຕ່ລະແຖວ
-    const originalRenderAppointmentsPage = window.renderAppointmentsPage;
-    window.renderAppointmentsPage = function() {
-        const appointments = JSON.parse(localStorage.getItem('clinic_appointments')) || []; 
-        const todayDate = new Date().toISOString().split('T')[0]; 
-        let countToday = 0; let countPending = 0; let countConfirmed = 0; let countCompleted = 0;
-        
-        appointments.forEach(a => { 
-            if(a.appointment_date === todayDate) countToday++; 
-            if(a.status.includes('ລໍຖ້າ')) countPending++; 
-            if(a.status.includes('ຢືນຢັນ')) countConfirmed++; 
-            if(a.status.includes('ສຳເລັດ')) countCompleted++; 
-        });
-        
-        document.getElementById('apt-stat-today').innerText = countToday; 
-        document.getElementById('apt-stat-pending').innerText = countPending; 
-        document.getElementById('apt-stat-confirmed').innerText = countConfirmed; 
-        document.getElementById('apt-stat-completed').innerText = countCompleted; 
-        
-        const tbody = document.getElementById('appointment-table-body'); 
-        tbody.innerHTML = '';
-        
-        if(appointments.length === 0) { 
-            tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding: 20px;">ຍັງບໍ່ມີນັດໝາຍ</td></tr>'; 
-        } else {
-            appointments.sort((a,b) => (a.appointment_date + a.appointment_time).localeCompare(b.appointment_date + b.appointment_time));
-            appointments.forEach((apt, index) => { 
-                const dArr = apt.appointment_date.split('-'); 
-                const displayDate = dArr.length === 3 ? `${dArr[2]}/${dArr[1]}/${dArr[0]}` : apt.appointment_date; 
-                
-                const tr = document.createElement('tr'); 
-                tr.innerHTML = `
-                    <td><strong>${apt.apt_no}</strong></td>
-                    <td>${apt.patient_name}<br><small style="color:#7b8794">${apt.phone || ''}</small></td>
-                    <td>${displayDate}</td>
-                    <td style="font-weight:bold;">${apt.appointment_time}</td>
-                    <td>${apt.doctor}</td>
-                    <td>${apt.reason}</td>
-                    <td><span class="badge ${apt.status.includes('ຢືນຢັນ')?'badge-green':(apt.status.includes('ລໍຖ້າ')?'badge-yellow':'badge-gray')}">${apt.status}</span></td>
-                    <td style="text-align: center;">
-                        <span class="action-icon" title="ສົ່ງເຂົ້າຫ້ອງກວດ" onclick="sendAptToConsultation('${apt.patient_name}', '${apt.doctor}')">🩺</span>
-                        <!-- ປຸ່ມພິມໃບນັດໝາຍ ຖືກເພີ່ມເຂົ້າໃໝ່ -->
-                        <span class="action-icon" title="ພິມໃບນັດໝາຍ" onclick="printAppointment('${apt.apt_no}')">🖨️</span>
-                        <span class="action-icon" title="ແກ້ໄຂ" onclick="window.showCustomAlert('ແກ້ໄຂຂໍ້ມູນນັດໝາຍ', 'ແກ້ໄຂ', '✏️')">✏️</span>
-                        <span class="action-icon" title="ລຶບ" onclick="deleteAppointment(${index})">🗑️</span>
-                    </td>
-                `; 
-                tbody.appendChild(tr); 
-            });
-        }
-        
-        const timelineContainer = document.getElementById('appointment-timeline'); timelineContainer.innerHTML = ''; 
-        const todaysApts = appointments.filter(a => a.appointment_date === todayDate).sort((a,b) => a.appointment_time.localeCompare(b.appointment_time));
-        if(todaysApts.length === 0) { 
-            timelineContainer.innerHTML = '<p style="color:#7b8794;">ບໍ່ມີນັດໝາຍໃນມື້ນີ້</p>'; 
-        } else { 
-            todaysApts.forEach(apt => { 
-                timelineContainer.innerHTML += `<div class="timeline-item"><div class="timeline-time">${apt.appointment_time}</div><div class="timeline-content"><strong>${apt.patient_name}</strong> &mdash; ພົບແພດ: ${apt.doctor} (${apt.reason}) <span style="font-size:12px; margin-left: 10px;">${apt.status}</span></div></div>`; 
-            }); 
-        }
-    };
-
-    // 5. ຟັງຊັນການພິມ ໃບນັດໝາຍ (Appointment Slip)
     window.printAppointment = function(aptNo) {
         let appointments = JSON.parse(localStorage.getItem('clinic_appointments')) || [];
         const apt = appointments.find(a => a.apt_no === aptNo);
@@ -4405,15 +4251,12 @@ window.toggleFollowUpFields = function() {
         document.getElementById('aptPrintModal').style.display = 'flex';
     };
 
-    // ================= PATIENT EDIT MODULE (ແກ້ໄຂຂໍ້ມູນຄົນເຈັບ) ================= //
-    // ຟັງຊັນໃໝ່: ຄົ້ນຫາ ແລະ ດຶງຂໍ້ມູນອັດຕະໂນມັດເມື່ອພິມລະຫັດໃສ່ກ່ອງ Patient ID
     window.autoFillPatientByCode = function(code) {
         if (!code || code.trim() === '') return;
         let patients = JSON.parse(localStorage.getItem('clinic_local_patients')) || globalPatientsList || [];
         let patient = patients.find(p => p.patient_code === code.trim() || p.id === code.trim());
 
         if (patient) {
-            // ຖ້າພົບຄົນເຈັບເກົ່າ ໃຫ້ດຶງຂໍ້ມູນມາໃສ່ຟອມ
             currentEditPatientId = patient.id || patient.patient_code;
             document.getElementById('pt_hn_number').value = patient.hn_number || '';
             document.getElementById('pt_fullname').value = patient.fullname || '';
@@ -4425,11 +4268,9 @@ window.toggleFollowUpFields = function() {
             document.getElementById('pt_allergy').value = patient.allergy || '';
             document.getElementById('pt_health_history').value = patient.health_history || '';
 
-            // ປ່ຽນຫົວຂໍ້ເພື່ອແຈ້ງໃຫ້ຮູ້ວ່າດຶງຂໍ້ມູນເກົ່າມາແລ້ວ
             document.querySelector('#patientModal h3').innerHTML = '✏️ ພົບຂໍ້ມູນເກົ່າ (ກຳລັງແກ້ໄຂ)';
-            document.getElementById('pt_patient_code').style.backgroundColor = '#e7f7ef'; // ປ່ຽນສີກ່ອງເປັນສີຂຽວອ່ອນ
+            document.getElementById('pt_patient_code').style.backgroundColor = '#e7f7ef'; 
         } else {
-            // ຖ້າບໍ່ພົບ ໝາຍຄວາມວ່າເປັນລະຫັດໃໝ່
             currentEditPatientId = null;
             document.querySelector('#patientModal h3').innerHTML = '+ ເພີ່ມຄົນເຈັບ (ສ້າງລະຫັດໃໝ່)';
             document.getElementById('pt_patient_code').style.backgroundColor = '#fff';
@@ -4445,364 +4286,254 @@ window.toggleFollowUpFields = function() {
             return;
         }
 
-        // ກຳນົດ ID ເພື່ອບອກໃຫ້ລະບົບຮູ້ວ່າເປັນການ "ແກ້ໄຂ" ບໍ່ແມ່ນ "ເພີ່ມໃໝ່"
         currentEditPatientId = patient.id || patient.patient_code; 
         
-        // ດຶງຂໍ້ມູນເກົ່າມາສະແດງໃນຟອມ
         document.getElementById('pt_patient_code').value = patient.patient_code || '';
         document.getElementById('pt_hn_number').value = patient.hn_number || '';
         document.getElementById('pt_fullname').value = patient.fullname || '';
         document.getElementById('pt_gender').value = patient.gender || '';
-        
         if (patient.dob) document.getElementById('pt_dob').value = patient.dob;
         else document.getElementById('pt_dob').value = '';
-        
         document.getElementById('pt_phone').value = patient.phone || '';
         document.getElementById('pt_blood_group').value = patient.blood_group || '';
         document.getElementById('pt_status').value = patient.status || 'Active';
         document.getElementById('pt_allergy').value = patient.allergy || '';
         document.getElementById('pt_health_history').value = patient.health_history || '';
 
-        // ປ່ຽນຫົວຂໍ້ Modal ໃຫ້ຮູ້ວ່າກຳລັງແກ້ໄຂ
         document.querySelector('#patientModal h3').innerText = '✏️ ແກ້ໄຂຂໍ້ມູນຄົນເຈັບ';
         document.getElementById('patientModal').style.display = 'flex';
     };
 
-    // ປັບໃຫ້ປຸ່ມ "+ ເພີ່ມຄົນເຈັບ" ກັບມາເປັນຫົວຂໍ້ເດີມທຸກຄັ້ງທີ່ກົດເພີ່ມໃໝ່
     const originalOpenAddPatientModal = window.openAddPatientModal;
     window.openAddPatientModal = function() {
         document.querySelector('#patientModal h3').innerText = '+ ເພີ່ມຄົນເຈັບ';
         originalOpenAddPatientModal();
     };
 
-// ================= MASTER MEDICINE CATALOG MODULE ================= //
+    const masterCatalogData = [
+        { cat: "💊 ຢາແກ້ໄຂ້/ປວດ", items: [
+            { name: "Paracetamol 500mg", generic: "Paracetamol", form: "Tablet", unit: "ເມັດ", price: 1000 },
+            { name: "Ibuprofen 400mg", generic: "Ibuprofen", form: "Tablet", unit: "ເມັດ", price: 1500 },
+            { name: "Diclofenac 50mg", generic: "Diclofenac Sodium", form: "Tablet", unit: "ເມັດ", price: 2000 }
+        ]},
+        { cat: "🤧 ຫວັດ/ໄອ/ເຈັບຄໍ", items: [
+            { name: "Cetirizine 10mg", generic: "Cetirizine", form: "Tablet", unit: "ເມັດ", price: 1000 },
+            { name: "Bromhexine 8mg", generic: "Bromhexine", form: "Tablet", unit: "ເມັດ", price: 800 },
+            { name: "Dextromethorphan", generic: "Dextromethorphan", form: "Syrup", unit: "ຂວດ", price: 15000 }
+        ]}
+    ];
 
-// ຖານຂໍ້ມູນ Master Catalog 20 ໝວດໝູ່ (ສາມາດເພີ່ມຢາໃສ່ແຕ່ລະໝວດໄດ້ໃນອະນາຄົດ)
-const masterCatalogData = [
-    { cat: "💊 ຢາແກ້ໄຂ້/ປວດ", items: [
-        { name: "Paracetamol 500mg", generic: "Paracetamol", form: "Tablet", unit: "ເມັດ", price: 1000 },
-        { name: "Ibuprofen 400mg", generic: "Ibuprofen", form: "Tablet", unit: "ເມັດ", price: 1500 },
-        { name: "Diclofenac 50mg", generic: "Diclofenac Sodium", form: "Tablet", unit: "ເມັດ", price: 2000 }
-    ]},
-    { cat: "🤧 ຫວັດ/ໄອ/ເຈັບຄໍ", items: [
-        { name: "Cetirizine 10mg", generic: "Cetirizine", form: "Tablet", unit: "ເມັດ", price: 1000 },
-        { name: "Bromhexine 8mg", generic: "Bromhexine", form: "Tablet", unit: "ເມັດ", price: 800 },
-        { name: "Dextromethorphan", generic: "Dextromethorphan", form: "Syrup", unit: "ຂວດ", price: 15000 }
-    ]},
-    { cat: "🤢 ກະເພາະ/ຖອກທ້ອງ", items: [
-        { name: "Omeprazole 20mg", generic: "Omeprazole", form: "Capsule", unit: "ແຄັບຊູນ", price: 2500 },
-        { name: "Loperamide 2mg", generic: "Loperamide", form: "Capsule", unit: "ແຄັບຊູນ", price: 1500 },
-        { name: "ORS (ເກືອແຮ່)", generic: "Oral Rehydration Salts", form: "Sachet", unit: "ຊອງ", price: 2000 }
-    ]},
-    { cat: "🌿 ພູມແພ້", items: [
-        { name: "Loratadine 10mg", generic: "Loratadine", form: "Tablet", unit: "ເມັດ", price: 1500 },
-        { name: "Chlorpheniramine 4mg", generic: "Chlorpheniramine", form: "Tablet", unit: "ເມັດ", price: 500 }
-    ]},
-    { cat: "🧴 ຜິວໜັງ", items: [
-        { name: "Clotrimazole Cream", generic: "Clotrimazole 1%", form: "Cream", unit: "ຫຼອດ", price: 12000 },
-        { name: "Betamethasone Cream", generic: "Betamethasone", form: "Cream", unit: "ຫຼອດ", price: 15000 }
-    ]},
-    { cat: "❤️ ຄວາມດັນ/ຫົວໃຈ", items: [
-        { name: "Amlodipine 5mg", generic: "Amlodipine", form: "Tablet", unit: "ເມັດ", price: 2000 },
-        { name: "Losartan 50mg", generic: "Losartan", form: "Tablet", unit: "ເມັດ", price: 3000 }
-    ]},
-    { cat: "🩸 ເບົາຫວານ/ໄຂມັນ", items: [
-        { name: "Metformin 500mg", generic: "Metformin", form: "Tablet", unit: "ເມັດ", price: 1500 },
-        { name: "Atorvastatin 20mg", generic: "Atorvastatin", form: "Tablet", unit: "ເມັດ", price: 4000 }
-    ]},
-    { cat: "🫁 ຫອບຫືດ/ລະບົບຫາຍໃຈ", items: [
-        { name: "Salbutamol Inhaler", generic: "Salbutamol 100mcg", form: "Inhaler", unit: "ຫຼອດ", price: 35000 }
-    ]},
-    { cat: "🦠 ຢາຕ້ານເຊື້ອ", items: [
-        { name: "Amoxicillin 500mg", generic: "Amoxicillin", form: "Capsule", unit: "ແຄັບຊູນ", price: 2000 },
-        { name: "Azithromycin 250mg", generic: "Azithromycin", form: "Tablet", unit: "ເມັດ", price: 5000 }
-    ]},
-    { cat: "🪱 ພະຍາດພະຍາດກາຝາກ", items: [
-        { name: "Albendazole 400mg", generic: "Albendazole", form: "Tablet", unit: "ເມັດ", price: 3000 }
-    ]},
-    { cat: "👁️ ຕາ/ຫູ", items: [
-        { name: "Tetracycline Eye Ointment", generic: "Tetracycline 1%", form: "Ointment", unit: "ຫຼອດ", price: 10000 },
-        { name: "Chloramphenicol Ear Drops", generic: "Chloramphenicol", form: "Drops", unit: "ຂວດ", price: 12000 }
-    ]},
-    { cat: "🧠 ປະສາດ/ຈິດເວດ", items: [
-        { name: "Amitriptyline 10mg", generic: "Amitriptyline", form: "Tablet", unit: "ເມັດ", price: 1500 },
-        { name: "Diazepam 5mg", generic: "Diazepam", form: "Tablet", unit: "ເມັດ", price: 2000 }
-    ]},
-    { cat: "🦴 ກ້າມຊີ້ນ/ຂໍ້", items: [
-        { name: "Meloxicam 7.5mg", generic: "Meloxicam", form: "Tablet", unit: "ເມັດ", price: 2500 },
-        { name: "Allopurinol 100mg", generic: "Allopurinol", form: "Tablet", unit: "ເມັດ", price: 1500 }
-    ]},
-    { cat: "👶 ຢາເດັກ", items: [
-        { name: "Paracetamol Syrup", generic: "Paracetamol 120mg/5ml", form: "Syrup", unit: "ຂວດ", price: 15000 }
-    ]},
-    { cat: "🤰 ແມ່/ສູດສຳລັບແມ່", items: [
-        { name: "Folic Acid 5mg", generic: "Folic Acid", form: "Tablet", unit: "ເມັດ", price: 1000 },
-        { name: "Ferrous Sulfate", generic: "Ferrous Sulfate", form: "Tablet", unit: "ເມັດ", price: 1000 }
-    ]},
-    { cat: "🚑 ຢາສຸກເສີນ", items: [
-        { name: "Epinephrine (Adrenaline)", generic: "Epinephrine 1mg/ml", form: "Injection", unit: "ຫຼອດສັກ", price: 25000 }
-    ]},
-    { cat: "💉 ຢາສັກ/IV", items: [
-        { name: "Normal Saline (NSS) 0.9%", generic: "Sodium Chloride", form: "IV Fluid", unit: "ຖົງ/ຂວດ", price: 15000 },
-        { name: "Ceftriaxone 1g", generic: "Ceftriaxone", form: "Injection", unit: "ຫຼອດສັກ", price: 20000 }
-    ]},
-    { cat: "🧪 ຢາສຳລັບ Laboratory/Procedure", items: [
-        { name: "Ultrasound Gel", generic: "Ultrasound Gel", form: "Gel", unit: "ຂວດ", price: 35000 }
-    ]},
-    { cat: "💊 ວິຕາມິນ/ແຮ່ທາດ", items: [
-        { name: "Vitamin B Complex", generic: "Vitamin B Comp", form: "Tablet", unit: "ເມັດ", price: 1500 },
-        { name: "Vitamin C 500mg", generic: "Ascorbic Acid", form: "Tablet", unit: "ເມັດ", price: 1000 }
-    ]},
-    { cat: "🧴 ຢາທາ/ຢາລ້າງແຜ", items: [
-        { name: "Povidone Iodine (Betadine)", generic: "Povidone Iodine 10%", form: "Solution", unit: "ຂວດ", price: 12000 },
-        { name: "Alcohol 70%", generic: "Ethyl Alcohol", form: "Solution", unit: "ຂວດ", price: 10000 }
-    ]}
-];
+    window.currentCatalogIndex = 0;
+    window.openMasterMedicineCatalog = function() {
+        renderCatalogTabs();
+        renderCatalogItems(0); 
+        document.getElementById('masterCatalogModal').style.display = 'flex';
+    };
 
-window.currentCatalogIndex = 0;
+    window.renderCatalogTabs = function() {
+        const sidebar = document.getElementById('catalog-sidebar-tabs');
+        sidebar.innerHTML = '';
+        masterCatalogData.forEach((category, index) => {
+            const div = document.createElement('div');
+            div.className = `catalog-tab ${index === window.currentCatalogIndex ? 'active' : ''}`;
+            div.innerText = category.cat;
+            div.onclick = function() {
+                window.currentCatalogIndex = index;
+                renderCatalogTabs();
+                renderCatalogItems(index);
+            };
+            sidebar.appendChild(div);
+        });
+    };
 
-window.openMasterMedicineCatalog = function() {
-    renderCatalogTabs();
-    renderCatalogItems(0); // ສະແດງໝວດທຳອິດເປັນຄ່າເລີ່ມຕົ້ນ
-    document.getElementById('masterCatalogModal').style.display = 'flex';
-};
-
-window.renderCatalogTabs = function() {
-    const sidebar = document.getElementById('catalog-sidebar-tabs');
-    sidebar.innerHTML = '';
-    
-    masterCatalogData.forEach((category, index) => {
-        const div = document.createElement('div');
-        div.className = `catalog-tab ${index === window.currentCatalogIndex ? 'active' : ''}`;
-        div.innerText = category.cat;
-        div.onclick = function() {
-            window.currentCatalogIndex = index;
-            renderCatalogTabs();
-            renderCatalogItems(index);
-        };
-        sidebar.appendChild(div);
-    });
-};
-
-window.renderCatalogItems = function(categoryIndex) {
-    const grid = document.getElementById('catalog-items-grid');
-    const category = masterCatalogData[categoryIndex];
-    document.getElementById('catalog-category-title').innerText = category.cat;
-    grid.innerHTML = '';
-    
-    const searchText = document.getElementById('catalog-search').value.toLowerCase();
-    
-    // ດຶງຂໍ້ມູນ Inventory ໃນປັດຈຸບັນ ເພື່ອກວດສອບວ່າຢານີ້ມີໃນສາງແລ້ວຫຼືຍັງ
-    let inv = JSON.parse(localStorage.getItem('clinic_inventory')) || [];
-    
-    let filteredItems = category.items.filter(item => 
-        item.name.toLowerCase().includes(searchText) || item.generic.toLowerCase().includes(searchText)
-    );
-
-    if (filteredItems.length === 0) {
-        grid.innerHTML = `<div style="grid-column: 1/-1; text-align: center; color: #7b8794; padding: 30px;">ບໍ່ພົບລາຍການຢາໃນການຄົ້ນຫາ</div>`;
-        return;
-    }
-
-    filteredItems.forEach((item, itemIdx) => {
-        // ກວດສອບຊື່ວ່າມີໃນສາງແລ້ວຫຼືບໍ່
-        const isExists = inv.some(i => i.name.toLowerCase() === item.name.toLowerCase());
+    window.renderCatalogItems = function(categoryIndex) {
+        const grid = document.getElementById('catalog-items-grid');
+        const category = masterCatalogData[categoryIndex];
+        document.getElementById('catalog-category-title').innerText = category.cat;
+        grid.innerHTML = '';
         
-        const card = document.createElement('div');
-        card.className = 'catalog-card';
-        card.innerHTML = `
-            <div>
-                <h4>${item.name}</h4>
-                <p><strong>Generic:</strong> ${item.generic}<br>
-                <strong>ຮູບແບບ:</strong> ${item.form} | <strong>ໜ່ວຍ:</strong> ${item.unit}<br>
-                <strong>ລາຄາແນະນຳ:</strong> ${item.price.toLocaleString()} ₭</p>
-            </div>
-            ${isExists 
-                ? `<button class="btn-imported">✅ ມີໃນສາງແລ້ວ</button>` 
-                : `<button class="btn-import" onclick="importToInventory(${categoryIndex}, '${item.name}')">📥 ດຶງເຂົ້າສາງ</button>`
-            }
-        `;
-        grid.appendChild(card);
-    });
-};
-
-window.importToInventory = function(catIndex, itemName) {
-    try {
-        const category = masterCatalogData[catIndex];
-        const itemData = category.items.find(i => i.name === itemName);
+        const searchText = document.getElementById('catalog-search').value.toLowerCase();
+        let inv = JSON.parse(localStorage.getItem('clinic_inventory')) || [];
         
-        if (!itemData) {
-            window.showCustomAlert('ບໍ່ພົບຂໍ້ມູນລາຍການສິນຄ້າ', 'ແຈ້ງເຕືອນ', '⚠️');
+        let filteredItems = category.items.filter(item => 
+            item.name.toLowerCase().includes(searchText) || item.generic.toLowerCase().includes(searchText)
+        );
+
+        if (filteredItems.length === 0) {
+            grid.innerHTML = `<div style="grid-column: 1/-1; text-align: center; color: #7b8794; padding: 30px;">ບໍ່ພົບລາຍການຢາໃນການຄົ້ນຫາ</div>`;
             return;
         }
 
-        // 1. ປິດໜ້າຈໍ Master Catalog ລົງກ່ອນ
-        document.getElementById('masterCatalogModal').style.display = 'none';
-
-        // 2. ສ້າງລະຫັດສິນຄ້າໃໝ່ອັດຕະໂນມັດ
-        const dateStr = new Date().toISOString().slice(2, 10).replace(/-/g, ''); 
-        const randomNum = Math.floor(Math.random() * 900) + 100; 
-        document.getElementById('inv_add_id').value = `MED-${dateStr.slice(4)}${randomNum}`;
-
-        // 3. ດຶງຂໍ້ມູນຈາກ Master Catalog ມາປ້ອນລົງໃນຟອມ
-        document.getElementById('inv_add_barcode').value = '';
-        document.getElementById('inv_add_name').value = itemData.name || '';
-        document.getElementById('inv_add_generic').value = itemData.generic || '';
-        document.getElementById('inv_add_type').value = 'ຢາ (Medicine)';
-        document.getElementById('inv_add_form').value = itemData.form || '';
-        document.getElementById('inv_add_unit').value = itemData.unit || '';
-        document.getElementById('inv_add_min').value = '20'; 
-        document.getElementById('inv_add_max').value = '1000';
-        document.getElementById('inv_add_cost').value = ''; 
-        document.getElementById('inv_add_price').value = itemData.price || '';
-        document.getElementById('inv_add_notes').value = 'ດຶງຂໍ້ມູນຈາກ Master Catalog';
-
-        // 4. ເປີດໜ້າຈໍເພີ່ມສິນຄ້າ (ບັງຄັບໃຫ້ສະແດງຢູ່ໜ້າສຸດດ້ວຍ zIndex)
-        const addModal = document.getElementById('invAddModal');
-        addModal.style.zIndex = '3000'; 
-        addModal.style.display = 'flex';
-
-    } catch (error) {
-        console.error("ເກີດຂໍ້ຜິດພາດໃນການດຶງຂໍ້ມູນ:", error);
-        window.showCustomAlert('ມີບາງຢ່າງຜິດພາດ ກະລຸນາກວດສອບ Console', 'ແຈ້ງເຕືອນ', '❌');
-    }
-};
-
-// ຟັງຊັນສຳລັບດຶງຂໍ້ຄວາມຈາກ Dropdown ມາໃສ່ຊ່ອງການກວດຮ່າງກາຍ
-window.insertPETemplate = function() {
-    const select = document.getElementById('cst2_pe_template');
-    const textarea = document.getElementById('cst2_physical_exam');
-    
-    if(select.value) {
-        // ຖ້າໃນກ່ອງມີຂໍ້ຄວາມຢູ່ແລ້ວ ໃຫ້ຍະຫວ່າງແຖວແລ້ວຕໍ່ທ້າຍ, ຖ້າບໍ່ມີໃຫ້ເອົາໃສ່ເລີຍ
-        if(textarea.value.trim() !== '') {
-            textarea.value += '\n' + select.value;
-        } else {
-            textarea.value = select.value;
-        }
-        // ເຄຼຍຄ່າ Dropdown ກັບໄປທີ່ຄ່າເລີ່ມຕົ້ນ ເພື່ອໃຫ້ກົດເລືອກອັນອື່ນເພີ່ມໄດ້ອີກ
-        select.value = ''; 
-    }
-};
-
-// ຟັງຊັນສຳລັບຄິດໄລ່ BMI ອັດຕະໂນມັດ ເມື່ອປ້ອນນ້ຳໜັກ ແລະ ສ່ວນສູງ
-window.calcBMI = function() {
-    const weight = parseFloat(document.getElementById('cst2_weight').value);
-    const heightCm = parseFloat(document.getElementById('cst2_height').value);
-    
-    if (weight > 0 && heightCm > 0) {
-        const heightM = heightCm / 100;
-        const bmi = (weight / (heightM * heightM)).toFixed(1);
-        let meaning = "";
-        
-        if (bmi < 18.5) meaning = " (ຈ່ອຍ)";
-        else if (bmi >= 18.5 && bmi <= 24.9) meaning = " (ປົກກະຕິ)";
-        else if (bmi >= 25 && bmi <= 29.9) meaning = " (ນ້ຳໜັກເກີນ)";
-        else meaning = " (ຕຸ້ຍ)";
-        
-        document.getElementById('cst2_bmi').value = bmi + meaning;
-    } else {
-        document.getElementById('cst2_bmi').value = '';
-    }
-};
-// ================= FIREBASE REALTIME 100% (ອັບເດດແລ້ວ) ================= //
-const firebaseConfig = {
-  apiKey: "AIzaSyC8QCPCsNGeRZcL-mCza74wbYB1V34qiDQ",
-  authDomain: "clinic-management-system-c245d.firebaseapp.com",
-  projectId: "clinic-management-system-c245d",
-  storageBucket: "clinic-management-system-c245d.firebasestorage.app",
-  messagingSenderId: "1096934846097",
-  appId: "1:1096934846097:web:bd571c289dc430e5fe9930",
-  measurementId: "G-HQJLCT7ZKJ"
-};
-
-// 1. ເລີ່ມຕົ້ນເຊື່ອມຕໍ່ Firebase
-if (!firebase.apps.length) {
-    firebase.initializeApp(firebaseConfig);
-}
-const db = firebase.firestore();
-console.log("🟢 ລະບົບ Realtime Firebase ພ້ອມໃຊ້ງານແລ້ວ!");
-
-// ---------------------------------------------------------
-// 2. ດັກຈັບ: Collection 'appointments' (ນັດໝາຍ) ແບບ Realtime
-// ---------------------------------------------------------
-let isInitialAptLoad = true;
-
-db.collection("appointments").onSnapshot((snapshot) => {
-    let localApts = JSON.parse(localStorage.getItem('clinic_appointments')) || [];
-    let hasChanges = false;
-
-    snapshot.docChanges().forEach((change) => {
-        if (change.type === "added" || change.type === "modified") {
-            const newData = change.doc.data();
-            
-            // ເອົາຂໍ້ມູນໃໝ່ຈາກ Firebase ມາອັບເດດລົງ LocalStorage
-            let existingIndex = localApts.findIndex(a => a.apt_no === newData.apt_no);
-            if (existingIndex !== -1) {
-                localApts[existingIndex] = newData;
-            } else {
-                localApts.push(newData);
-                // ແຈ້ງເຕືອນສະເພາະຕອນມີຄົນເພີ່ມໃໝ່ (ບໍ່ແຈ້ງຕອນໂຫຼດໜ້າເວັບຄັ້ງທຳອິດ)
-                if (!isInitialAptLoad) {
-                    window.showCustomAlert(`ມີນັດໝາຍໃໝ່ຂອງ: ${newData.patient_name || 'ບໍ່ລະບຸຊື່'}`, '🔔 Firebase ແຈ້ງເຕືອນ', '📅');
+        filteredItems.forEach((item) => {
+            const isExists = inv.some(i => i.name.toLowerCase() === item.name.toLowerCase());
+            const card = document.createElement('div');
+            card.className = 'catalog-card';
+            card.innerHTML = `
+                <div>
+                    <h4>${item.name}</h4>
+                    <p><strong>Generic:</strong> ${item.generic}<br>
+                    <strong>ຮູບແບບ:</strong> ${item.form} | <strong>ໜ່ວຍ:</strong> ${item.unit}<br>
+                    <strong>ລາຄາແນະນຳ:</strong> ${item.price.toLocaleString()} ₭</p>
+                </div>
+                ${isExists 
+                    ? `<button class="btn-imported">✅ ມີໃນສາງແລ້ວ</button>` 
+                    : `<button class="btn-import" onclick="importToInventory(${categoryIndex}, '${item.name}')">📥 ດຶງເຂົ້າສາງ</button>`
                 }
-            }
-            hasChanges = true;
-        }
-    });
+            `;
+            grid.appendChild(card);
+        });
+    };
 
-    if (hasChanges) {
-        localStorage.setItem('clinic_appointments', JSON.stringify(localApts)); // ເຊບລົງເຄື່ອງ
-        
-        // ຖ້າເປີດໜ້ານັດໝາຍຢູ່ ໃຫ້ໂຫຼດຕາຕະລາງໃໝ່ທັນທີ
-        if(document.getElementById('page-appointments').style.display === 'block') {
-            if(typeof renderAppointmentsPage === 'function') renderAppointmentsPage(); 
+    window.importToInventory = function(catIndex, itemName) {
+        try {
+            const category = masterCatalogData[catIndex];
+            const itemData = category.items.find(i => i.name === itemName);
+            if (!itemData) return;
+
+            document.getElementById('masterCatalogModal').style.display = 'none';
+            const dateStr = new Date().toISOString().slice(2, 10).replace(/-/g, ''); 
+            const randomNum = Math.floor(Math.random() * 900) + 100; 
+            document.getElementById('inv_add_id').value = `MED-${dateStr.slice(4)}${randomNum}`;
+
+            document.getElementById('inv_add_name').value = itemData.name || '';
+            document.getElementById('inv_add_generic').value = itemData.generic || '';
+            document.getElementById('inv_add_type').value = 'ຢາ (Medicine)';
+            document.getElementById('inv_add_form').value = itemData.form || '';
+            document.getElementById('inv_add_unit').value = itemData.unit || '';
+            document.getElementById('inv_add_price').value = itemData.price || '';
+
+            const addModal = document.getElementById('invAddModal');
+            addModal.style.zIndex = '3000'; 
+            addModal.style.display = 'flex';
+        } catch (error) {
+            console.error("ເກີດຂໍ້ຜິດພາດ:", error);
         }
-        // ອັບເດດຕົວເລກນັດໝາຍຢູ່ໜ້າ Dashboard
-        if(document.getElementById('total-appointments')) {
-            document.getElementById('total-appointments').innerText = localApts.length;
+    };
+
+    window.insertPETemplate = function() {
+        const select = document.getElementById('cst2_pe_template');
+        const textarea = document.getElementById('cst2_physical_exam');
+        if(select.value) {
+            textarea.value = textarea.value.trim() !== '' ? textarea.value + '\n' + select.value : select.value;
+            select.value = ''; 
         }
+    };
+
+    window.calcBMI = function() {
+        const weight = parseFloat(document.getElementById('cst2_weight').value);
+        const heightCm = parseFloat(document.getElementById('cst2_height').value);
+        if (weight > 0 && heightCm > 0) {
+            const heightM = heightCm / 100;
+            const bmi = (weight / (heightM * heightM)).toFixed(1);
+            let meaning = bmi < 18.5 ? " (ຈ່ອຍ)" : (bmi <= 24.9 ? " (ປົກກະຕິ)" : (bmi <= 29.9 ? " (ນ້ຳໜັກເກີນ)" : " (ຕຸ້ຍ)"));
+            document.getElementById('cst2_bmi').value = bmi + meaning;
+        } else {
+            document.getElementById('cst2_bmi').value = '';
+        }
+    };
+
+    // ================= FIREBASE REALTIME 100% (ອັບເດດແລ້ວ: ດັກຈັບທັງ ADDED, MODIFIED, REMOVED) ================= //
+    const firebaseConfig = {
+      apiKey: "AIzaSyC8QCPCsNGeRZcL-mCza74wbYB1V34qiDQ",
+      authDomain: "clinic-management-system-c245d.firebaseapp.com",
+      projectId: "clinic-management-system-c245d",
+      storageBucket: "clinic-management-system-c245d.firebasestorage.app",
+      messagingSenderId: "1096934846097",
+      appId: "1:1096934846097:web:bd571c289dc430e5fe9930",
+      measurementId: "G-HQJLCT7ZKJ"
+    };
+
+    if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
     }
-    
-    if (isInitialAptLoad) isInitialAptLoad = false;
-});
+    const db = firebase.firestore();
+    console.log("🟢 ລະບົບ Realtime Firebase ພ້ອມໃຊ້ງານແລ້ວ!");
 
-// ---------------------------------------------------------
-// 3. ດັກຈັບ: Collection 'patients' (ຄົນເຈັບ) ແບບ Realtime
-// ---------------------------------------------------------
-db.collection("patients").onSnapshot((snapshot) => {
-    let localPatients = JSON.parse(localStorage.getItem('clinic_local_patients')) || [];
-    let hasChanges = false;
-    
-    snapshot.docChanges().forEach((change) => {
-        if (change.type === "added" || change.type === "modified") {
+    // 1. ນັດໝາຍ Realtime (ຮອງຮັບການລຶບ - Removed)
+    let isInitialAptLoad = true;
+    db.collection("appointments").onSnapshot((snapshot) => {
+        let localApts = JSON.parse(localStorage.getItem('clinic_appointments')) || [];
+        let hasChanges = false;
+
+        snapshot.docChanges().forEach((change) => {
             const newData = change.doc.data();
-            
-            // ເອົາຂໍ້ມູນໃໝ່ຈາກ Firebase ມາອັບເດດລົງ LocalStorage ແລະ Global Variable
-            let existingIndex = localPatients.findIndex(p => p.patient_code === newData.patient_code);
-            if (existingIndex !== -1) {
-                localPatients[existingIndex] = newData; // ອັບເດດຄົນເກົ່າ
-            } else {
-                localPatients.unshift(newData); // ເພີ່ມຄົນໃໝ່ໄວ້ເທິງສຸດ
+            if (change.type === "added" || change.type === "modified") {
+                let existingIndex = localApts.findIndex(a => a.apt_no === newData.apt_no);
+                if (existingIndex !== -1) {
+                    localApts[existingIndex] = newData;
+                } else {
+                    localApts.push(newData);
+                    if (!isInitialAptLoad) {
+                        window.showCustomAlert(`ມີນັດໝາຍໃໝ່ຂອງ: ${newData.patient_name || 'ບໍ່ລະບຸຊື່'}`, '🔔 Firebase ແຈ້ງເຕືອນ', '📅');
+                    }
+                }
+                hasChanges = true;
             }
-            hasChanges = true;
+            if (change.type === "removed") {
+                localApts = localApts.filter(a => a.apt_no !== newData.apt_no);
+                hasChanges = true;
+            }
+        });
+
+        if (hasChanges) {
+            localStorage.setItem('clinic_appointments', JSON.stringify(localApts));
+            if(document.getElementById('page-appointments').style.display === 'block') {
+                if(typeof renderAppointmentsPage === 'function') renderAppointmentsPage(); 
+            }
+            if(document.getElementById('total-appointments')) {
+                document.getElementById('total-appointments').innerText = localApts.length;
+            }
+        }
+        if (isInitialAptLoad) isInitialAptLoad = false;
+    });
+
+    // 2. ຄົນເຈັບ Realtime (ຮອງຮັບການລຶບ - Removed ເພື່ອບໍ່ໃຫ້ ID-undefined ກັບມາອີກ)
+    db.collection("patients").onSnapshot((snapshot) => {
+        let localPatients = JSON.parse(localStorage.getItem('clinic_local_patients')) || [];
+        let hasChanges = false;
+        
+        snapshot.docChanges().forEach((change) => {
+            const newData = change.doc.data();
+            if (change.type === "added" || change.type === "modified") {
+                let existingIndex = localPatients.findIndex(p => p.patient_code === newData.patient_code);
+                if (existingIndex !== -1) {
+                    localPatients[existingIndex] = newData; 
+                } else {
+                    localPatients.unshift(newData); 
+                }
+                hasChanges = true;
+            }
+            if (change.type === "removed") {
+                localPatients = localPatients.filter(p => p.patient_code !== newData.patient_code && p.fullname !== newData.fullname);
+                hasChanges = true;
+            }
+        });
+        
+        if (hasChanges) {
+            localStorage.setItem('clinic_local_patients', JSON.stringify(localPatients));
+            globalPatientsList = localPatients; 
+            
+            if(document.getElementById('page-dashboard').style.display === 'block') {
+                renderDashboardTable(localPatients);
+            }
+            if(document.getElementById('page-patients').style.display === 'block') {
+                if(typeof renderPatientsPage === 'function') renderPatientsPage();
+            }
         }
     });
-    
-    if (hasChanges) {
-        localStorage.setItem('clinic_local_patients', JSON.stringify(localPatients));
-        globalPatientsList = localPatients; // ບັງຄັບອັບເດດຕົວປ່ຽນຫຼັກ
-        
-        // ຖ້າເປີດໜ້າ Dashboard ຫຼື ໜ້າຄົນເຈັບຢູ່ ໃຫ້ໂຫຼດຕາຕະລາງໃໝ່ທັນທີ
-        if(document.getElementById('page-dashboard').style.display === 'block') {
-            renderDashboardTable(localPatients);
-        }
-        if(document.getElementById('page-patients').style.display === 'block') {
-            if(typeof renderPatientsPage === 'function') renderPatientsPage();
-        }
-    }
-});
 
+    // ================= ຟັງຊັນລຶບຂໍ້ມູນການກວດ (ໃນໜ້າຫ້ອງກວດ) ================= //
+    window.deleteConsultation = function(index) {
+        window.showCustomConfirm('ທ່ານຕ້ອງການລຶບຂໍ້ມູນການກວດນີ້ ແທ້ຫຼືບໍ່? (ເໝາະສຳລັບລຶບຂໍ້ມູນທົດລອງ)', 'ຢືນຢັນການລຶບ', function() {
+            let visits = JSON.parse(localStorage.getItem('clinic_visits')) || [];
+            if (index >= 0 && index < visits.length) {
+                visits.splice(index, 1);
+                localStorage.setItem('clinic_visits', JSON.stringify(visits));
+                if(typeof window.renderConsultationsPage === 'function') window.renderConsultationsPage();
+                window.showCustomAlert('ລຶບຂໍ້ມູນການກວດສຳເລັດແລ້ວ', 'ສຳເລັດ', '✅');
+            }
+        });
+    };
 </script>
 </body>
 </html>
