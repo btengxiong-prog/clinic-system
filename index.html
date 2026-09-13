@@ -3032,9 +3032,40 @@ window.toggleFollowUpFields = function() {
         localStorage.setItem('clinic_visits', JSON.stringify(visits)); 
         window.showCustomAlert('ບັນທຶກຂໍ້ມູນການວິນິດໄສ ແລະ ສັ່ງຢາ ສຳເລັດ!', 'ສຳເລັດ', '✅'); 
         
-        // ຖ້າມີການສັ່ງຢາ ແລະ ໝໍກົດສຳເລັດ, ໃຫ້ສົ່ງໄປຫ້ອງຈ່າຍຢາແບບອັດຕະໂນມັດ (ໃນອະນາຄົດສາມາດຂຽນໂຄດເຊື່ອມຕໍ່ໄດ້ເລີຍ)
+        // ຖ້າມີການສັ່ງຢາ ແລະ ໝໍກົດສຳເລັດ, ໃຫ້ສົ່ງໄປຫ້ອງຈ່າຍຢາແບບອັດຕະໂນມັດ
         if(prescriptions.length > 0 && document.getElementById('cst2_status').value === '🟢 ສຳເລັດ') {
-             console.log("Prescription automatically sent to Pharmacy Queue.");
+            let rxs = JSON.parse(localStorage.getItem('clinic_prescriptions')) || [];
+            // ກວດສອບວ່າເຄີຍສົ່ງໄປແລ້ວຫຼືຍັງ ສຳລັບ Visit ນີ້ ເພື່ອບໍ່ໃຫ້ສົ່ງຊ້ຳ
+            let existingRx = rxs.find(r => r.visit_id === visits[editingVisitIndex].visit_id);
+            
+            if (!existingRx) {
+                const dateStr = new Date().toISOString().slice(2, 10).replace(/-/g, ''); 
+                const randomNum = Math.floor(Math.random() * 900) + 100;
+                const rxNo = `RX-${dateStr}-${randomNum}`;
+                
+                const newRx = { 
+                    rx_no: rxNo, 
+                    visit_id: visits[editingVisitIndex].visit_id, 
+                    patient_name: visits[editingVisitIndex].patient_name, 
+                    doctor: visits[editingVisitIndex].doctor, 
+                    date: new Date().toISOString().split('T')[0], 
+                    status: '🟡 ລໍຖ້າຈ່າຍ', 
+                    instruction: document.getElementById('cst2_advice').value || '', 
+                    note: 'ສົ່ງອັດຕະໂນມັດຈາກຫ້ອງກວດ', 
+                    items: prescriptions.map(p => ({
+                        name: p.name,
+                        strength: '-',
+                        qty: p.qty,
+                        unit: 'ຕາມສັ່ງ',
+                        usage: p.usage,
+                        freq: '-',
+                        days: ''
+                    }))
+                };
+                rxs.push(newRx);
+                localStorage.setItem('clinic_prescriptions', JSON.stringify(rxs));
+                if(typeof renderPharmacyPage === 'function') renderPharmacyPage();
+            }
         }
 
         document.getElementById('consultationStep2Modal').style.display = 'none'; 
@@ -3577,22 +3608,76 @@ window.toggleFollowUpFields = function() {
         posCalculateTotal();
     };
 
-    // ຟັງຊັນຈຳລອງການດຶງຂໍ້ມູນຄ່າໃຊ້ຈ່າຍ (Mockup) ຖ້າເຊື່ອມ Backend ແທ້ກໍ່ດຶງຈາກ API ບ່ອນນີ້
+    // ຟັງຊັນດຶງຂໍ້ມູນຄ່າໃຊ້ຈ່າຍຕົວຈິງຈາກທຸກພະແນກ ໂດຍອ້າງອີງຈາກ Visit ID
     window.posMockLoadData = function() {
-        const searchVal = document.getElementById('pos_search_visit').value;
+        const searchVal = document.getElementById('pos_search_visit').value.trim();
         if (!searchVal) {
-            window.showCustomAlert('ກະລຸນາປ້ອນ Visit ID ຫຼື ເລກໃບຢາ ທີ່ຕ້ອງການເກັບເງິນ!', 'ແຈ້ງເຕືອນ', '⚠️');
+            window.showCustomAlert('ກະລຸນາປ້ອນ Visit ID ທີ່ຕ້ອງການເກັບເງິນ! (ຕົວຢ່າງ: V-260913-XXX)', 'ແຈ້ງເຕືອນ', '⚠️');
             return;
         }
+        
+        const visits = JSON.parse(localStorage.getItem('clinic_visits')) || [];
+        const visit = visits.find(v => v.visit_id === searchVal);
+        
+        if (!visit) {
+            window.showCustomAlert('ບໍ່ພົບຂໍ້ມູນການກວດ (Visit ID) ນີ້ໃນລະບົບ!', 'ບໍ່ພົບຂໍ້ມູນ', '❌');
+            return;
+        }
+
         document.getElementById('pos_sale_items_body').innerHTML = '';
+        let hasItems = false;
         
-        // ຂໍ້ມູນຈຳລອງ (Mock Data) ທີ່ດຶງມາ
+        // 1. ຄ່າກວດພະຍາດ (Doctor Fee) - ຕັ້ງຄ່າເລີ່ມຕົ້ນ 50,000 ກີບ
         posAddItemRow('ຄ່າກວດພະຍາດ (Consultation)', 1, 50000);
-        posAddItemRow('Paracetamol 500mg', 10, 1000);
-        posAddItemRow('Amoxicillin 500mg', 20, 2000);
-        posAddItemRow('ຄ່າບໍລິການພະຍາບານ (Service)', 1, 30000);
-        
-        window.showCustomAlert('ດຶງຂໍ້ມູນຄ່າໃຊ້ຈ່າຍຂອງລະຫັດນີ້ສຳເລັດແລ້ວ', 'ດຶງຂໍ້ມູນສຳເລັດ', '✅');
+        hasItems = true;
+
+        // 2. ຄ່າຫັດຖະການ (Procedures) ຖ້າມີ
+        if(visit.procedures && visit.procedures.length > 0) {
+            visit.procedures.forEach(proc => {
+                posAddItemRow(`ຄ່າຫັດຖະການ: ${proc}`, 1, 30000); // ລາຄາຫັດຖະການຕັ້ງຕົ້ນ 30,000 ກີບ
+            });
+        }
+
+        // 3. ຄ່າຢາ ຈາກໃບສັ່ງຢາ (Pharmacy)
+        const rxs = JSON.parse(localStorage.getItem('clinic_prescriptions')) || [];
+        const rx = rxs.find(r => r.visit_id === searchVal);
+        if (rx && rx.items && rx.items.length > 0) {
+            const inventory = JSON.parse(localStorage.getItem('clinic_inventory')) || [];
+            rx.items.forEach(item => {
+                let price = 0;
+                // ຄົ້ນຫາລາຄາຢາຈາກສາງ Inventory
+                const invItem = inventory.find(i => i.name.toLowerCase() === item.name.toLowerCase());
+                if(invItem) price = invItem.price;
+                posAddItemRow(`ຢາ: ${item.name}`, item.qty, price);
+            });
+        }
+
+        // 4. ຄ່າ Lab (Laboratory)
+        const labs = JSON.parse(localStorage.getItem('clinic_lab_orders')) || [];
+        const myLabs = labs.filter(l => l.visit_id === searchVal);
+        myLabs.forEach(lab => {
+            lab.tests.forEach(test => {
+                posAddItemRow(`ຄ່າກວດ Lab: ${test}`, 1, 40000); // ລາຄາ Lab ຕັ້ງຕົ້ນ 40,000 ກີບ/ລາຍການ
+            });
+        });
+
+        // 5. ຄ່າ X-Ray
+        const xrays = JSON.parse(localStorage.getItem('clinic_xray_orders')) || [];
+        const myXrays = xrays.filter(x => x.visit_id === searchVal);
+        myXrays.forEach(xr => {
+            posAddItemRow(`ຄ່າ X-Ray: ${xr.type}`, 1, xr.price || 150000); // ດຶງລາຄາທີ່ປ້ອນຕອນສັ່ງ
+        });
+
+        // 6. ຄ່າ Echo
+        const echos = JSON.parse(localStorage.getItem('clinic_echo_orders')) || [];
+        const myEchos = echos.filter(e => e.visit_id === searchVal);
+        myEchos.forEach(ec => {
+            posAddItemRow(`ຄ່າ Echo: ${ec.type}`, 1, ec.price || 300000); // ດຶງລາຄາທີ່ປ້ອນຕອນສັ່ງ
+        });
+
+        if (hasItems) {
+            window.showCustomAlert('ດຶງຂໍ້ມູນຄ່າໃຊ້ຈ່າຍທັງໝົດສຳເລັດແລ້ວ! ລະບົບໄດ້ຄິດໄລ່ຍອດລວມໃຫ້ແລ້ວ.', 'ດຶງຂໍ້ມູນສຳເລັດ', '✅');
+        }
     };
 
     // ຟັງຊັນຄິດໄລ່ຍອດເງິນ ແລະ ເງິນທອນ
