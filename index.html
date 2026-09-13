@@ -3608,75 +3608,97 @@ window.toggleFollowUpFields = function() {
         posCalculateTotal();
     };
 
-// ຟັງຊັນດຶງຂໍ້ມູນຄ່າໃຊ້ຈ່າຍຕົວຈິງຈາກທຸກພະແນກ ໂດຍອ້າງອີງຈາກ Visit ID
+// ຟັງຊັນດຶງຂໍ້ມູນຄ່າໃຊ້ຈ່າຍຕົວຈິງ ອັບເດດໃຫ້ຄົ້ນຫາດ້ວຍ PT-, ຊື່ຄົນເຈັບ, ຫຼື Visit ID ໄດ້
     window.posMockLoadData = function() {
         const searchVal = document.getElementById('pos_search_visit').value.trim();
         if (!searchVal) {
-            window.showCustomAlert('ກະລຸນາປ້ອນ Visit ID ທີ່ຕ້ອງການເກັບເງິນ! (ຕົວຢ່າງ: V-260913-XXX)', 'ແຈ້ງເຕືອນ', '⚠️');
+            window.showCustomAlert('ກະລຸນາປ້ອນ ລະຫັດຄົນເຈັບ (PT-), ຊື່ຄົນເຈັບ ຫຼື Visit ID!', 'ແຈ້ງເຕືອນ', '⚠️');
             return;
         }
         
         const visits = JSON.parse(localStorage.getItem('clinic_visits')) || [];
-        const visit = visits.find(v => v.visit_id === searchVal);
+        const patients = JSON.parse(localStorage.getItem('clinic_local_patients')) || globalPatientsList || [];
         
-        if (!visit) {
-            window.showCustomAlert('ບໍ່ພົບຂໍ້ມູນການກວດ (Visit ID) ນີ້ໃນລະບົບ!', 'ບໍ່ພົບຂໍ້ມູນ', '❌');
+        let targetVisit = null;
+
+        // 1. ລອງຄົ້ນຫາດ້ວຍ Visit ID (V-...) ໂດຍກົງ
+        targetVisit = visits.find(v => v.visit_id === searchVal);
+
+        // 2. ຖ້າບໍ່ພົບ ລອງຄົ້ນຫາດ້ວຍ ລະຫັດຄົນເຈັບ (PT-...) ຫຼື ຊື່ຄົນເຈັບ
+        if (!targetVisit) {
+            // ຊອກຫາຂໍ້ມູນຄົນເຈັບກ່ອນ
+            const matchedPatient = patients.find(p => p.patient_code === searchVal || p.fullname === searchVal);
+            
+            if (matchedPatient) {
+                // ດຶງປະຫວັດການກວດທັງໝົດຂອງຄົນເຈັບຄົນນີ້
+                const patientVisits = visits.filter(v => v.patient_name === matchedPatient.fullname);
+                
+                if (patientVisits.length > 0) {
+                    // ລຽງລຳດັບເພື່ອເອົາ Visit ຫຼ້າສຸດ (ໃໝ່ສຸດ) ມາຄິດໄລ່ເງິນ
+                    patientVisits.sort((a, b) => new Date(b.date) - new Date(a.date));
+                    targetVisit = patientVisits[0]; 
+                }
+            }
+        }
+        
+        if (!targetVisit) {
+            window.showCustomAlert('ບໍ່ພົບປະຫວັດການກວດ ຂອງຄົນເຈັບ ຫຼື ລະຫັດນີ້ໃນມື້ນີ້!', 'ບໍ່ພົບຂໍ້ມູນ', '❌');
             return;
         }
 
+        const visitIdToBill = targetVisit.visit_id; // ໃຊ້ Visit ID ນີ້ໃນການກວາດຫາຄ່າໃຊ້ຈ່າຍທັງໝົດ
         document.getElementById('pos_sale_items_body').innerHTML = '';
         let hasItems = false;
         
-        // 1. ຄ່າກວດພະຍາດ (Doctor Fee) - ປ່ຽນເປັນ 0 ໃຫ້ພະນັກງານປ້ອນເອງ
+        // 1. ຄ່າກວດພະຍາດ (Doctor Fee)
         posAddItemRow('ຄ່າກວດພະຍາດ (Consultation)', 1, 0);
         hasItems = true;
 
-        // 2. ຄ່າຫັດຖະການ (Procedures) ຖ້າມີ - ປ່ຽນເປັນ 0 ໃຫ້ພະນັກງານປ້ອນເອງ
-        if(visit.procedures && visit.procedures.length > 0) {
-            visit.procedures.forEach(proc => {
+        // 2. ຄ່າຫັດຖະການ (Procedures)
+        if(targetVisit.procedures && targetVisit.procedures.length > 0) {
+            targetVisit.procedures.forEach(proc => {
                 posAddItemRow(`ຄ່າຫັດຖະການ: ${proc}`, 1, 0);
             });
         }
 
-        // 3. ຄ່າຢາ ຈາກໃບສັ່ງຢາ (Pharmacy) - ດຶງລາຄາທີ່ຕັ້ງໄວ້ໃນສາງ (Inventory) ມາອັດຕະໂນມັດ
+        // 3. ຄ່າຢາ (Pharmacy)
         const rxs = JSON.parse(localStorage.getItem('clinic_prescriptions')) || [];
-        const rx = rxs.find(r => r.visit_id === searchVal);
+        const rx = rxs.find(r => r.visit_id === visitIdToBill);
         if (rx && rx.items && rx.items.length > 0) {
             const inventory = JSON.parse(localStorage.getItem('clinic_inventory')) || [];
             rx.items.forEach(item => {
                 let price = 0;
-                // ຄົ້ນຫາລາຄາຢາຈາກສາງ
                 const invItem = inventory.find(i => i.name.toLowerCase() === item.name.toLowerCase());
                 if(invItem) price = invItem.price;
                 posAddItemRow(`ຢາ: ${item.name}`, item.qty, price);
             });
         }
 
-        // 4. ຄ່າ Lab (Laboratory) - ປ່ຽນເປັນ 0 ໃຫ້ພະນັກງານປ້ອນເອງ
+        // 4. ຄ່າ Lab
         const labs = JSON.parse(localStorage.getItem('clinic_lab_orders')) || [];
-        const myLabs = labs.filter(l => l.visit_id === searchVal);
+        const myLabs = labs.filter(l => l.visit_id === visitIdToBill);
         myLabs.forEach(lab => {
             lab.tests.forEach(test => {
                 posAddItemRow(`ຄ່າກວດ Lab: ${test}`, 1, 0);
             });
         });
 
-        // 5. ຄ່າ X-Ray - ດຶງລາຄາທີ່ແພດປ້ອນຕອນສັ່ງ, ຖ້າບໍ່ໄດ້ປ້ອນໃຫ້ເປັນ 0
+        // 5. ຄ່າ X-Ray
         const xrays = JSON.parse(localStorage.getItem('clinic_xray_orders')) || [];
-        const myXrays = xrays.filter(x => x.visit_id === searchVal);
+        const myXrays = xrays.filter(x => x.visit_id === visitIdToBill);
         myXrays.forEach(xr => {
             posAddItemRow(`ຄ່າ X-Ray: ${xr.type}`, 1, xr.price || 0); 
         });
 
-        // 6. ຄ່າ Echo - ດຶງລາຄາທີ່ແພດປ້ອນຕອນສັ່ງ, ຖ້າບໍ່ໄດ້ປ້ອນໃຫ້ເປັນ 0
+        // 6. ຄ່າ Echo
         const echos = JSON.parse(localStorage.getItem('clinic_echo_orders')) || [];
-        const myEchos = echos.filter(e => e.visit_id === searchVal);
+        const myEchos = echos.filter(e => e.visit_id === visitIdToBill);
         myEchos.forEach(ec => {
             posAddItemRow(`ຄ່າ Echo: ${ec.type}`, 1, ec.price || 0); 
         });
 
         if (hasItems) {
-            window.showCustomAlert('ດຶງຂໍ້ມູນລາຍການສຳເລັດແລ້ວ! ກະລຸນາປ້ອນລາຄາຄ່າບໍລິການຕ່າງໆໃນຕາຕະລາງ.', 'ດຶງຂໍ້ມູນສຳເລັດ', '✅');
+            window.showCustomAlert(`ດຶງຂໍ້ມູນຂອງຄົນເຈັບ: ${targetVisit.patient_name} ສຳເລັດແລ້ວ!`, 'ດຶງຂໍ້ມູນສຳເລັດ', '✅');
         }
     };
 
