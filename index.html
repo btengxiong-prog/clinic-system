@@ -1256,7 +1256,7 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
     <div class="modal-card large">
         <h3>+ ເພີ່ມຄົນເຈັບ</h3>
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-            <div class="form-group"><label>Patient ID/ລະຫັດຄົນເຈັບ</label><input type="text" id="pt_patient_code" placeholder="PT-000001" style="background: #f4f7fb;"></div>
+            <div class="form-group"><label>Patient ID/ລະຫັດຄົນເຈັບ (ພິມເພື່ອຄົ້ນຫາ)</label><input type="text" id="pt_patient_code" placeholder="ພິມລະຫັດເກົ່າ ຫຼື ສ້າງໃໝ່..." style="background: #fff; border: 2px solid #1976d2;" oninput="autoFillPatientByCode(this.value)"></div>
             <div class="form-group"><label>ເລກ HN/ລະຫັດໂຮງໝໍ</label><input type="text" id="pt_hn_number" placeholder="HN-000001"></div>
             <div class="form-group"><label>ຊື່-ນາມສະກຸນ *</label><input type="text" id="pt_fullname" placeholder="ປ້ອນຊື່-ນາມສະກຸນ"></div>
             <div class="form-group"><label>ເພດ *</label><select id="pt_gender"><option value="">-- ເລືອກ --</option><option value="ຊາຍ">ຊາຍ</option><option value="ຍິງ">ຍິງ</option></select></div>
@@ -4201,7 +4201,37 @@ window.toggleFollowUpFields = function() {
         document.getElementById('aptPrintModal').style.display = 'flex';
     };
 
-// ================= PATIENT EDIT MODULE (ແກ້ໄຂຂໍ້ມູນຄົນເຈັບ) ================= //
+    // ================= PATIENT EDIT MODULE (ແກ້ໄຂຂໍ້ມູນຄົນເຈັບ) ================= //
+    // ຟັງຊັນໃໝ່: ຄົ້ນຫາ ແລະ ດຶງຂໍ້ມູນອັດຕະໂນມັດເມື່ອພິມລະຫັດໃສ່ກ່ອງ Patient ID
+    window.autoFillPatientByCode = function(code) {
+        if (!code || code.trim() === '') return;
+        let patients = JSON.parse(localStorage.getItem('clinic_local_patients')) || globalPatientsList || [];
+        let patient = patients.find(p => p.patient_code === code.trim() || p.id === code.trim());
+
+        if (patient) {
+            // ຖ້າພົບຄົນເຈັບເກົ່າ ໃຫ້ດຶງຂໍ້ມູນມາໃສ່ຟອມ
+            currentEditPatientId = patient.id || patient.patient_code;
+            document.getElementById('pt_hn_number').value = patient.hn_number || '';
+            document.getElementById('pt_fullname').value = patient.fullname || '';
+            document.getElementById('pt_gender').value = patient.gender || '';
+            if (patient.dob) document.getElementById('pt_dob').value = patient.dob;
+            document.getElementById('pt_phone').value = patient.phone || '';
+            document.getElementById('pt_blood_group').value = patient.blood_group || '';
+            document.getElementById('pt_status').value = patient.status || 'Active';
+            document.getElementById('pt_allergy').value = patient.allergy || '';
+            document.getElementById('pt_health_history').value = patient.health_history || '';
+
+            // ປ່ຽນຫົວຂໍ້ເພື່ອແຈ້ງໃຫ້ຮູ້ວ່າດຶງຂໍ້ມູນເກົ່າມາແລ້ວ
+            document.querySelector('#patientModal h3').innerHTML = '✏️ ພົບຂໍ້ມູນເກົ່າ (ກຳລັງແກ້ໄຂ)';
+            document.getElementById('pt_patient_code').style.backgroundColor = '#e7f7ef'; // ປ່ຽນສີກ່ອງເປັນສີຂຽວອ່ອນ
+        } else {
+            // ຖ້າບໍ່ພົບ ໝາຍຄວາມວ່າເປັນລະຫັດໃໝ່
+            currentEditPatientId = null;
+            document.querySelector('#patientModal h3').innerHTML = '+ ເພີ່ມຄົນເຈັບ (ສ້າງລະຫັດໃໝ່)';
+            document.getElementById('pt_patient_code').style.backgroundColor = '#fff';
+        }
+    };
+
     window.editPatient = function(ptId) {
         let patients = JSON.parse(localStorage.getItem('clinic_local_patients')) || globalPatientsList || [];
         const patient = patients.find(p => p.patient_code === ptId || p.id === ptId);
