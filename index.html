@@ -1443,8 +1443,20 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
                 <thead><tr><th style="width: 25%;">ລາຍການກວດ</th><th style="width: 20%;">ຜົນກວດ (Result)</th><th style="width: 15%;">ໜ່ວຍ (Unit)</th><th style="width: 20%;">Reference Range</th><th style="width: 15%;">ໝາຍເຫດ (Flag)</th><th style="width: 5%;">ລຶບ</th></tr></thead>
                 <tbody id="lab_result_body"></tbody>
             </table>
-            <div style="padding: 10px; text-align: center; background: #f9fbfd;"><button class="btn-action" style="background: #e2e8f0; color: #333;" onclick="addLabResultRow()">+ ເພີ່ມແຖວຜົນກວດ</button></div>
+        <div style="padding: 10px; text-align: center; background: #f9fbfd;"><button class="btn-action" style="background: #e2e8f0; color: #333;" onclick="addLabResultRow()">+ ເພີ່ມແຖວຜົນກວດ</button></div>
         </div>
+        
+        <!-- ສ່ວນທີ່ເພີ່ມໃໝ່: ອັບໂຫຼດເອກະສານ -->
+        <div class="section-title">📎 3. ອັບໂຫຼດເອກະສານຜົນກວດຕົ້ນສະບັບ (Attachments)</div>
+        <div style="background: #f9fbfd; padding: 15px; border: 1px dashed #ccc; border-radius: 8px; margin-bottom: 15px;">
+            <input type="file" id="lab_file_upload" accept=".pdf, image/jpeg, image/png" style="display: none;" onchange="handleLabFileUpload(event)">
+            <button class="btn-action" style="background: #102a43; color: white;" onclick="document.getElementById('lab_file_upload').click()">📎 ເລືອກໄຟລ໌ (PDF / JPG / PNG)</button>
+            <div id="lab_attachments_list" style="margin-top: 10px; display: flex; flex-direction: column; gap: 5px;">
+                <!-- ໄຟລ໌ທີ່ອັບໂຫຼດຈະສະແດງຢູ່ບ່ອນນີ້ -->
+            </div>
+        </div>
+        <!-- ຈົບສ່ວນທີ່ເພີ່ມໃໝ່ -->
+
         <div class="form-group"><label>ສະຖານະ Lab</label><select id="lab_proc_status"><option value="🟡 ລໍຖ້າຮັບຕົວຢ່າງ">🟡 ລໍຖ້າຮັບຕົວຢ່າງ</option><option value="🔬 ກຳລັງວິເຄາະ">🔬 ກຳລັງວິເຄາະ</option><option value="⚠️ ລໍຖ້າຢືນຢັນ">⚠️ ລໍຖ້າຢືນຢັນ</option><option value="🟢 ສຳເລັດ">🟢 ສຳເລັດ (ສົ່ງຜົນໃຫ້ແພດ)</option></select></div>
         <div class="modal-actions"><button class="btn-cancel" onclick="document.getElementById('labProcessModal').style.display='none'">ຍົກເລີກ</button><button class="btn-submit" onclick="saveLabProcess()">💾 ບັນທຶກຂໍ້ມູນ Lab</button></div>
     </div>
@@ -2054,6 +2066,54 @@ window.showCustomAlert = function(message, title = "ແຈ້ງເຕືອນ"
         }
 
         document.getElementById('patientHistoryModal').style.display = 'flex';
+    };
+
+// ຕົວປ່ຽນເກັບໄຟລ໌ຊົ່ວຄາວຕອນກຳລັງອັບໂຫຼດ
+    window.currentLabAttachments = [];
+
+    // ຟັງຊັນອ່ານໄຟລ໌ທີ່ອັບໂຫຼດ (ແປງເປັນ Base64 ເພື່ອເກັບລົງ LocalStorage ສຳລັບ Demo)
+    window.handleLabFileUpload = function(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        // ກວດສອບຂະໜາດໄຟລ໌ ບໍ່ໃຫ້ເກີນ 2MB ສຳລັບ LocalStorage
+        if (file.size > 2 * 1024 * 1024) {
+            window.showCustomAlert('ໄຟລ໌ມີຂະໜາດໃຫຍ່ເກີນໄປ! (ກະລຸນາເລືອກໄຟລ໌ທີ່ນ້ອຍກວ່າ 2MB ສຳລັບລະບົບຈຳລອງນີ້)', 'ແຈ້ງເຕືອນ', '⚠️');
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            window.currentLabAttachments.push({
+                name: file.name,
+                type: file.type,
+                data: e.target.result // Base64 data
+            });
+            renderLabAttachments();
+        };
+        reader.readAsDataURL(file);
+        event.target.value = ''; // Reset input
+    };
+
+    window.renderLabAttachments = function() {
+        const listContainer = document.getElementById('lab_attachments_list');
+        listContainer.innerHTML = '';
+        if (window.currentLabAttachments.length === 0) {
+            listContainer.innerHTML = '<span style="font-size: 13px; color: #7b8794;">ຍັງບໍ່ມີເອກະສານແນບຕິດ</span>';
+            return;
+        }
+        window.currentLabAttachments.forEach((file, index) => {
+            const icon = file.type.includes('pdf') ? '📄' : '🖼️';
+            listContainer.innerHTML += `
+                <div style="display: flex; justify-content: space-between; align-items: center; background: #fff; border: 1px solid #ccc; padding: 5px 10px; border-radius: 4px;">
+                    <span style="font-size: 13px;">${icon} ${file.name}</span>
+                    <div>
+                        <a href="${file.data}" download="${file.name}" style="text-decoration: none; font-size: 14px; margin-right: 10px;" title="ດາວໂຫຼດ">📥</a>
+                        <button style="border: none; background: transparent; color: #d32f2f; cursor: pointer;" onclick="window.currentLabAttachments.splice(${index}, 1); renderLabAttachments();">🗑️</button>
+                    </div>
+                </div>
+            `;
+        });
     };
 
     // ຟັງຊັນສຳລັບປຸ່ມ "ເປີດການກວດໃໝ່" ຈາກໜ້າປະຫວັດ ໂດຍດຶງຊື່ໄປໄວ້ໃຫ້ອັດຕະໂນມັດ
@@ -2770,9 +2830,46 @@ window.showCustomAlert = function(message, title = "ແຈ້ງເຕືອນ"
         document.getElementById('labOrderModal').style.display = 'none'; window.showCustomAlert(`ສົ່ງຄຳສັ່ງກວດ Lab ເລກທີ ${labNo} ສຳເລັດແລ້ວ!`, 'ສຳເລັດ', '✅'); renderDoctorLabOrdersList(visitId); renderLabPage();
     };
     window.renderDoctorLabOrdersList = function(visitId) {
-        let labOrders = JSON.parse(localStorage.getItem('clinic_lab_orders')) || []; let myLabs = labOrders.filter(l => l.visit_id === visitId); const container = document.getElementById('cst2_lab_orders_list'); container.innerHTML = '';
-        if(myLabs.length === 0) { container.innerHTML = 'ຍັງບໍ່ມີການສັ່ງ Lab ສຳລັບ Visit ນີ້'; return; }
-        myLabs.forEach((lab) => { let badgeColor = lab.status.includes('ສຳເລັດ') ? 'badge-green' : (lab.status.includes('ຮັບຕົວຢ່າງ') ? 'badge-gray' : 'badge-yellow'); let viewBtn = lab.status.includes('ສຳເລັດ') ? `<button onclick="printLabReport('${lab.lab_no}')" style="background:transparent; border:none; color:#1976d2; cursor:pointer;">👁️ ເບິ່ງຜົນ</button>` : ''; container.innerHTML += `<div style="display:flex; justify-content:space-between; margin-bottom: 4px; padding: 4px; background: #fff; border-radius: 4px;"><span><strong>${lab.lab_no}</strong>: ${lab.tests.join(', ')}</span><span><span class="badge ${badgeColor}">${lab.status}</span> ${viewBtn}</span></div>`; });
+        let labOrders = JSON.parse(localStorage.getItem('clinic_lab_orders')) || []; 
+        let myLabs = labOrders.filter(l => l.visit_id === visitId); 
+        const container = document.getElementById('cst2_lab_orders_list'); 
+        container.innerHTML = '';
+        
+        if(myLabs.length === 0) { 
+            container.innerHTML = 'ຍັງບໍ່ມີການສັ່ງ Lab ສຳລັບ Visit ນີ້'; 
+            return; 
+        }
+
+        myLabs.forEach((lab) => { 
+            let badgeColor = lab.status.includes('ສຳເລັດ') ? 'badge-green' : (lab.status.includes('ຮັບຕົວຢ່າງ') ? 'badge-gray' : 'badge-yellow'); 
+            
+            // ປຸ່ມເບິ່ງຜົນແບບ Structured Data (ຕາຕະລາງເດີມ)
+            let viewBtn = lab.status.includes('ສຳເລັດ') ? `<button onclick="printLabReport('${lab.lab_no}')" style="background:transparent; border:none; color:#1976d2; cursor:pointer; font-weight:bold; margin-left:10px;">👁️ ເບິ່ງຕາຕະລາງຜົນ</button>` : ''; 
+            
+            // ສ້າງລາຍການໄຟລ໌ແນບຕິດ (PDF/ຮູບພາບ)
+            let attachmentsHtml = '';
+            if (lab.attachments && lab.attachments.length > 0) {
+                attachmentsHtml = `<div style="margin-top: 5px; padding-top: 5px; border-top: 1px dashed #ccc;">`;
+                lab.attachments.forEach(file => {
+                    const icon = file.type.includes('pdf') ? '📄' : '🖼️';
+                    attachmentsHtml += `
+                        <div style="display:inline-block; background:#e3f2fd; padding:3px 8px; border-radius:4px; margin-right:5px; font-size:12px; margin-bottom: 3px;">
+                            ${icon} ${file.name} 
+                            <a href="${file.data}" target="_blank" style="text-decoration:none; margin-left:5px; color:#1976d2; font-weight:bold;" title="ເປີດເບິ່ງໄຟລ໌">👁️ ເປີດໄຟລ໌ອັບໂຫຼດ</a>
+                        </div>`;
+                });
+                attachmentsHtml += `</div>`;
+            }
+
+            container.innerHTML += `
+                <div style="margin-bottom: 8px; padding: 8px; background: #fff; border-radius: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); border: 1px solid #eee;">
+                    <div style="display:flex; justify-content:space-between;">
+                        <span><strong>${lab.lab_no}</strong>: ${lab.tests.join(', ')}</span>
+                        <span><span class="badge ${badgeColor}">${lab.status}</span> ${viewBtn}</span>
+                    </div>
+                    ${attachmentsHtml}
+                </div>`; 
+        });
     }
     window.openLabProcessModal = function(index) {
         let labOrders = JSON.parse(localStorage.getItem('clinic_lab_orders')) || []; if(index < 0 || index >= labOrders.length) return; const lab = labOrders[index]; editingLabIndex = index;
@@ -2781,9 +2878,14 @@ window.showCustomAlert = function(message, title = "ແຈ້ງເຕືອນ"
         const tbody = document.getElementById('lab_result_body'); tbody.innerHTML = '';
         if(lab.results && lab.results.length > 0) { lab.results.forEach(r => addLabResultRow(r)); } else {
             if(lab.tests.includes('CBC')) { addLabResultRow({name: 'WBC', res: '', unit: 'x10^9/L', ref: '4.0 - 10.0'}); addLabResultRow({name: 'RBC', res: '', unit: 'x10^12/L', ref: '4.2 - 5.9'}); addLabResultRow({name: 'Hemoglobin', res: '', unit: 'g/dL', ref: '12.0 - 16.0'}); addLabResultRow({name: 'Platelets', res: '', unit: 'x10^9/L', ref: '150 - 400'}); }
-            if(lab.tests.includes('Blood Sugar') || lab.tests.includes('Glucose')) { addLabResultRow({name: 'Fasting Blood Sugar', res: '', unit: 'mg/dL', ref: '70 - 100'}); }
+    if(lab.tests.includes('Blood Sugar') || lab.tests.includes('Glucose')) { addLabResultRow({name: 'Fasting Blood Sugar', res: '', unit: 'mg/dL', ref: '70 - 100'}); }
             if(tbody.innerHTML === '') addLabResultRow(); 
         }
+
+        // ໂຫຼດໄຟລ໌ທີ່ເຄີຍແນບໄວ້ມາສະແດງ
+        window.currentLabAttachments = lab.attachments ? [...lab.attachments] : [];
+        window.renderLabAttachments();
+
         document.getElementById('labProcessModal').style.display = 'flex';
     };
     window.addLabResultRow = function(data = {}) { const tbody = document.getElementById('lab_result_body'); const tr = document.createElement('tr'); tr.innerHTML = `<td><input type="text" class="lr-name" value="${data.name || ''}" placeholder="ຊື່ການກວດ"></td><td><input type="text" class="lr-res" value="${data.res || ''}" placeholder="ຜົນ"></td><td><input type="text" class="lr-unit" value="${data.unit || ''}" placeholder="ໜ່ວຍ"></td><td><input type="text" class="lr-ref" value="${data.ref || ''}" placeholder="ຄ່າມາດຕະຖານ"></td><td><select class="lr-flag"><option value="">-- ເລືອກ --</option><option value="🟢 Normal" ${data.flag==='🟢 Normal'?'selected':''}>🟢 Normal</option><option value="🟠 High" ${data.flag==='🟠 High'?'selected':''}>🟠 High</option><option value="🔵 Low" ${data.flag==='🔵 Low'?'selected':''}>🔵 Low</option><option value="🔴 Critical" ${data.flag==='🔴 Critical'?'selected':''}>🔴 Critical</option></select></td><td style="text-align:center;"><button class="btn-remove-row" onclick="this.closest('tr').remove()">🗑️</button></td>`; tbody.appendChild(tr); };
@@ -2791,9 +2893,21 @@ window.showCustomAlert = function(message, title = "ແຈ້ງເຕືອນ"
         if(editingLabIndex === -1) return; let labOrders = JSON.parse(localStorage.getItem('clinic_lab_orders')) || []; let lab = labOrders[editingLabIndex];
         lab.status = document.getElementById('lab_proc_status').value; lab.specimen = { no: document.getElementById('lab_spec_no').value, type: document.getElementById('lab_spec_type').value, time: document.getElementById('lab_spec_time').value };
         const rows = document.getElementById('lab_result_body').querySelectorAll('tr'); const results = [];
-        rows.forEach(row => { const name = row.querySelector('.lr-name').value.trim(); if(name) { results.push({ name: name, res: row.querySelector('.lr-res').value.trim(), unit: row.querySelector('.lr-unit').value.trim(), ref: row.querySelector('.lr-ref').value.trim(), flag: row.querySelector('.lr-flag').value }); } });
-        lab.results = results; labOrders[editingLabIndex] = lab; localStorage.setItem('clinic_lab_orders', JSON.stringify(labOrders));
-        document.getElementById('labProcessModal').style.display = 'none'; window.showCustomAlert('ບັນທຶກຂໍ້ມູນ Lab ສຳເລັດ!', 'ສຳເລັດ', '✅'); renderLabPage();
+    rows.forEach(row => { const name = row.querySelector('.lr-name').value.trim(); if(name) { results.push({ name: name, res: row.querySelector('.lr-res').value.trim(), unit: row.querySelector('.lr-unit').value.trim(), ref: row.querySelector('.lr-ref').value.trim(), flag: row.querySelector('.lr-flag').value }); } });
+        
+        lab.results = results; 
+        lab.attachments = window.currentLabAttachments; // ບັນທຶກໄຟລ໌ແນບຕິດ
+
+        labOrders[editingLabIndex] = lab; 
+        localStorage.setItem('clinic_lab_orders', JSON.stringify(labOrders));
+        document.getElementById('labProcessModal').style.display = 'none'; 
+        window.showCustomAlert('ບັນທຶກຂໍ້ມູນ Lab ແລະ ເອກະສານສຳເລັດ!', 'ສຳເລັດ', '✅'); 
+        renderLabPage();
+        
+        // ອັບເດດໜ້າຈໍຫ້ອງກວດຂອງໝໍໃຫ້ເຫັນໄຟລ໌ທັນທີ (ຖ້າເປີດຢູ່)
+        if(document.getElementById('consultationStep2Modal').style.display === 'flex') {
+            renderDoctorLabOrdersList(lab.visit_id);
+        }
     };
     window.printLabReport = function(labNo) {
         let labOrders = JSON.parse(localStorage.getItem('clinic_lab_orders')) || []; const lab = labOrders.find(l => l.lab_no === labNo); if(!lab) return;
