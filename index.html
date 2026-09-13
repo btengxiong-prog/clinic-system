@@ -2411,7 +2411,7 @@ window.showCustomAlert = function(message, title = "ແຈ້ງເຕືອນ"
         }
     }
 
-function renderDashboardTable(patients) {
+    function renderDashboardTable(patients) {
         const tbody = document.getElementById('patient-table-body');
         if (!tbody) return;
         tbody.innerHTML = "";
@@ -2453,7 +2453,7 @@ function renderDashboardTable(patients) {
                 <td><small>${allergy}</small></td>
                 <td><small style="color: #7b8794;">${history}</small></td>
                 <td>${statusBadge}</td>
-                <td style="text-align: center; min-width: 100px;">
+                <td style="text-align: center; min-width: 120px; white-space: nowrap;">
                     <span class="action-icon" title="ເບິ່ງຂໍ້ມູນ" onclick="viewPatientQuick('${name}')">👁️</span>
                     <span class="action-icon" title="ແກ້ໄຂຂໍ້ມູນ" onclick="editPatient('${ptId}')">✏️</span>
                     <span class="action-icon" title="ລຶບຂໍ້ມູນທົດລອງ" onclick="deletePatient('${ptId}')" style="color: #d32f2f;">🗑️</span>
@@ -2465,7 +2465,7 @@ function renderDashboardTable(patients) {
 
     window.filterPatientsPage = function() { renderPatientsPage(); };
 
-function renderPatientsPage() {
+    function renderPatientsPage() {
         const tbody = document.getElementById('patients-full-table-body');
         if(!tbody) return;
         let patients = JSON.parse(localStorage.getItem('clinic_local_patients')) || globalPatientsList || [];
@@ -2520,7 +2520,7 @@ function renderPatientsPage() {
                 <td><small>${allergy}</small></td>
                 <td><small style="color: #7b8794;">${history}</small></td>
                 <td>${statusBadge}</td>
-                <td style="text-align: center; min-width: 100px;">
+                <td style="text-align: center; min-width: 120px; white-space: nowrap;">
                     <span class="action-icon" title="ເບິ່ງຂໍ້ມູນ" onclick="viewPatientQuick('${name}')">👁️</span>
                     <span class="action-icon" title="ແກ້ໄຂຂໍ້ມູນ" onclick="editPatient('${ptId}')">✏️</span>
                     <span class="action-icon" title="ລຶບຂໍ້ມູນທົດລອງ" onclick="deletePatient('${ptId}')" style="color: #d32f2f;">🗑️</span>
