@@ -2144,17 +2144,12 @@ window.showCustomAlert = function(message, title = "ແຈ້ງເຕືອນ"
         document.getElementById('patientHistoryModal').style.display = 'flex';
     };
 
-// ================= ຟັງຊັນລຶບຄົນເຈັບ (ອັບເດດແກ້ໄຂບັນຫາ ID-undefined) ================= //
+// ================= ຟັງຊັນລຶບຄົນເຈັບ (ອັບເດດໃໝ່: ລຶບຂໍ້ມູນທົດລອງໄດ້ 100%) ================= //
     window.deletePatient = function(ptId) {
         let patients = JSON.parse(localStorage.getItem('clinic_local_patients')) || globalPatientsList || [];
         
-        // ອັບເດດການຄົ້ນຫາໃຫ້ຮອງຮັບກໍລະນີ ID ເປັນ 'ID-undefined'
-        let patientIndex = patients.findIndex(p => {
-            let generatedId = p.patient_code || ('ID-' + p.id);
-            return String(p.patient_code) === String(ptId) || 
-                   String(p.id) === String(ptId) || 
-                   String(generatedId) === String(ptId);
-        });
+        // ແກ້ໄຂບັນຫາທີ 1: ແປງເປັນ String ກ່ອນທຽບຄ່າ ເພື່ອປ້ອງກັນ error "ບໍ່ພົບຂໍ້ມູນ" ຍ້ອນ Type ບໍ່ກົງກັນ
+        let patientIndex = patients.findIndex(p => String(p.patient_code) === String(ptId) || String(p.id) === String(ptId));
         
         if (patientIndex === -1) {
             window.showCustomAlert('ບໍ່ພົບຂໍ້ມູນຄົນເຈັບໃນລະບົບ (ອາດຈະຖືກລຶບໄປກ່ອນໜ້ານີ້ແລ້ວ, ລອງ Refresh ໜ້າຈໍເບິ່ງໃໝ່)', 'ຜິດພາດ', '❌');
@@ -2163,12 +2158,14 @@ window.showCustomAlert = function(message, title = "ແຈ້ງເຕືອນ"
         
         const patient = patients[patientIndex];
         
+        // ກວດສອບປະຫວັດ
         let visits = JSON.parse(localStorage.getItem('clinic_visits')) || [];
         let appointments = JSON.parse(localStorage.getItem('clinic_appointments')) || [];
         
         let hasVisits = visits.some(v => v.patient_name === patient.fullname);
         let hasAppointments = appointments.some(a => a.patient_name === patient.fullname);
         
+        // ແກ້ໄຂບັນຫາທີ 2: ປ່ຽນຈາກ "ຫ້າມລຶບ" ເປັນການ "ເຕືອນແລ້ວລຶບປະຫວັດຖິ້ມພ້ອມກັນ (Cascade Delete)"
         let confirmMessage = `ທ່ານຕ້ອງການລຶບຂໍ້ມູນຄົນເຈັບ: <strong>${patient.fullname}</strong> ແທ້ຫຼືບໍ່?`;
         
         if (hasVisits || hasAppointments) {
@@ -2176,12 +2173,12 @@ window.showCustomAlert = function(message, title = "ແຈ້ງເຕືອນ"
         }
         
         window.showCustomConfirm(confirmMessage, 'ຢືນຢັນການລຶບຂັ້ນເດັດຂາດ', async function() {
-            // 1. ລຶບອອກຈາກ Array
+            // 1. ລຶບຂໍ້ມູນຄົນເຈັບອອກຈາກ Array ຫຼັກ
             patients.splice(patientIndex, 1);
             localStorage.setItem('clinic_local_patients', JSON.stringify(patients));
             globalPatientsList = patients;
             
-            // 2. ລຶບປະຫວັດ
+            // 2. ທຳຄວາມສະອາດປະຫວັດເກົ່າຂອງຄົນເຈັບນີ້ຖິ້ມ (Cascade Delete)
             if (hasVisits) {
                 visits = visits.filter(v => v.patient_name !== patient.fullname);
                 localStorage.setItem('clinic_visits', JSON.stringify(visits));
@@ -2191,24 +2188,21 @@ window.showCustomAlert = function(message, title = "ແຈ້ງເຕືອນ"
                 localStorage.setItem('clinic_appointments', JSON.stringify(appointments));
             }
             
-            // 3. ລຶບອອກຈາກ Firebase ໂດຍກວດສອບຄ່າ ID ໃຫ້ແນ່ໃຈ
+            // 3. ລຶບອອກຈາກ Firebase (ຖ້າມີການເຊື່ອມຕໍ່ຢູ່)
             try {
                 if (typeof db !== 'undefined') {
-                    let firebaseDocId = patient.patient_code || patient.id || String(ptId);
-                    if (firebaseDocId && firebaseDocId !== 'undefined' && firebaseDocId !== 'ID-undefined') {
-                        await db.collection("patients").doc(String(firebaseDocId)).delete();
-                    }
+                    await db.collection("patients").doc(String(ptId)).delete();
                     console.log("✅ ລຶບຂໍ້ມູນຄົນເຈັບອອກຈາກ Firebase ສຳເລັດ!");
                 }
             } catch (error) {
                 console.error("❌ ເກີດຂໍ້ຜິດພາດໃນການລຶບອອກຈາກ Firebase:", error);
             }
             
-            // 4. ອັບເດດໜ້າຈໍ
+            // 4. ແຕ້ມຕາຕະລາງໃໝ່ ເພື່ອອັບເດດໜ້າຈໍທັນທີ
             renderDashboardTable(patients);
             if(typeof renderPatientsPage === 'function') renderPatientsPage();
             
-            window.showCustomAlert('ລຶບຂໍ້ມູນຄົນເຈັບ (ລວມທັງ ID-undefined) ສຳເລັດແລ້ວ!', 'ສຳເລັດ', '✅');
+            window.showCustomAlert('ລຶບຂໍ້ມູນຄົນເຈັບ ແລະ ປະຫວັດທີ່ກ່ຽວຂ້ອງ ສຳເລັດແລ້ວ!', 'ສຳເລັດ', '✅');
         });
     };
 
@@ -3158,72 +3152,7 @@ window.toggleFollowUpFields = function() {
         renderConsultationsPage(); 
     });
     
-window.renderConsultationsPage = function() { 
-        const visits = JSON.parse(localStorage.getItem('clinic_visits')) || []; 
-        const todayDate = new Date().toISOString().split('T')[0]; 
-        let countToday = 0; let countProgress = 0; let countCompleted = 0; let countWaiting = 0; 
-        
-        visits.forEach(v => { 
-            if(v.date === todayDate) countToday++; 
-            if(v.status.includes('ກຳລັງກວດ')) countProgress++; 
-            if(v.status.includes('ສຳເລັດ')) countCompleted++; 
-            if(v.status.includes('ລໍຖ້າ')) countWaiting++; 
-        }); 
-        
-        document.getElementById('cst-stat-today').innerText = countToday + ' ຄັ້ງ'; 
-        document.getElementById('cst-stat-progress').innerText = countProgress + ' ຄົນ'; 
-        document.getElementById('cst-stat-completed').innerText = countCompleted + ' ຄົນ'; 
-        document.getElementById('cst-stat-waiting').innerText = countWaiting + ' ຄົນ'; 
-        
-        const tbody = document.getElementById('consultation-table-body'); 
-        tbody.innerHTML = ''; 
-        
-        if(visits.length === 0) { 
-            tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding: 20px;">ຍັງບໍ່ມີຂໍ້ມູນການກວດ</td></tr>'; 
-        } else { 
-            visits.sort((a,b) => (b.date + b.time).localeCompare(a.date + a.time)); 
-            visits.forEach((v, index) => { 
-                const dArr = v.date.split('-'); 
-                const displayDate = dArr.length === 3 ? `${dArr[2]}/${dArr[1]}/${dArr[0]}` : v.date; 
-                let badgeClass = 'badge-gray'; 
-                if(v.status.includes('ກຳລັງກວດ')) badgeClass = 'badge-yellow'; 
-                else if(v.status.includes('ສຳເລັດ')) badgeClass = 'badge-green'; 
-                else if(v.status.includes('ລໍຖ້າ')) badgeClass = 'badge-blue'; 
-                
-                const displaySymDiag = (v.diagnosis) ? `<strong>${v.diagnosis}</strong>` : (v.symptoms || '-'); 
-                const originalVisits = JSON.parse(localStorage.getItem('clinic_visits')) || []; 
-                const trueIndex = originalVisits.findIndex(ov => ov.visit_id === v.visit_id); 
-                
-                const tr = document.createElement('tr'); 
-                tr.innerHTML = `
-                    <td><strong>${v.visit_id}</strong></td>
-                    <td>${v.patient_name}</td>
-                    <td>${displayDate}</td>
-                    <td style="font-weight:bold;">${v.time}</td>
-                    <td>${v.doctor}</td>
-                    <td>${displaySymDiag}</td>
-                    <td><span class="badge ${badgeClass}">${v.status}</span></td>
-                    <td style="text-align: center; white-space: nowrap;">
-                        <span class="action-icon" title="ບັນທຶກຜົນການກວດ / ແກ້ໄຂ" onclick="openConsultationStep2(${trueIndex})">✏️</span>
-                        <span class="action-icon" title="ລຶບຂໍ້ມູນການກວດ" onclick="deleteConsultation(${trueIndex})" style="color: #d32f2f;">🗑️</span>
-                    </td>
-                `; 
-                tbody.appendChild(tr); 
-            }); 
-        } 
-    };
-
-    window.deleteConsultation = function(index) {
-        window.showCustomConfirm('ທ່ານຕ້ອງການລຶບຂໍ້ມູນການກວດນີ້ ແທ້ຫຼືບໍ່? (ເໝາະສຳລັບລຶບຂໍ້ມູນທົດລອງ)', 'ຢືນຢັນການລຶບ', function() {
-            let visits = JSON.parse(localStorage.getItem('clinic_visits')) || [];
-            if (index >= 0 && index < visits.length) {
-                visits.splice(index, 1);
-                localStorage.setItem('clinic_visits', JSON.stringify(visits));
-                if(typeof renderConsultationsPage === 'function') renderConsultationsPage();
-                window.showCustomAlert('ລຶບຂໍ້ມູນການກວດສຳເລັດແລ້ວ', 'ສຳເລັດ', '✅');
-            }
-        });
-    };
+    function renderConsultationsPage() { const visits = JSON.parse(localStorage.getItem('clinic_visits')) || []; const todayDate = new Date().toISOString().split('T')[0]; let countToday = 0; let countProgress = 0; let countCompleted = 0; let countWaiting = 0; visits.forEach(v => { if(v.date === todayDate) countToday++; if(v.status.includes('ກຳລັງກວດ')) countProgress++; if(v.status.includes('ສຳເລັດ')) countCompleted++; if(v.status.includes('ລໍຖ້າ')) countWaiting++; }); document.getElementById('cst-stat-today').innerText = countToday + ' ຄັ້ງ'; document.getElementById('cst-stat-progress').innerText = countProgress + ' ຄົນ'; document.getElementById('cst-stat-completed').innerText = countCompleted + ' ຄົນ'; document.getElementById('cst-stat-waiting').innerText = countWaiting + ' ຄົນ'; const tbody = document.getElementById('consultation-table-body'); tbody.innerHTML = ''; if(visits.length === 0) { tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding: 20px;">ຍັງບໍ່ມີຂໍ້ມູນການກວດ</td></tr>'; } else { visits.sort((a,b) => (b.date + b.time).localeCompare(a.date + a.time)); visits.forEach((v, index) => { const dArr = v.date.split('-'); const displayDate = dArr.length === 3 ? `${dArr[2]}/${dArr[1]}/${dArr[0]}` : v.date; let badgeClass = 'badge-gray'; if(v.status.includes('ກຳລັງກວດ')) badgeClass = 'badge-yellow'; else if(v.status.includes('ສຳເລັດ')) badgeClass = 'badge-green'; else if(v.status.includes('ລໍຖ້າ')) badgeClass = 'badge-blue'; const displaySymDiag = (v.diagnosis) ? `<strong>${v.diagnosis}</strong>` : (v.symptoms || '-'); const originalVisits = JSON.parse(localStorage.getItem('clinic_visits')) || []; const trueIndex = originalVisits.findIndex(ov => ov.visit_id === v.visit_id); 
         const tr = document.createElement('tr'); 
         tr.innerHTML = `<td><strong>${v.visit_id}</strong></td><td>${v.patient_name}</td><td>${displayDate}</td><td style="font-weight:bold;">${v.time}</td><td>${v.doctor}</td><td>${displaySymDiag}</td><td><span class="badge ${badgeClass}">${v.status}</span></td><td style="text-align: center;"><span class="action-icon" title="ບັນທຶກຜົນການກວດ / ແກ້ໄຂ" onclick="openConsultationStep2(${trueIndex})">✏️</span></td>`; 
         tbody.appendChild(tr); }); } }
@@ -4856,26 +4785,6 @@ db.collection("patients").onSnapshot((snapshot) => {
         }
     }
 });
-
-// ================= ຟັງຊັນລຶບຂໍ້ມູນການກວດ (ໃນໜ້າຫ້ອງກວດ) ================= //
-    window.deleteConsultation = function(index) {
-        window.showCustomConfirm('ທ່ານຕ້ອງການລຶບຂໍ້ມູນການກວດນີ້ ແທ້ຫຼືບໍ່? (ເໝາະສຳລັບລຶບຂໍ້ມູນທົດລອງ)', 'ຢືນຢັນການລຶບ', function() {
-            let visits = JSON.parse(localStorage.getItem('clinic_visits')) || [];
-            
-            if (index >= 0 && index < visits.length) {
-                // ລຶບຂໍ້ມູນອອກຈາກ Array
-                visits.splice(index, 1);
-                
-                // ບັນທຶກລົງ LocalStorage ໃໝ່
-                localStorage.setItem('clinic_visits', JSON.stringify(visits));
-                
-                // ແຕ້ມໜ້າຈໍຫ້ອງກວດຄືນໃໝ່
-                if(typeof renderConsultationsPage === 'function') renderConsultationsPage();
-                
-                window.showCustomAlert('ລຶບຂໍ້ມູນການກວດສຳເລັດແລ້ວ', 'ສຳເລັດ', '✅');
-            }
-        });
-    };
 
 </script>
 </body>
