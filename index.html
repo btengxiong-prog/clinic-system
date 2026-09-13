@@ -176,6 +176,8 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
     .vital-signs-grid, .stats-5, .pos-stats-grid { grid-template-columns: repeat(2, 1fr); }
 }
 </style>
+<!-- ເພີ່ມແຖວນີ້ໄວ້ກ່ອນປິດ </head> -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 
@@ -4608,6 +4610,82 @@ window.calcBMI = function() {
         document.getElementById('cst2_bmi').value = '';
     }
 };
+// ================= SUPABASE REALTIME 100% (ເພີ່ມໃໝ່) ================= //
+// 1. ໃສ່ URL ແລະ Anon Key ຈາກໂປຣເຈັກ Supabase ຂອງທ່ານ
+const SUPABASE_URL = 'https://YOUR_SUPABASE_PROJECT.supabase.co';
+const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
+
+if (window.supabase) {
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    console.log("🟢 ລະບົບ Realtime Supabase ພ້ອມໃຊ້ງານແລ້ວ!");
+
+    // 2. ສ້າງຊ່ອງທາງ (Channel) ເພື່ອຕິດຕາມການປ່ຽນແປງຂອງ Database
+    const realtimeChannel = supabase.channel('clinic-realtime');
+
+    // ---------------------------------------------------------
+    // ດັກຈັບ: ຕາຕະລາງ 'patients' (ຄົນເຈັບ)
+    // ---------------------------------------------------------
+    realtimeChannel.on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'patients' },
+        (payload) => {
+            console.log('🔄 Realtime [Patients]:', payload);
+            
+            // ເອີ້ນໃຊ້ຟັງຊັນເດີມຂອງທ່ານເພື່ອໂຫຼດຂໍ້ມູນໃໝ່ທັນທີ ໂດຍບໍ່ຕ້ອງ Refresh ໜ້າຈໍ
+            loadDashboardData(); 
+            if(document.getElementById('page-patients').style.display === 'block') {
+                renderPatientsPage(); 
+            }
+            // ແຈ້ງເຕືອນແບບນຽນໆໃຫ້ User ຮູ້ (ເປັນທາງເລືອກ)
+            console.log("ອັບເດດຂໍ້ມູນຄົນເຈັບລ່າສຸດອັດຕະໂນມັດ!");
+        }
+    );
+
+    // ---------------------------------------------------------
+    // ດັກຈັບ: ຕາຕະລາງ 'appointments' (ນັດໝາຍ)
+    // ---------------------------------------------------------
+    realtimeChannel.on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'appointments' },
+        (payload) => {
+            console.log('🔄 Realtime [Appointments]:', payload);
+            
+            // ຖ້າມີການຈອງຄິວໃໝ່ຈາກໜ້າຈໍອື່ນ ໃຫ້ໂຫຼດໃໝ່ທັນທີ
+            if(document.getElementById('page-appointments').style.display === 'block') {
+                // ສົມມຸດວ່າດຶງຈາກ DB ໃໝ່ (ສາມາດປັບໃຫ້ດຶງ API ຫຼື Supabase Select ໄດ້)
+                renderAppointmentsPage(); 
+            }
+            
+            // ໂຊແຈ້ງເຕືອນ Custom Alert ທີ່ທ່ານຂຽນໄວ້ (ຖ້າເປັນ INSERT ໃໝ່)
+            if (payload.eventType === 'INSERT') {
+                window.showCustomAlert(`ມີນັດໝາຍໃໝ່ເຂົ້າມາ!`, '🔔 Realtime ແຈ້ງເຕືອນ', '📅');
+            }
+        }
+    );
+
+    // ---------------------------------------------------------
+    // ດັກຈັບ: ຕາຕະລາງ 'visits' (ຫ້ອງກວດ)
+    // ---------------------------------------------------------
+    realtimeChannel.on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'visits' },
+        (payload) => {
+            console.log('🔄 Realtime [Visits]:', payload);
+            if(document.getElementById('page-consultations').style.display === 'block') {
+                renderConsultationsPage();
+            }
+        }
+    );
+
+    // 3. ເລີ່ມຕົ້ນການ Subscribe ເພື່ອຟັງການປ່ຽນແປງຕະຫຼອດເວລາ
+    realtimeChannel.subscribe((status) => {
+        if (status === 'SUBSCRIBED') {
+            console.log("✅ ເຊື່ອມຕໍ່ Realtime Channel ສຳເລັດ!");
+        }
+    });
+} else {
+    console.error("❌ ບໍ່ພົບ Supabase Library ກະລຸນາກວດສອບການເພີ່ມ Script ໃນ <head>");
+}
 </script>
 </body>
 </html>
