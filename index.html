@@ -4655,42 +4655,81 @@ console.log("🟢 ລະບົບ Realtime Firebase ພ້ອມໃຊ້ງາ�
 // ---------------------------------------------------------
 // 2. ດັກຈັບ: Collection 'appointments' (ນັດໝາຍ) ແບບ Realtime
 // ---------------------------------------------------------
-let isInitialAptLoad = true; // ຕົວປ່ຽນສຳລັບເຊັກການໂຫຼດຄັ້ງທຳອິດ
+let isInitialAptLoad = true;
 
 db.collection("appointments").onSnapshot((snapshot) => {
-    // ຖ້າເປັນການໂຫຼດໜ້າເວັບຄັ້ງທຳອິດ ໃຫ້ຂ້າມການແຈ້ງເຕືອນໄປກ່ອນ
-    if (isInitialAptLoad) {
-        isInitialAptLoad = false;
-        return; 
-    }
+    let localApts = JSON.parse(localStorage.getItem('clinic_appointments')) || [];
+    let hasChanges = false;
 
-    snapshot.docChanges().forEach((change) => {
-        if (change.type === "added") {
-            const data = change.doc.data();
-            console.log("📅 ມີນັດໝາຍໃໝ່: ", data);
-            
-            // ໂຫຼດຂໍ້ມູນໜ້ານັດໝາຍໃໝ່ຖ້າເປີດຢູ່
-            if(document.getElementById('page-appointments').style.display === 'block') {
-                if(typeof renderAppointmentsPage === 'function') renderAppointmentsPage(); 
-            }
-            
-            // ແຈ້ງເຕືອນສະເພາະຕອນມີຄົນກົດເພີ່ມເຂົ້າມາໃໝ່ແທ້ໆ
-            window.showCustomAlert(`ມີນັດໝາຍໃໝ່ຂອງ: ${data.patient_name || 'ບໍ່ລະບຸຊື່'}`, '🔔 Firebase ແຈ້ງເຕືອນ', '📅');
-        }
-    });
-});
-
-// 3. ດັກຈັບ: Collection 'patients' (ຄົນເຈັບ) ແບບ Realtime
-db.collection("patients").onSnapshot((snapshot) => {
     snapshot.docChanges().forEach((change) => {
         if (change.type === "added" || change.type === "modified") {
-            console.log("👥 ຂໍ້ມູນຄົນເຈັບອັບເດດ: ", change.doc.data());
-            // ໂຫຼດໜ້າຄົນເຈັບໃໝ່ຖ້າເປີດຢູ່
-            if(document.getElementById('page-patients').style.display === 'block') {
-                if(typeof renderPatientsPage === 'function') renderPatientsPage();
+            const newData = change.doc.data();
+            
+            // ເອົາຂໍ້ມູນໃໝ່ຈາກ Firebase ມາອັບເດດລົງ LocalStorage
+            let existingIndex = localApts.findIndex(a => a.apt_no === newData.apt_no);
+            if (existingIndex !== -1) {
+                localApts[existingIndex] = newData;
+            } else {
+                localApts.push(newData);
+                // ແຈ້ງເຕືອນສະເພາະຕອນມີຄົນເພີ່ມໃໝ່ (ບໍ່ແຈ້ງຕອນໂຫຼດໜ້າເວັບຄັ້ງທຳອິດ)
+                if (!isInitialAptLoad) {
+                    window.showCustomAlert(`ມີນັດໝາຍໃໝ່ຂອງ: ${newData.patient_name || 'ບໍ່ລະບຸຊື່'}`, '🔔 Firebase ແຈ້ງເຕືອນ', '📅');
+                }
             }
+            hasChanges = true;
         }
     });
+
+    if (hasChanges) {
+        localStorage.setItem('clinic_appointments', JSON.stringify(localApts)); // ເຊບລົງເຄື່ອງ
+        
+        // ຖ້າເປີດໜ້ານັດໝາຍຢູ່ ໃຫ້ໂຫຼດຕາຕະລາງໃໝ່ທັນທີ
+        if(document.getElementById('page-appointments').style.display === 'block') {
+            if(typeof renderAppointmentsPage === 'function') renderAppointmentsPage(); 
+        }
+        // ອັບເດດຕົວເລກນັດໝາຍຢູ່ໜ້າ Dashboard
+        if(document.getElementById('total-appointments')) {
+            document.getElementById('total-appointments').innerText = localApts.length;
+        }
+    }
+    
+    if (isInitialAptLoad) isInitialAptLoad = false;
+});
+
+// ---------------------------------------------------------
+// 3. ດັກຈັບ: Collection 'patients' (ຄົນເຈັບ) ແບບ Realtime
+// ---------------------------------------------------------
+db.collection("patients").onSnapshot((snapshot) => {
+    let localPatients = JSON.parse(localStorage.getItem('clinic_local_patients')) || [];
+    let hasChanges = false;
+    
+    snapshot.docChanges().forEach((change) => {
+        if (change.type === "added" || change.type === "modified") {
+            const newData = change.doc.data();
+            
+            // ເອົາຂໍ້ມູນໃໝ່ຈາກ Firebase ມາອັບເດດລົງ LocalStorage ແລະ Global Variable
+            let existingIndex = localPatients.findIndex(p => p.patient_code === newData.patient_code);
+            if (existingIndex !== -1) {
+                localPatients[existingIndex] = newData; // ອັບເດດຄົນເກົ່າ
+            } else {
+                localPatients.unshift(newData); // ເພີ່ມຄົນໃໝ່ໄວ້ເທິງສຸດ
+            }
+            hasChanges = true;
+        }
+    });
+    
+    if (hasChanges) {
+        localStorage.setItem('clinic_local_patients', JSON.stringify(localPatients));
+        globalPatientsList = localPatients; // ບັງຄັບອັບເດດຕົວປ່ຽນຫຼັກ
+        
+        // ຖ້າເປີດໜ້າ Dashboard ຫຼື ໜ້າຄົນເຈັບຢູ່ ໃຫ້ໂຫຼດຕາຕະລາງໃໝ່ທັນທີ
+        if(document.getElementById('page-dashboard').style.display === 'block') {
+            renderDashboardTable(localPatients);
+        }
+        if(document.getElementById('page-patients').style.display === 'block') {
+            if(typeof renderPatientsPage === 'function') renderPatientsPage();
+        }
+    }
 });
 
 </script>
