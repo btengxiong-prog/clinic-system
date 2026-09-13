@@ -2144,56 +2144,65 @@ window.showCustomAlert = function(message, title = "ແຈ້ງເຕືອນ"
         document.getElementById('patientHistoryModal').style.display = 'flex';
     };
 
-// ================= ຟັງຊັນລຶບຄົນເຈັບ (ສະເພາະຄົນທີ່ບໍ່ມີປະຫວັດ) ================= //
+// ================= ຟັງຊັນລຶບຄົນເຈັບ (ອັບເດດໃໝ່: ລຶບຂໍ້ມູນທົດລອງໄດ້ 100%) ================= //
     window.deletePatient = function(ptId) {
         let patients = JSON.parse(localStorage.getItem('clinic_local_patients')) || globalPatientsList || [];
-        let patientIndex = patients.findIndex(p => p.patient_code === ptId || p.id === ptId);
+        
+        // ແກ້ໄຂບັນຫາທີ 1: ແປງເປັນ String ກ່ອນທຽບຄ່າ ເພື່ອປ້ອງກັນ error "ບໍ່ພົບຂໍ້ມູນ" ຍ້ອນ Type ບໍ່ກົງກັນ
+        let patientIndex = patients.findIndex(p => String(p.patient_code) === String(ptId) || String(p.id) === String(ptId));
         
         if (patientIndex === -1) {
-            window.showCustomAlert('ບໍ່ພົບຂໍ້ມູນຄົນເຈັບໃນລະບົບ', 'ຜິດພາດ', '❌');
+            window.showCustomAlert('ບໍ່ພົບຂໍ້ມູນຄົນເຈັບໃນລະບົບ (ອາດຈະຖືກລຶບໄປກ່ອນໜ້ານີ້ແລ້ວ, ລອງ Refresh ໜ້າຈໍເບິ່ງໃໝ່)', 'ຜິດພາດ', '❌');
             return;
         }
         
         const patient = patients[patientIndex];
         
-        // 1. ກວດສອບປະຫວັດໃນຫ້ອງກວດ (Visits)
+        // ກວດສອບປະຫວັດ
         let visits = JSON.parse(localStorage.getItem('clinic_visits')) || [];
-        let hasVisits = visits.some(v => v.patient_name === patient.fullname);
-        
-        // 2. ກວດສອບປະຫວັດໃນນັດໝາຍ (Appointments)
         let appointments = JSON.parse(localStorage.getItem('clinic_appointments')) || [];
+        
+        let hasVisits = visits.some(v => v.patient_name === patient.fullname);
         let hasAppointments = appointments.some(a => a.patient_name === patient.fullname);
         
-        // ຖ້າມີປະຫວັດ ຫ້າມລຶບເດັດຂາດ
+        // ແກ້ໄຂບັນຫາທີ 2: ປ່ຽນຈາກ "ຫ້າມລຶບ" ເປັນການ "ເຕືອນແລ້ວລຶບປະຫວັດຖິ້ມພ້ອມກັນ (Cascade Delete)"
+        let confirmMessage = `ທ່ານຕ້ອງການລຶບຂໍ້ມູນຄົນເຈັບ: <strong>${patient.fullname}</strong> ແທ້ຫຼືບໍ່?`;
+        
         if (hasVisits || hasAppointments) {
-            window.showCustomAlert('ບໍ່ສາມາດລຶບໄດ້! ເນື່ອງຈາກຄົນເຈັບມີປະຫວັດການນັດໝາຍ ຫຼື ການປິ່ນປົວແລ້ວ. ແນະນຳໃຫ້ເຂົ້າໄປແກ້ໄຂແລ້ວປ່ຽນສະຖານະເປັນ Inactive ແທນ.', 'ແຈ້ງເຕືອນ', '⚠️');
-            return;
+            confirmMessage = `⚠️ <strong>ຄຳເຕືອນ:</strong> ຄົນເຈັບນີ້ມີປະຫວັດນັດໝາຍ ຫຼື ການກວດແລ້ວ!<br><br>ການລຶບຈະເຮັດໃຫ້ <strong>ປະຫວັດທັງໝົດຂອງຄົນເຈັບນີ້ຖືກລຶບໄປພ້ອມກັນ!</strong> (ເໝາະສຳລັບການລຶບຂໍ້ມູນທົດລອງ)<br><br>ທ່ານຍັງຕ້ອງການລຶບຖິ້ມແທ້ຫຼືບໍ່?`;
         }
         
-        // ຖ້າບໍ່ມີປະຫວັດ ໃຫ້ຖາມຢືນຢັນກ່ອນລຶບ
-        window.showCustomConfirm(`ທ່ານຕ້ອງການລຶບຂໍ້ມູນຄົນເຈັບ: <strong>${patient.fullname}</strong> ແທ້ຫຼືບໍ່?`, 'ຢືນຢັນການລຶບ', async function() {
-            // ລຶບອອກຈາກ Array
+        window.showCustomConfirm(confirmMessage, 'ຢືນຢັນການລຶບຂັ້ນເດັດຂາດ', async function() {
+            // 1. ລຶບຂໍ້ມູນຄົນເຈັບອອກຈາກ Array ຫຼັກ
             patients.splice(patientIndex, 1);
-            
-            // ອັບເດດລົງ LocalStorage
             localStorage.setItem('clinic_local_patients', JSON.stringify(patients));
             globalPatientsList = patients;
             
-            // ລຶບອອກຈາກ Firebase (ຖ້າມີການເຊື່ອມຕໍ່)
+            // 2. ທຳຄວາມສະອາດປະຫວັດເກົ່າຂອງຄົນເຈັບນີ້ຖິ້ມ (Cascade Delete)
+            if (hasVisits) {
+                visits = visits.filter(v => v.patient_name !== patient.fullname);
+                localStorage.setItem('clinic_visits', JSON.stringify(visits));
+            }
+            if (hasAppointments) {
+                appointments = appointments.filter(a => a.patient_name !== patient.fullname);
+                localStorage.setItem('clinic_appointments', JSON.stringify(appointments));
+            }
+            
+            // 3. ລຶບອອກຈາກ Firebase (ຖ້າມີການເຊື່ອມຕໍ່ຢູ່)
             try {
                 if (typeof db !== 'undefined') {
-                    await db.collection("patients").doc(ptId).delete();
+                    await db.collection("patients").doc(String(ptId)).delete();
                     console.log("✅ ລຶບຂໍ້ມູນຄົນເຈັບອອກຈາກ Firebase ສຳເລັດ!");
                 }
             } catch (error) {
                 console.error("❌ ເກີດຂໍ້ຜິດພາດໃນການລຶບອອກຈາກ Firebase:", error);
             }
             
-            // ແຕ້ມຕາຕະລາງໃໝ່
+            // 4. ແຕ້ມຕາຕະລາງໃໝ່ ເພື່ອອັບເດດໜ້າຈໍທັນທີ
             renderDashboardTable(patients);
             if(typeof renderPatientsPage === 'function') renderPatientsPage();
             
-            window.showCustomAlert('ລຶບຂໍ້ມູນຄົນເຈັບທົດລອງ ສຳເລັດແລ້ວ!', 'ສຳເລັດ', '✅');
+            window.showCustomAlert('ລຶບຂໍ້ມູນຄົນເຈັບ ແລະ ປະຫວັດທີ່ກ່ຽວຂ້ອງ ສຳເລັດແລ້ວ!', 'ສຳເລັດ', '✅');
         });
     };
 
