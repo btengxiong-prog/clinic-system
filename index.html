@@ -4697,23 +4697,6 @@ if (window.supabase) {
 } else {
     console.error("❌ ບໍ່ພົບ Supabase Library ກະລຸນາກວດສອບການເພີ່ມ Script ໃນ <head>");
 }
-// ================= FIREBASE REALTIME 100% (ເພີ່ມໃໝ່) ================= //
-// 1. ເອົາຄ່າ Config ຈາກ Firebase Console ມາໃສ່ບ່ອນນີ້
-const firebaseConfig = {
-    apiKey: "YOUR_API_KEY",
-    authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-    projectId: "YOUR_PROJECT_ID",
-    storageBucket: "YOUR_PROJECT_ID.appspot.com",
-    messagingSenderId: "YOUR_SENDER_ID",
-    appId: "YOUR_APP_ID"
-};
-
-// 2. ເລີ່ມຕົ້ນເຊື່ອມຕໍ່ Firebase
-if (!firebase.apps.length) {
-    firebase.initializeApp(firebaseConfig);
-}
-const db = firebase.firestore();
-console.log("🟢 ລະບົບ Realtime Firebase ພ້ອມໃຊ້ງານແລ້ວ!");
 
 // ---------------------------------------------------------
 // 3. ດັກຈັບ: Collection 'appointments' (ນັດໝາຍ) ແບບ Realtime
