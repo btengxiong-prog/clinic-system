@@ -1358,34 +1358,53 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
             <div id="cst2_echo_orders_list" style="font-size: 13px; color: #555;">ຍັງບໍ່ມີການສັ່ງ Echo</div>
         </div>
 
-        <div class="section-title">🩺 ອາການປັດຈຸບັນ ແລະ ສັນຍານຊີບ (Vital Signs)</div>
-        <div class="form-group"><label>ອາການສຳຄັນ / ອາການໃນປັດຈຸບັນ</label><textarea id="cst2_symptoms" rows="2"></textarea></div>
-        <div class="vital-signs-grid">
-            <div class="form-group"><label>ອຸນຫະພູມ (°C)</label><input type="number" id="cst2_temp" placeholder="36.5" step="0.1"></div><div class="form-group"><label>ຄວາມດັນ (mmHg)</label><input type="text" id="cst2_bp" placeholder="120/80"></div><div class="form-group"><label>ຊີບຈອນ (bpm)</label><input type="number" id="cst2_pulse" placeholder="80"></div><div class="form-group"><label>SpO2 (%)</label><input type="number" id="cst2_spo2" placeholder="98"></div><div class="form-group"><label>ນ້ຳໜັກ (kg)</label><input type="number" id="cst2_weight" placeholder="60" step="0.1"></div><div class="form-group"><label>ສ່ວນສູງ (cm)</label><input type="number" id="cst2_height" placeholder="165"></div>
-        </div>
-        
-        <div class="section-title">🔬 ການກວດ ແລະ ການວິນິດໄສ</div>
-        
-        <div class="form-group">
-            <label style="display: flex; justify-content: space-between; align-items: center;">
-                ການກວດຮ່າງກາຍ (Physical Examination)
-                <select id="cst2_pe_template" onchange="insertPETemplate()" style="width: auto; padding: 3px 8px; font-size: 13px; border-radius: 6px; border: 1px solid #ccc; background: #e3f2fd; color: #1976d2; font-weight: bold; cursor: pointer;">
-                    <option value="">+ ເລືອກແມ່ແບບອາການ...</option>
-                    <option value="ປົກກະຕິ (Normal): ຄົນເຈັບຮູ້ສຶກຕົວດີ, ຕາບໍ່ເຫຼືອງ ບໍ່ຈືດມ່ານ. ຟັງປອດໃສດີທັງສອງຂ້າງ, ຫົວໃຈເຕັ້ນປົກກະຕິ. ທ້ອງອ່ອນ ບໍ່ກົດເຈັບ, ຕັບມ້າມບໍ່ໂຕ.">🟢 ປົກກະຕິທົ່ວໄປ (Normal)</option>
-                    <option value="HEENT: ຄໍແດງອັກເສບ (Pharyngitis), ຕ່ອມທອນຊິນໂຕມີໜອງ, ຕ່ອມນ້ຳເຫຼືອງໃຫຍ່.">👀 ຫູ, ຕາ, ຄໍ, ດັງ (HEENT)</option>
-                    <option value="ລະບົບຫາຍໃຈຜິດປົກກະຕິ: ຫາຍໃຈຫອບອິດເມື່ອຍ, ຟັງປອດໄດ້ຍິນສຽງ Wheezing/Crepitation, ບໍ່ມີຂາບວມ.">🫁 ລະບົບຫາຍໃຈ (Respiratory)</option>
-                    <option value="ລະບົບຫົວໃຈຜິດປົກກະຕິ: ຈັງຫວະຫົວໃຈເຕັ້ນຜິດປົກກະຕິ, ໄດ້ຍິນສຽງຟູ່ (Murmur), ຂາບວມ.">❤️ ລະບົບຫົວໃຈ (Cardio)</option>
-                    <option value="ລະບົບຊ່ອງທ້ອງຜິດປົກກະຕິ: ທ້ອງອືດ, ກົດເຈັບ (Tenderness) ບໍລິເວນ..., ມີອາການ Rebound tenderness, ຟັງສຽງລຳໄສ້ເຮັດວຽກຫຼຸດລົງ.">🫃 ລະບົບຊ່ອງທ້ອງ (Abdomen)</option>
-                    <option value="ລະບົບປະສາດ: ອາການຊາ, ກຳລັງກ້າມຊີ້ນຫຼຸດລົງ (Motor weakness), Reflex ຜິດປົກກະຕິ.">🧠 ລະບົບປະສາດ (Neuro)</option>
-                    <option value="ຜິວໜັງ/ກ້າມຊີ້ນ: ພົບຜື່ນແດງ (Rash), ຂໍ້ບວມແດງຮ້ອນ, ກົດເຈັບບໍລິເວນກ້າມຊີ້ນ.">🧴 ຜິວໜັງ ແລະ ກ້າມຊີ້ນ</option>
-                </select>
-            </label>
-            <textarea id="cst2_physical_exam" rows="3" placeholder="ພິມອາການທີ່ກວດພົບ ຫຼື ເລືອກຈາກແມ່ແບບດ້ານເທິງ..."></textarea>
+        <div class="section-title">📋 1. ປະຫວັດ ແລະ ອາການ (Chief Complaint & History)</div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+            <div class="form-group"><label>ອາການສຳຄັນ (Chief Complaint) *</label><textarea id="cst2_symptoms" rows="2" placeholder="ຕົວຢ່າງ: ໄຂ້, ໄອ 3 ມື້"></textarea></div>
+            <div class="form-group"><label>ປະຫວັດການເຈັບປ່ວຍ (Present/Past History)</label><textarea id="cst2_history" rows="2" placeholder="ປະຫວັດພະຍາດປະຈຳຕົວ, ການກິນຢາ, ການແພ້..."></textarea></div>
         </div>
 
-        <!-- 2 ຊ່ອງນີ້ແມ່ນອັນທີ່ຖືກລຶບໄປ ຂ້າພະເຈົ້າດຶງກັບມາໃສ່ຄືນໃຫ້ແລ້ວ -->
-        <div class="form-group"><label>ຜົນກວດ Lab / ອື່ນໆ (ຖ້າມີ)</label><textarea id="cst2_lab_result" rows="2"></textarea></div>
-        <div class="form-group"><label style="color: #b42318; font-weight: bold;">ການວິນິດໄສເບື້ອງຕົ້ນ (Diagnosis) *</label><textarea id="cst2_diagnosis" rows="2"></textarea></div>
+        <div class="section-title">❤️ 2. ສັນຍານຊີບ ແລະ ປະເມີນຄວາມປວດ (Vital Signs & Pain)</div>
+        <div class="vital-signs-grid" style="grid-template-columns: repeat(4, 1fr);">
+            <div class="form-group"><label>ອຸນຫະພູມ (°C)</label><input type="number" id="cst2_temp" placeholder="36.5" step="0.1"></div>
+            <div class="form-group"><label>ຄວາມດັນ (mmHg)</label><input type="text" id="cst2_bp" placeholder="120/80"></div>
+            <div class="form-group"><label>ຊີບຈອນ (bpm)</label><input type="number" id="cst2_pulse" placeholder="80"></div>
+            <div class="form-group"><label>SpO2 (%)</label><input type="number" id="cst2_spo2" placeholder="98"></div>
+            <div class="form-group"><label>ນ້ຳໜັກ (kg)</label><input type="number" id="cst2_weight" placeholder="60" step="0.1" oninput="calcBMI()"></div>
+            <div class="form-group"><label>ສ່ວນສູງ (cm)</label><input type="number" id="cst2_height" placeholder="165" oninput="calcBMI()"></div>
+            <div class="form-group"><label>BMI</label><input type="text" id="cst2_bmi" placeholder="-" readonly style="background:#f4f7fb; font-weight:bold;"></div>
+            <div class="form-group"><label style="color:#d32f2f; font-weight:bold;">Pain Score (0-10)</label><input type="number" id="cst2_pain" placeholder="0" min="0" max="10"></div>
+        </div>
+        
+        <div class="section-title">🔬 3. ການກວດຮ່າງກາຍ (Physical Examination)</div>
+        <div style="background: #f9fbfd; padding: 15px; border: 1px solid #e8edf3; border-radius: 8px; margin-bottom: 15px;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                <div class="form-group"><label>👤 General (ສະພາບທົ່ວໄປ)</label><input type="text" id="cst2_pe_general" placeholder="ຮູ້ສຶກຕົວດີ, ອ່ອນເພຍ, ຊີດ..."></div>
+                <div class="form-group"><label>👁️👂 HEENT (ຫົວ, ຕາ, ຫູ, ຄໍ, ດັງ)</label><input type="text" id="cst2_pe_heent" placeholder="ຄໍແດງ, ຕ່ອມທອນຊິນໂຕ, ຕາເຫຼືອງ..."></div>
+                <div class="form-group"><label>🫁 Respiratory (ປອດ/ຫາຍໃຈ)</label><input type="text" id="cst2_pe_rs" placeholder="Clear, Wheezing, Crackles..."></div>
+                <div class="form-group"><label>❤️ Cardiovascular (ຫົວໃຈ/ເລືອດ)</label><input type="text" id="cst2_pe_cvs" placeholder="Normal S1 S2, No murmur..."></div>
+                <div class="form-group"><label>🩺 Abdomen / GI (ຊ່ອງທ້ອງ)</label><input type="text" id="cst2_pe_gi" placeholder="Soft, Not tender, Bowel sound normal..."></div>
+                <div class="form-group"><label>🧠 Neuro / 🦴 Musculoskeletal</label><input type="text" id="cst2_pe_neuro" placeholder="Motor normal, Reflexes intact..."></div>
+            </div>
+            
+            <div class="form-group" style="margin-top: 10px; margin-bottom: 0;">
+                <label style="display: flex; justify-content: space-between; align-items: center;">
+                    📝 ສະຫຼຸບຜົນກວດຮ່າງກາຍ (PE Summary & Skin)
+                    <select id="cst2_pe_template" onchange="insertPETemplate()" style="width: auto; padding: 3px 8px; font-size: 13px; border-radius: 6px; border: 1px solid #ccc; background: #e3f2fd; color: #1976d2; font-weight: bold; cursor: pointer;">
+                        <option value="">+ ເລືອກແມ່ແບບອາການ...</option>
+                        <option value="ປົກກະຕິ (Normal): ຄົນເຈັບຮູ້ສຶກຕົວດີ, ຕາບໍ່ເຫຼືອງ ບໍ່ຈືດມ່ານ. ຟັງປອດໃສດີທັງສອງຂ້າງ, ຫົວໃຈເຕັ້ນປົກກະຕິ. ທ້ອງອ່ອນ ບໍ່ກົດເຈັບ.">🟢 ປົກກະຕິທົ່ວໄປ (Normal)</option>
+                        <option value="HEENT: ຄໍແດງອັກເສບ (Pharyngitis), ຕ່ອມທອນຊິນໂຕມີໜອງ.">👀 ຫູ, ຕາ, ຄໍ, ດັງ (HEENT)</option>
+                        <option value="ລະບົບຫາຍໃຈຜິດປົກກະຕິ: ຫາຍໃຈຫອບອິດເມື່ອຍ, ຟັງປອດໄດ້ຍິນສຽງ Wheezing.">🫁 ລະບົບຫາຍໃຈ (Respiratory)</option>
+                        <option value="ລະບົບຊ່ອງທ້ອງ: ກົດເຈັບ (Tenderness) ບໍລິເວນ..., ຟັງສຽງລຳໄສ້ເຮັດວຽກຫຼຸດລົງ.">🫃 ລະບົບຊ່ອງທ້ອງ (Abdomen)</option>
+                    </select>
+                </label>
+                <textarea id="cst2_physical_exam" rows="2" placeholder="ພິມສະຫຼຸບ, ອາການທາງຜິວໜັງ ຫຼື ໃຊ້ແມ່ແບບດ້ານເທິງ..."></textarea>
+            </div>
+        </div>
+
+        <div class="section-title">🧪 4. ຜົນກວດເພີ່ມເຕີມ ແລະ ການວິນິດໄສ (Inv & Diagnosis)</div>
+        <div class="form-group"><label>ຜົນກວດ Lab / X-Ray / Echo (Investigations)</label><textarea id="cst2_lab_result" rows="2"></textarea></div>
+        <div class="form-group"><label style="color: #b42318; font-weight: bold;">ການວິນິດໄສເບື້ອງຕົ້ນ (Diagnosis & Assessment) *</label><textarea id="cst2_diagnosis" rows="2" placeholder="ລະບຸຊື່ພະຍາດ ຫຼື ອາການຫຼັກ..."></textarea></div>
 
         <div class="section-title">💊 ການຮັກສາ ແລະ ສັ່ງຢາ</div>
         <div class="form-group"><label>ວິທີການຮັກສາ / ຫັດຖະການ</label><textarea id="cst2_treatment" rows="2"></textarea></div><div class="form-group"><label>ລາຍການຢາ (Prescription)</label><textarea id="cst2_medicine" rows="2"></textarea></div>
@@ -2724,16 +2743,16 @@ window.showCustomAlert = function(message, title = "ແຈ້ງເຕືອນ"
     window.deleteAppointment = function(index) { window.showCustomConfirm('ທ່ານຕ້ອງການລຶບນັດໝາຍນີ້ແທ້ຫຼືບໍ່?', 'ຢືນຢັນການລຶບ', function() { let appointments = JSON.parse(localStorage.getItem('clinic_appointments')) || []; appointments.splice(index, 1); localStorage.setItem('clinic_appointments', JSON.stringify(appointments)); renderAppointmentsPage(); window.showCustomAlert('ລຶບນັດໝາຍສຳເລັດແລ້ວ', 'ສຳເລັດ', '✅'); }); };
 
     window.sendAptToConsultation = function(patientName, doctorName) { document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('active')); document.querySelector('.menu-item[data-page="consultations"]').classList.add('active'); document.getElementById('page-header-title').innerText = "ຫ້ອງກວດ"; ['dashboard', 'patients', 'appointments', 'laboratory', 'xray', 'echo', 'pharmacy', 'inventory', 'pos', 'reports'].forEach(id => { let e=document.getElementById('page-' + id); if(e) e.style.display = 'none';}); document.getElementById('page-consultations').style.display = 'block'; populateConsultationPatientDropdown(); setCurrentDateTimeCst1(); const ptSelect = document.getElementById('cst1_patient'); const drSelect = document.getElementById('cst1_doctor'); if (patientName) { for (let i = 0; i < ptSelect.options.length; i++) { if (ptSelect.options[i].value === patientName) { ptSelect.selectedIndex = i; break; } } } if (doctorName && doctorName !== 'ບໍ່ລະບຸ') { for (let i = 0; i < drSelect.options.length; i++) { if (drSelect.options[i].value === doctorName) { drSelect.selectedIndex = i; break; } } } autoFillConsultationPatient(); document.getElementById('consultationStep1Modal').style.display = 'flex'; };
-    document.getElementById('btnProceedCst1').addEventListener('click', () => { const ptName = document.getElementById('cst1_patient').value; const doctor = document.getElementById('cst1_doctor').value; if(!ptName || !doctor) { window.showCustomAlert('ກະລຸນາເລືອກ ຄົນເຈັບ ແລະ ແພດຜູ້ກວດ!', 'ແຈ້ງເຕືອນ', '⚠️'); return; } const dateStr = document.getElementById('cst1_date').value.replace(/-/g, ''); const randomNum = Math.floor(Math.random() * 900) + 100; const visitId = `V-${dateStr}-${randomNum}`; const newVisit = { visit_id: visitId, patient_name: ptName, date: document.getElementById('cst1_date').value, time: document.getElementById('cst1_time').value, doctor: doctor, status: '🟡 ກຳລັງກວດ', symptoms: '', temp: '', bp: '', pulse: '', spo2: '', weight: '', height: '', physical_exam: '', lab_result: '', diagnosis: '', treatment: '', medicine: '', advice: '', next_apt: '' }; let visits = JSON.parse(localStorage.getItem('clinic_visits')) || []; visits.push(newVisit); localStorage.setItem('clinic_visits', JSON.stringify(visits)); document.getElementById('consultationStep1Modal').style.display = 'none'; openConsultationStep2(visits.length - 1); renderConsultationsPage(); });
+    document.getElementById('btnProceedCst1').addEventListener('click', () => { const ptName = document.getElementById('cst1_patient').value; const doctor = document.getElementById('cst1_doctor').value; if(!ptName || !doctor) { window.showCustomAlert('ກະລຸນາເລືອກ ຄົນເຈັບ ແລະ ແພດຜູ້ກວດ!', 'ແຈ້ງເຕືອນ', '⚠️'); return; } const dateStr = document.getElementById('cst1_date').value.replace(/-/g, ''); const randomNum = Math.floor(Math.random() * 900) + 100; const visitId = `V-${dateStr}-${randomNum}`; const newVisit = { visit_id: visitId, patient_name: ptName, date: document.getElementById('cst1_date').value, time: document.getElementById('cst1_time').value, doctor: doctor, status: '🟡 ກຳລັງກວດ', symptoms: '', history: '', temp: '', bp: '', pulse: '', spo2: '', weight: '', height: '', bmi: '', pain: '', pe_general: '', pe_heent: '', pe_rs: '', pe_cvs: '', pe_gi: '', pe_neuro: '', physical_exam: '', lab_result: '', diagnosis: '', treatment: '', medicine: '', advice: '', next_apt: '' }; let visits = JSON.parse(localStorage.getItem('clinic_visits')) || []; visits.push(newVisit); localStorage.setItem('clinic_visits', JSON.stringify(visits)); document.getElementById('consultationStep1Modal').style.display = 'none'; openConsultationStep2(visits.length - 1); renderConsultationsPage(); });
     
     window.openConsultationStep2 = function(index) { 
         let visits = JSON.parse(localStorage.getItem('clinic_visits')) || []; if(index < 0 || index >= visits.length) return; const visit = visits[index]; editingVisitIndex = index; 
-        document.getElementById('cst2_visit_id').innerText = visit.visit_id; document.getElementById('cst2_pt_name').innerText = visit.patient_name; document.getElementById('cst2_doctor').innerText = visit.doctor; document.getElementById('cst2_status').value = visit.status || '🟡 ກຳລັງກວດ'; document.getElementById('cst2_symptoms').value = visit.symptoms || ''; document.getElementById('cst2_temp').value = visit.temp || ''; document.getElementById('cst2_bp').value = visit.bp || ''; document.getElementById('cst2_pulse').value = visit.pulse || ''; document.getElementById('cst2_spo2').value = visit.spo2 || ''; document.getElementById('cst2_weight').value = visit.weight || ''; document.getElementById('cst2_height').value = visit.height || ''; document.getElementById('cst2_physical_exam').value = visit.physical_exam || ''; document.getElementById('cst2_lab_result').value = visit.lab_result || ''; document.getElementById('cst2_diagnosis').value = visit.diagnosis || ''; document.getElementById('cst2_treatment').value = visit.treatment || ''; document.getElementById('cst2_medicine').value = visit.medicine || ''; document.getElementById('cst2_advice').value = visit.advice || ''; document.getElementById('cst2_next_apt').value = visit.next_apt || ''; 
+        document.getElementById('cst2_visit_id').innerText = visit.visit_id; document.getElementById('cst2_pt_name').innerText = visit.patient_name; document.getElementById('cst2_doctor').innerText = visit.doctor; document.getElementById('cst2_status').value = visit.status || '🟡 ກຳລັງກວດ'; document.getElementById('cst2_symptoms').value = visit.symptoms || ''; document.getElementById('cst2_history').value = visit.history || ''; document.getElementById('cst2_temp').value = visit.temp || ''; document.getElementById('cst2_bp').value = visit.bp || ''; document.getElementById('cst2_pulse').value = visit.pulse || ''; document.getElementById('cst2_spo2').value = visit.spo2 || ''; document.getElementById('cst2_weight').value = visit.weight || ''; document.getElementById('cst2_height').value = visit.height || ''; document.getElementById('cst2_bmi').value = visit.bmi || ''; document.getElementById('cst2_pain').value = visit.pain || ''; document.getElementById('cst2_pe_general').value = visit.pe_general || ''; document.getElementById('cst2_pe_heent').value = visit.pe_heent || ''; document.getElementById('cst2_pe_rs').value = visit.pe_rs || ''; document.getElementById('cst2_pe_cvs').value = visit.pe_cvs || ''; document.getElementById('cst2_pe_gi').value = visit.pe_gi || ''; document.getElementById('cst2_pe_neuro').value = visit.pe_neuro || ''; document.getElementById('cst2_physical_exam').value = visit.physical_exam || ''; document.getElementById('cst2_lab_result').value = visit.lab_result || ''; document.getElementById('cst2_diagnosis').value = visit.diagnosis || ''; document.getElementById('cst2_treatment').value = visit.treatment || ''; document.getElementById('cst2_medicine').value = visit.medicine || ''; document.getElementById('cst2_advice').value = visit.advice || ''; document.getElementById('cst2_next_apt').value = visit.next_apt || ''; 
         renderDoctorLabOrdersList(visit.visit_id); renderDoctorXrayOrdersList(visit.visit_id); renderDoctorEchoOrdersList(visit.visit_id);
         document.getElementById('consultationStep2Modal').style.display = 'flex'; 
     };
 
-    document.getElementById('btnSaveCst2').addEventListener('click', () => { if(editingVisitIndex === -1) return; let visits = JSON.parse(localStorage.getItem('clinic_visits')) || []; const diagnosis = document.getElementById('cst2_diagnosis').value; if(!diagnosis.trim() && document.getElementById('cst2_status').value === '🟢 ສຳເລັດ') { window.showCustomAlert('ກະລຸນາປ້ອນ "ການວິນິດໄສເບື້ອງຕົ້ນ" ກ່ອນປິດການກວດ!', 'ແຈ້ງເຕືອນ', '⚠️'); return; } visits[editingVisitIndex] = { ...visits[editingVisitIndex], status: document.getElementById('cst2_status').value, symptoms: document.getElementById('cst2_symptoms').value, temp: document.getElementById('cst2_temp').value, bp: document.getElementById('cst2_bp').value, pulse: document.getElementById('cst2_pulse').value, spo2: document.getElementById('cst2_spo2').value, weight: document.getElementById('cst2_weight').value, height: document.getElementById('cst2_height').value, physical_exam: document.getElementById('cst2_physical_exam').value, lab_result: document.getElementById('cst2_lab_result').value, diagnosis: diagnosis, treatment: document.getElementById('cst2_treatment').value, medicine: document.getElementById('cst2_medicine').value, advice: document.getElementById('cst2_advice').value, next_apt: document.getElementById('cst2_next_apt').value }; localStorage.setItem('clinic_visits', JSON.stringify(visits)); window.showCustomAlert('ບັນທຶກຜົນການກວດສຳເລັດ!', 'ສຳເລັດ', '✅'); document.getElementById('consultationStep2Modal').style.display = 'none'; renderConsultationsPage(); });
+    document.getElementById('btnSaveCst2').addEventListener('click', () => { if(editingVisitIndex === -1) return; let visits = JSON.parse(localStorage.getItem('clinic_visits')) || []; const diagnosis = document.getElementById('cst2_diagnosis').value; if(!diagnosis.trim() && document.getElementById('cst2_status').value === '🟢 ສຳເລັດ') { window.showCustomAlert('ກະລຸນາປ້ອນ "ການວິນິດໄສເບື້ອງຕົ້ນ" ກ່ອນປິດການກວດ!', 'ແຈ້ງເຕືອນ', '⚠️'); return; } visits[editingVisitIndex] = { ...visits[editingVisitIndex], status: document.getElementById('cst2_status').value, symptoms: document.getElementById('cst2_symptoms').value, history: document.getElementById('cst2_history').value, temp: document.getElementById('cst2_temp').value, bp: document.getElementById('cst2_bp').value, pulse: document.getElementById('cst2_pulse').value, spo2: document.getElementById('cst2_spo2').value, weight: document.getElementById('cst2_weight').value, height: document.getElementById('cst2_height').value, bmi: document.getElementById('cst2_bmi').value, pain: document.getElementById('cst2_pain').value, pe_general: document.getElementById('cst2_pe_general').value, pe_heent: document.getElementById('cst2_pe_heent').value, pe_rs: document.getElementById('cst2_pe_rs').value, pe_cvs: document.getElementById('cst2_pe_cvs').value, pe_gi: document.getElementById('cst2_pe_gi').value, pe_neuro: document.getElementById('cst2_pe_neuro').value, physical_exam: document.getElementById('cst2_physical_exam').value, lab_result: document.getElementById('cst2_lab_result').value, diagnosis: diagnosis, treatment: document.getElementById('cst2_treatment').value, medicine: document.getElementById('cst2_medicine').value, advice: document.getElementById('cst2_advice').value, next_apt: document.getElementById('cst2_next_apt').value }; localStorage.setItem('clinic_visits', JSON.stringify(visits)); window.showCustomAlert('ບັນທຶກຜົນການກວດສຳເລັດ!', 'ສຳເລັດ', '✅'); document.getElementById('consultationStep2Modal').style.display = 'none'; renderConsultationsPage(); });
     
     function renderConsultationsPage() { const visits = JSON.parse(localStorage.getItem('clinic_visits')) || []; const todayDate = new Date().toISOString().split('T')[0]; let countToday = 0; let countProgress = 0; let countCompleted = 0; let countWaiting = 0; visits.forEach(v => { if(v.date === todayDate) countToday++; if(v.status.includes('ກຳລັງກວດ')) countProgress++; if(v.status.includes('ສຳເລັດ')) countCompleted++; if(v.status.includes('ລໍຖ້າ')) countWaiting++; }); document.getElementById('cst-stat-today').innerText = countToday + ' ຄັ້ງ'; document.getElementById('cst-stat-progress').innerText = countProgress + ' ຄົນ'; document.getElementById('cst-stat-completed').innerText = countCompleted + ' ຄົນ'; document.getElementById('cst-stat-waiting').innerText = countWaiting + ' ຄົນ'; const tbody = document.getElementById('consultation-table-body'); tbody.innerHTML = ''; if(visits.length === 0) { tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding: 20px;">ຍັງບໍ່ມີຂໍ້ມູນການກວດ</td></tr>'; } else { visits.sort((a,b) => (b.date + b.time).localeCompare(a.date + a.time)); visits.forEach((v, index) => { const dArr = v.date.split('-'); const displayDate = dArr.length === 3 ? `${dArr[2]}/${dArr[1]}/${dArr[0]}` : v.date; let badgeClass = 'badge-gray'; if(v.status.includes('ກຳລັງກວດ')) badgeClass = 'badge-yellow'; else if(v.status.includes('ສຳເລັດ')) badgeClass = 'badge-green'; else if(v.status.includes('ລໍຖ້າ')) badgeClass = 'badge-blue'; const displaySymDiag = (v.diagnosis) ? `<strong>${v.diagnosis}</strong>` : (v.symptoms || '-'); const originalVisits = JSON.parse(localStorage.getItem('clinic_visits')) || []; const trueIndex = originalVisits.findIndex(ov => ov.visit_id === v.visit_id); 
         const tr = document.createElement('tr'); 
@@ -4091,6 +4110,26 @@ window.insertPETemplate = function() {
     }
 };
 
+// ຟັງຊັນສຳລັບຄິດໄລ່ BMI ອັດຕະໂນມັດ ເມື່ອປ້ອນນ້ຳໜັກ ແລະ ສ່ວນສູງ
+window.calcBMI = function() {
+    const weight = parseFloat(document.getElementById('cst2_weight').value);
+    const heightCm = parseFloat(document.getElementById('cst2_height').value);
+    
+    if (weight > 0 && heightCm > 0) {
+        const heightM = heightCm / 100;
+        const bmi = (weight / (heightM * heightM)).toFixed(1);
+        let meaning = "";
+        
+        if (bmi < 18.5) meaning = " (ຈ່ອຍ)";
+        else if (bmi >= 18.5 && bmi <= 24.9) meaning = " (ປົກກະຕິ)";
+        else if (bmi >= 25 && bmi <= 29.9) meaning = " (ນ້ຳໜັກເກີນ)";
+        else meaning = " (ຕຸ້ຍ)";
+        
+        document.getElementById('cst2_bmi').value = bmi + meaning;
+    } else {
+        document.getElementById('cst2_bmi').value = '';
+    }
+};
 </script>
 </body>
 </html>
