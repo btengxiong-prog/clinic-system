@@ -4802,145 +4802,41 @@ window.toggleFollowUpFields = function() {
     };
 </script>
 <script>
-    // 1. ຟັງຊັນລຶບ Echo
+<!-- ================== ເລີ່ມຕົ້ນໂຄດໃໝ່ທີ່ສະອາດ 100% ================== -->
+<script>
+    // =========================================================================
+    // ຟັງຊັນຊ່ວຍເຫຼືອ: ລຶບ ແລະ ຈັດການ Checkbox (Lab, X-Ray, Echo)
+    // =========================================================================
     window.deleteEchoOrder = function(echoNo) {
         window.showCustomConfirm(`ທ່ານຕ້ອງການລຶບລາຍການ Echo ເລກທີ <strong>${echoNo}</strong> ນี้ແທ້ຫຼືບໍ່?`, 'ຢືນຢັນການລຶບ', function() {
             let list = JSON.parse(localStorage.getItem('clinic_echo_orders')) || [];
             list = list.filter(item => item.echo_no !== echoNo);
             localStorage.setItem('clinic_echo_orders', JSON.stringify(list));
-            if(typeof renderEchoPage === 'function') renderEchoPage();
+            renderEchoPage();
             window.showCustomAlert('ລຶບລາຍການ Echo ສຳເລັດແລ້ວ', 'ສຳເລັດ', '✅');
         });
     };
 
-    // 2. ຟັງຊັນລຶບ X-Ray
     window.deleteXrayOrder = function(xrayNo) {
         window.showCustomConfirm(`ທ່ານຕ້ອງການລຶບລາຍການ X-Ray ເລກທີ <strong>${xrayNo}</strong> ນี้ແທ້ຫຼືບໍ່?`, 'ຢືນຢັນການລຶບ', function() {
             let list = JSON.parse(localStorage.getItem('clinic_xray_orders')) || [];
             list = list.filter(item => item.xray_no !== xrayNo);
             localStorage.setItem('clinic_xray_orders', JSON.stringify(list));
-            if(typeof renderXrayPage === 'function') renderXrayPage();
+            renderXrayPage();
             window.showCustomAlert('ລຶບລາຍການ X-Ray ສຳເລັດແລ້ວ', 'ສຳເລັດ', '✅');
         });
     };
 
-    // 3. ຟັງຊັນລຶບ Lab
     window.deleteLabOrder = function(labNo) {
         window.showCustomConfirm(`ທ່ານຕ້ອງການລຶບລາຍການ Lab ເລກທີ <strong>${labNo}</strong> ນี้ແທ້ຫຼືບໍ່?`, 'ຢືນຢັນການລຶບ', function() {
             let list = JSON.parse(localStorage.getItem('clinic_lab_orders')) || [];
             list = list.filter(item => item.lab_no !== labNo);
             localStorage.setItem('clinic_lab_orders', JSON.stringify(list));
-            if(typeof renderLabPage === 'function') renderLabPage();
+            renderLabPage();
             window.showCustomAlert('ລຶບລາຍການ Lab ສຳເລັດແລ້ວ', 'ສຳເລັດ', '✅');
         });
     };
 
-    // --- ປັບປຸງການ Render Echo ໃຫ້ມີສະເພາະ Checkbox ແລະ ປຸ່ມລຶບດ້ານເທິງ ---
-    const _originalRenderEchoPage = window.renderEchoPage;
-    window.renderEchoPage = function() {
-        if (typeof _originalRenderEchoPage === 'function') _originalRenderEchoPage();
-        const table = document.querySelector('#page-echo table');
-        if (!table) return;
-        const theadTr = table.querySelector('thead tr');
-        if (theadTr && !theadTr.innerHTML.includes('select-all-echo')) {
-            theadTr.innerHTML = `<th style="width: 40px; text-align: center;"><input type="checkbox" id="select-all-echo" onclick="toggleSelectAll('echo', this)"></th>` + theadTr.innerHTML;
-        }
-        const tbody = document.getElementById('echo-table-body');
-        if (!tbody) return;
-        const rows = tbody.querySelectorAll('tr');
-        let list = JSON.parse(localStorage.getItem('clinic_echo_orders')) || [];
-        list.sort((a,b) => b.echo_no.localeCompare(a.echo_no));
-        
-        rows.forEach((tr, index) => {
-            if (list[index] && !tr.innerHTML.includes('echo-checkbox')) {
-                const item = list[index];
-                const tdCheck = document.createElement('td');
-                tdCheck.style.textAlign = 'center';
-                tdCheck.innerHTML = `<input type="checkbox" class="echo-checkbox" value="${item.echo_no}">`;
-                tr.insertBefore(tdCheck, tr.firstChild);
-            }
-        });
-
-        let filterBar = document.querySelector('#page-echo .filter-bar');
-        if (filterBar && !document.getElementById('btn-bulk-delete-echo')) {
-            const deleteBtnDiv = document.createElement('div');
-            deleteBtnDiv.className = 'filter-group';
-            deleteBtnDiv.innerHTML = `<button class="btn-action" id="btn-bulk-delete-echo" style="background: #d32f2f; color: white;" onclick="bulkDelete('echo')">🗑️ ລຶບທີ່ເລືອກ</button>`;
-            filterBar.appendChild(deleteBtnDiv);
-        }
-    };
-
-    // --- ປັບປຸງການ Render X-Ray ໃຫ້ມີສະເພາະ Checkbox ແລະ ປຸ່ມລຶບດ້ານເທິງ ---
-    const _originalRenderXrayPage = window.renderXrayPage;
-    window.renderXrayPage = function() {
-        if (typeof _originalRenderXrayPage === 'function') _originalRenderXrayPage();
-        const table = document.querySelector('#page-xray table');
-        if (!table) return;
-        const theadTr = table.querySelector('thead tr');
-        if (theadTr && !theadTr.innerHTML.includes('select-all-xray')) {
-            theadTr.innerHTML = `<th style="width: 40px; text-align: center;"><input type="checkbox" id="select-all-xray" onclick="toggleSelectAll('xray', this)"></th>` + theadTr.innerHTML;
-        }
-        const tbody = document.getElementById('xray-table-body');
-        if (!tbody) return;
-        const rows = tbody.querySelectorAll('tr');
-        let list = JSON.parse(localStorage.getItem('clinic_xray_orders')) || [];
-        list.sort((a,b) => b.xray_no.localeCompare(a.xray_no));
-        
-        rows.forEach((tr, index) => {
-            if (list[index] && !tr.innerHTML.includes('xray-checkbox')) {
-                const item = list[index];
-                const tdCheck = document.createElement('td');
-                tdCheck.style.textAlign = 'center';
-                tdCheck.innerHTML = `<input type="checkbox" class="xray-checkbox" value="${item.xray_no}">`;
-                tr.insertBefore(tdCheck, tr.firstChild);
-            }
-        });
-
-        let filterBar = document.querySelector('#page-xray .filter-bar');
-        if (filterBar && !document.getElementById('btn-bulk-delete-xray')) {
-            const deleteBtnDiv = document.createElement('div');
-            deleteBtnDiv.className = 'filter-group';
-            deleteBtnDiv.innerHTML = `<button class="btn-action" id="btn-bulk-delete-xray" style="background: #d32f2f; color: white;" onclick="bulkDelete('xray')">🗑️ ລຶບທີ່ເລືອກ</button>`;
-            filterBar.appendChild(deleteBtnDiv);
-        }
-    };
-
-    // --- ປັບປຸງການ Render Lab ໃຫ້ມີສະເພາະ Checkbox ແລະ ປຸ່ມລຶບດ້ານເທິງ ---
-    const _originalRenderLabPage = window.renderLabPage;
-    window.renderLabPage = function() {
-        if (typeof _originalRenderLabPage === 'function') _originalRenderLabPage();
-        const table = document.querySelector('#page-laboratory table');
-        if (!table) return;
-        const theadTr = table.querySelector('thead tr');
-        if (theadTr && !theadTr.innerHTML.includes('select-all-lab')) {
-            theadTr.innerHTML = `<th style="width: 40px; text-align: center;"><input type="checkbox" id="select-all-lab" onclick="toggleSelectAll('lab', this)"></th>` + theadTr.innerHTML;
-        }
-        const tbody = document.getElementById('lab-table-body');
-        if (!tbody) return;
-        const rows = tbody.querySelectorAll('tr');
-        let list = JSON.parse(localStorage.getItem('clinic_lab_orders')) || [];
-        list.sort((a,b) => b.lab_no.localeCompare(a.lab_no));
-        
-        rows.forEach((tr, index) => {
-            if (list[index] && !tr.innerHTML.includes('lab-checkbox')) {
-                const item = list[index];
-                const tdCheck = document.createElement('td');
-                tdCheck.style.textAlign = 'center';
-                tdCheck.innerHTML = `<input type="checkbox" class="lab-checkbox" value="${item.lab_no}">`;
-                tr.insertBefore(tdCheck, tr.firstChild);
-            }
-        });
-
-        let filterBar = document.querySelector('#page-laboratory .filter-bar');
-        if (filterBar && !document.getElementById('btn-bulk-delete-lab')) {
-            const deleteBtnDiv = document.createElement('div');
-            deleteBtnDiv.className = 'filter-group';
-            deleteBtnDiv.innerHTML = `<button class="btn-action" id="btn-bulk-delete-lab" style="background: #d32f2f; color: white;" onclick="bulkDelete('lab')">🗑️ ລຶບທີ່ເລືອກ</button>`;
-            filterBar.appendChild(deleteBtnDiv);
-        }
-    };
-
-    // --- Helper ຟັງຊັນສຳລັບການຕິກເລືອກທັງໝົດ ແລະ ລຶບຫຼາຍລາຍການພ້ອມກັນ ---
     window.toggleSelectAll = function(type, source) {
         const checkboxes = document.querySelectorAll(`.${type}-checkbox`);
         checkboxes.forEach(cb => cb.checked = source.checked);
@@ -4952,10 +4848,8 @@ window.toggleFollowUpFields = function() {
             window.showCustomAlert('ກະລຸນາຕິກເລືອກລາຍການທີ່ຕ້ອງການລຶບຢ່າງໜ້ອຍ 1 ລາຍການ!', 'ແຈ້ງເຕືອນ', '⚠️');
             return;
         }
-
         window.showCustomConfirm(`ທ່ານຕ້ອງການລຶບລາຍການທີ່ເລືອກຈຳນວນ <strong>${checkboxes.length}</strong> ລາຍການ ແທ້ຫຼືບໍ່?`, 'ຢືນຢັນການລຶບ', function() {
             let idsToRemove = Array.from(checkboxes).map(cb => cb.value);
-            
             if (type === 'echo') {
                 let list = JSON.parse(localStorage.getItem('clinic_echo_orders')) || [];
                 list = list.filter(item => !idsToRemove.includes(item.echo_no));
@@ -4972,116 +4866,222 @@ window.toggleFollowUpFields = function() {
                 localStorage.setItem('clinic_lab_orders', JSON.stringify(list));
                 renderLabPage();
             }
-
             window.showCustomAlert('ລຶບລາຍການທີ່ເລືອກສຳເລັດແລ້ວ!', 'ສຳເລັດ', '✅');
         });
     };
-</script>
-<script>
-    // ----------------------------------------------------
-    // ປັບປຸງການ Render X-Ray ແລະ Echo ໃຫ້ກົດປຸ່ມດຳເນີນການໄດ້ທັນທີ 100%
-    // ----------------------------------------------------
-    const _originalRenderXrayPageForAction = window.renderXrayPage;
+
+    // =========================================================================
+    // RENDER PAGES (Lab, X-Ray, Echo) - ປັບປຸງ Index & ໂຄງສ້າງໃໝ່ 100%
+    // =========================================================================
+    window.renderLabPage = function() {
+        const rawList = JSON.parse(localStorage.getItem('clinic_lab_orders')) || []; 
+        let cWait = 0, cAna = 0, cConf = 0, cComp = 0;
+        rawList.forEach(l => { 
+            if(l.status.includes('ຮັບຕົວຢ່າງ')) cWait++; 
+            if(l.status.includes('ວິເຄາະ')) cAna++; 
+            if(l.status.includes('ຢືນຢັນ')) cConf++; 
+            if(l.status.includes('ສຳເລັດ')) cComp++; 
+        });
+        document.getElementById('lab-stat-waiting').innerText = cWait; 
+        document.getElementById('lab-stat-analyzing').innerText = cAna; 
+        document.getElementById('lab-stat-confirm').innerText = cConf; 
+        document.getElementById('lab-stat-completed').innerText = cComp;
+        
+        const tbody = document.getElementById('lab-table-body'); 
+        if(!tbody) return;
+        tbody.innerHTML = '';
+
+        const table = document.querySelector('#page-laboratory table');
+        if (table) {
+            const theadTr = table.querySelector('thead tr');
+            if (theadTr && !theadTr.innerHTML.includes('select-all-lab')) {
+                theadTr.innerHTML = `<th style="width: 40px; text-align: center;"><input type="checkbox" id="select-all-lab" onclick="toggleSelectAll('lab', this)"></th>` + theadTr.innerHTML;
+            }
+        }
+
+        let filterBar = document.querySelector('#page-laboratory .filter-bar');
+        if (filterBar && !document.getElementById('btn-bulk-delete-lab')) {
+            const deleteBtnDiv = document.createElement('div');
+            deleteBtnDiv.className = 'filter-group';
+            deleteBtnDiv.innerHTML = `<button class="btn-action" id="btn-bulk-delete-lab" style="background: #d32f2f; color: white;" onclick="bulkDelete('lab')">🗑️ ລຶບທີ່ເລືອກ</button>`;
+            filterBar.appendChild(deleteBtnDiv);
+        }
+
+        if(rawList.length === 0) { 
+            tbody.innerHTML = '<tr><td colspan="9" style="text-align:center; padding: 20px; color:#7b8794;">ຍັງບໍ່ມີຄຳສັ່ງກວດ Lab</td></tr>'; 
+        } else { 
+            // ສ້າງ Copy ຂອງ List ມາລຽງລຳດັບ ເພື່ອບໍ່ໃຫ້ກະທົບກັບ Index ຕົວຈິງ
+            const displayList = [...rawList].sort((a,b) => b.lab_no.localeCompare(a.lab_no)); 
+            
+            displayList.forEach((item) => { 
+                let badgeClass = 'badge-gray'; 
+                if(item.status.includes('ວິເຄາະ')) badgeClass = 'badge-blue'; 
+                if(item.status.includes('ຢືນຢັນ')) badgeClass = 'badge-orange'; 
+                if(item.status.includes('ສຳເລັດ')) badgeClass = 'badge-green'; 
+                
+                const printBtn = item.status.includes('ສຳເລັດ') ? `<span class="action-icon" title="ພິມຜົນກວດ" onclick="printLabReport('${item.lab_no}')">🖨️</span>` : ''; 
+                // ຫາ Index ທີ່ແທ້ຈິງໃນ LocalStorage ບໍ່ແມ່ນໃນ List ທີ່ລຽງແລ້ວ
+                const trueIndex = rawList.findIndex(l => l.lab_no === item.lab_no); 
+                
+                const tr = document.createElement('tr'); 
+                tr.innerHTML = `
+                    <td style="text-align: center;"><input type="checkbox" class="lab-checkbox" value="${item.lab_no}"></td>
+                    <td><strong>${item.lab_no}</strong></td>
+                    <td style="color:#7b8794;">${item.visit_id}</td>
+                    <td><strong>${item.patient_name}</strong></td>
+                    <td><small>${item.tests.join(', ')}</small></td>
+                    <td>${item.date}</td>
+                    <td>${item.doctor}</td>
+                    <td><span class="badge ${badgeClass}">${item.status}</span></td>
+                    <td style="text-align:center;"><span class="action-icon" title="ດຳເນີນການ/ບັນທຶກຜົນ" onclick="openLabProcessModal(${trueIndex})">✏️</span> ${printBtn}</td>
+                `; 
+                tbody.appendChild(tr); 
+            }); 
+        }
+    };
+
     window.renderXrayPage = function() {
-        if (typeof _originalRenderXrayPage === 'function') _originalRenderXrayPage();
-        const tbody = document.getElementById('xray-table-body');
-        if (!tbody) return;
-        const rows = tbody.querySelectorAll('tr');
-        let list = JSON.parse(localStorage.getItem('clinic_xray_orders')) || [];
-        list.sort((a,b) => b.xray_no.localeCompare(a.xray_no));
-        
-        rows.forEach((tr, index) => {
-            if (list[index]) {
-                const item = list[index];
-                const realIndex = list.findIndex(l => l.xray_no === item.xray_no);
-                const actionTd = tr.lastElementChild;
-                if (actionTd) {
-                    // ປັບປຸງໄອຄອນກ້ອງຖ່າຍຮູບໃຫ້ເອີ້ນຟັງຊັນ openXrayProcessModal ໂດຍກົງ
-                    if (!actionTd.innerHTML.includes('openXrayProcessModal')) {
-                        actionTd.innerHTML = actionTd.innerHTML.replace('📷', `<span class="action-icon" title="ບັນທຶກການຖ່າຍ" onclick="openXrayProcessModal(${realIndex})">📷</span>`);
-                    }
-                }
-            }
+        const rawList = JSON.parse(localStorage.getItem('clinic_xray_orders')) || []; 
+        let cWait = 0, cCap = 0, cRead = 0, cComp = 0;
+        rawList.forEach(x => { 
+            if(x.status.includes('ລໍຖ້າຖ່າຍ')) cWait++; 
+            if(x.status.includes('ອ່ານຜົນ')) { cCap++; cRead++; } 
+            if(x.status.includes('ສຳເລັດ')) cComp++; 
         });
+        document.getElementById('xray-stat-waiting').innerText = cWait; 
+        document.getElementById('xray-stat-captured').innerText = cCap; 
+        document.getElementById('xray-stat-reading').innerText = cRead; 
+        document.getElementById('xray-stat-completed').innerText = cComp;
+        
+        const tbody = document.getElementById('xray-table-body'); 
+        if(!tbody) return;
+        tbody.innerHTML = '';
+
+        const table = document.querySelector('#page-xray table');
+        if (table) {
+            const theadTr = table.querySelector('thead tr');
+            if (theadTr && !theadTr.innerHTML.includes('select-all-xray')) {
+                theadTr.innerHTML = `<th style="width: 40px; text-align: center;"><input type="checkbox" id="select-all-xray" onclick="toggleSelectAll('xray', this)"></th>` + theadTr.innerHTML;
+            }
+        }
+
+        let filterBar = document.querySelector('#page-xray .filter-bar');
+        if (filterBar && !document.getElementById('btn-bulk-delete-xray')) {
+            const deleteBtnDiv = document.createElement('div');
+            deleteBtnDiv.className = 'filter-group';
+            deleteBtnDiv.innerHTML = `<button class="btn-action" id="btn-bulk-delete-xray" style="background: #d32f2f; color: white;" onclick="bulkDelete('xray')">🗑️ ລຶບທີ່ເລືອກ</button>`;
+            filterBar.appendChild(deleteBtnDiv);
+        }
+
+        if(rawList.length === 0) { 
+            tbody.innerHTML = '<tr><td colspan="9" style="text-align:center; padding: 20px; color:#7b8794;">ຍັງບໍ່ມີຄຳສັ່ງກວດ X-Ray</td></tr>'; 
+        } else {
+            // ສ້າງ Copy ຂອງ List ມາລຽງລຳດັບ ເພື່ອບໍ່ໃຫ້ກະທົບກັບ Index ຕົວຈິງ
+            const displayList = [...rawList].sort((a,b) => b.xray_no.localeCompare(a.xray_no));
+            
+            displayList.forEach((item) => {
+                let badgeClass = 'badge-gray'; 
+                if(item.status.includes('ລໍຖ້າຖ່າຍ')) badgeClass = 'badge-yellow'; 
+                if(item.status.includes('ອ່ານຜົນ')) badgeClass = 'badge-blue'; 
+                if(item.status.includes('ສຳເລັດ')) badgeClass = 'badge-green';
+                
+                // ຫາ Index ທີ່ແທ້ຈິງໃນ LocalStorage ບໍ່ແມ່ນໃນ List ທີ່ລຽງແລ້ວ
+                const trueIndex = rawList.findIndex(l => l.xray_no === item.xray_no); 
+                
+                let actionBtns = '';
+                if(item.status.includes('ລໍຖ້າຖ່າຍ') || item.status.includes('ອ່ານຜົນ')) actionBtns += `<span class="action-icon" title="ບັນທຶກການຖ່າຍ (Technician)" onclick="openXrayProcessModal(${trueIndex})">📷</span>`;
+                if(item.status.includes('ອ່ານຜົນ') || item.status.includes('ສຳເລັດ')) actionBtns += `<span class="action-icon" title="ອ່ານຜົນ/ຂຽນລາຍງານ (Radiologist)" onclick="openXrayReadModal(${trueIndex})">📝</span>`;
+                if(item.status.includes('ສຳເລັດ')) actionBtns += `<span class="action-icon" title="ພິມລາຍງານ" onclick="printXrayReport('${item.xray_no}')">🖨️</span>`;
+                
+                const tr = document.createElement('tr'); 
+                tr.innerHTML = `
+                    <td style="text-align: center;"><input type="checkbox" class="xray-checkbox" value="${item.xray_no}"></td>
+                    <td><strong>${item.xray_no}</strong></td>
+                    <td style="color:#7b8794;">${item.visit_id}</td>
+                    <td><strong>${item.patient_name}</strong></td>
+                    <td><small>${item.type}<br>(${item.region||'-'}/${item.side})</small></td>
+                    <td>${item.date}</td>
+                    <td>${item.doctor}</td>
+                    <td><span class="badge ${badgeClass}">${item.status}</span></td>
+                    <td style="text-align:center;">${actionBtns}</td>
+                `; 
+                tbody.appendChild(tr);
+            });
+        }
     };
 
-    const _originalRenderEchoPageForAction = window.renderEchoPage;
     window.renderEchoPage = function() {
-        if (typeof _originalRenderEchoPage === 'function') _originalRenderEchoPage();
-        const tbody = document.getElementById('echo-table-body');
-        if (!tbody) return;
-        const rows = tbody.querySelectorAll('tr');
-        let list = JSON.parse(localStorage.getItem('clinic_echo_orders')) || [];
-        list.sort((a,b) => b.echo_no.localeCompare(a.echo_no));
-        
-        rows.forEach((tr, index) => {
-            if (list[index]) {
-                const item = list[index];
-                const realIndex = list.findIndex(l => l.echo_no === item.echo_no);
-                const actionTd = tr.lastElementChild;
-                if (actionTd) {
-                    // ປັບປຸງໄອຄອນລຳໂພງໃຫ້ເອີ້ນຟັງຊັນ openEchoProcessModal ໂດຍກົງ
-                    if (!actionTd.innerHTML.includes('openEchoProcessModal')) {
-                        actionTd.innerHTML = actionTd.innerHTML.replace('🔊', `<span class="action-icon" title="ບັນທຶກຜົນກວດ" onclick="openEchoProcessModal(${realIndex})">🔊</span>`);
-                    }
-                }
-            }
+        const rawList = JSON.parse(localStorage.getItem('clinic_echo_orders')) || []; 
+        let cWait = 0, cProg = 0, cRep = 0, cComp = 0; let totalRev = 0;
+        rawList.forEach(e => { 
+            if(e.status.includes('ລໍຖ້າກວດ')) cWait++; 
+            if(e.status.includes('ກຳລັງກວດ')) cProg++; 
+            if(e.status.includes('ລາຍງານ') || e.status.includes('ຢືນຢັນ')) cRep++; 
+            if(e.status.includes('ສຳເລັດ')) { cComp++; totalRev += Number(e.price || 0); } 
         });
+        document.getElementById('echo-stat-waiting').innerText = cWait; 
+        document.getElementById('echo-stat-progress').innerText = cProg; 
+        document.getElementById('echo-stat-report').innerText = cRep; 
+        document.getElementById('echo-stat-completed').innerText = cComp; 
+        document.getElementById('echo-stat-revenue').innerText = totalRev.toLocaleString() + ' ₭'; 
+        
+        const tbody = document.getElementById('echo-table-body'); 
+        if(!tbody) return;
+        tbody.innerHTML = '';
+
+        const table = document.querySelector('#page-echo table');
+        if (table) {
+            const theadTr = table.querySelector('thead tr');
+            if (theadTr && !theadTr.innerHTML.includes('select-all-echo')) {
+                theadTr.innerHTML = `<th style="width: 40px; text-align: center;"><input type="checkbox" id="select-all-echo" onclick="toggleSelectAll('echo', this)"></th>` + theadTr.innerHTML;
+            }
+        }
+
+        let filterBar = document.querySelector('#page-echo .filter-bar');
+        if (filterBar && !document.getElementById('btn-bulk-delete-echo')) {
+            const deleteBtnDiv = document.createElement('div');
+            deleteBtnDiv.className = 'filter-group';
+            deleteBtnDiv.innerHTML = `<button class="btn-action" id="btn-bulk-delete-echo" style="background: #d32f2f; color: white;" onclick="bulkDelete('echo')">🗑️ ລຶບທີ່ເລືອກ</button>`;
+            filterBar.appendChild(deleteBtnDiv);
+        }
+
+        if(rawList.length === 0) { 
+            tbody.innerHTML = '<tr><td colspan="9" style="text-align:center; padding: 20px; color:#7b8794;">ຍັງບໍ່ມີຄຳສັ່ງກວດ Echo</td></tr>'; 
+        } else {
+            // ສ້າງ Copy ຂອງ List ມາລຽງລຳດັບ ເພື່ອບໍ່ໃຫ້ກະທົບກັບ Index ຕົວຈິງ
+            const displayList = [...rawList].sort((a,b) => b.echo_no.localeCompare(a.echo_no));
+            
+            displayList.forEach((item) => {
+                let badgeClass = 'badge-purple'; 
+                if(item.status.includes('ລໍຖ້າກວດ')) badgeClass = 'badge-yellow'; 
+                if(item.status.includes('ກຳລັງກວດ')) badgeClass = 'badge-blue'; 
+                if(item.status.includes('ລາຍງານ') || item.status.includes('ຢືນຢັນ')) badgeClass = 'badge-orange'; 
+                if(item.status.includes('ສຳເລັດ')) badgeClass = 'badge-green';
+                
+                // ຫາ Index ທີ່ແທ້ຈິງໃນ LocalStorage ບໍ່ແມ່ນໃນ List ທີ່ລຽງແລ້ວ
+                const trueIndex = rawList.findIndex(l => l.echo_no === item.echo_no); 
+                
+                let actionBtns = `<span class="action-icon" title="ດຳເນີນການກວດ / ຂຽນລາຍງານ" onclick="openEchoProcessModal(${trueIndex})">🔊</span>`;
+                if(item.status.includes('ສຳເລັດ') || item.status.includes('ຢືນຢັນ')) { 
+                    actionBtns += `<span class="action-icon" title="ພິມລາຍງານ" onclick="printEchoReport('${item.echo_no}')">🖨️</span>`; 
+                }
+                
+                const tr = document.createElement('tr'); 
+                tr.innerHTML = `
+                    <td style="text-align: center;"><input type="checkbox" class="echo-checkbox" value="${item.echo_no}"></td>
+                    <td><strong>${item.echo_no}</strong></td>
+                    <td style="color:#7b8794;">${item.visit_id}</td>
+                    <td><strong>${item.patient_name}</strong></td>
+                    <td><small>${item.type}</small></td>
+                    <td>${item.date}</td>
+                    <td>${item.doctor}</td>
+                    <td><span class="badge ${badgeClass}">${item.status}</span></td>
+                    <td style="text-align:center;">${actionBtns}</td>
+                `; 
+                tbody.appendChild(tr);
+            });
+        }
     };
-</script>
-<script>
-    // ========================================================
-    // ແກ້ໄຂບັນຫາປຸ່ມ 📷 (X-Ray) ແລະ 🔊 (Echo) ບໍ່ທຳງານ 100%
-    // ========================================================
-    document.addEventListener('click', function(e) {
-        // ກວດສອບວ່າມີການກົດຖືກໄອຄອນ (action-icon) ຫຼື ບໍ່
-        const icon = e.target.closest('.action-icon');
-        if (!icon) return;
-
-        const iconText = icon.innerText.trim();
-
-        // 1. ກວດສອບຖ້າກົດປຸ່ມ 📷 ຂອງ X-Ray
-        if (iconText === '📷' || icon.innerHTML.includes('📷')) {
-            const row = icon.closest('tr');
-            if (row) {
-                // ຄົ້ນຫາລະຫັດ X-Ray ຈາກແຖວນັ້ນ (ດຶງຮູບແບບ XR-xxxxxx-xxx)
-                const xrayNoMatch = row.innerText.match(/XR-\d+-\d+/);
-                if (xrayNoMatch) {
-                    const xrayNo = xrayNoMatch[0];
-                    const orders = JSON.parse(localStorage.getItem('clinic_xray_orders')) || [];
-                    const index = orders.findIndex(x => x.xray_no === xrayNo);
-                    
-                    // ເອີ້ນເປີດ Modal ໂດຍກົງ
-                    if (index !== -1 && typeof window.openXrayProcessModal === 'function') {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        window.openXrayProcessModal(index);
-                    }
-                }
-            }
-        }
-
-        // 2. ກວດສອບຖ້າກົດປຸ່ມ 🔊 ຂອງ Echo
-        if (iconText === '🔊' || icon.innerHTML.includes('🔊')) {
-            const row = icon.closest('tr');
-            if (row) {
-                // ຄົ້ນຫາລະຫັດ Echo ຈາກແຖວນັ້ນ (ດຶງຮູບແບບ ECHO-xxxxxx-xxx)
-                const echoNoMatch = row.innerText.match(/ECHO-\d+-\d+/);
-                if (echoNoMatch) {
-                    const echoNo = echoNoMatch[0];
-                    const orders = JSON.parse(localStorage.getItem('clinic_echo_orders')) || [];
-                    const index = orders.findIndex(x => x.echo_no === echoNo);
-                    
-                    // ເອີ້ນເປີດ Modal ໂດຍກົງ
-                    if (index !== -1 && typeof window.openEchoProcessModal === 'function') {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        window.openEchoProcessModal(index);
-                    }
-                }
-            }
-        }
-    }, true); // ໃຊ້ capture ໃຫ້ມັນດັກຈັບໄດ້ກ່ອນ Error ອື່ນໆ
 </script>
 </body>
 </html>
