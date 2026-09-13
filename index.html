@@ -4652,16 +4652,30 @@ if (!firebase.apps.length) {
 const db = firebase.firestore();
 console.log("🟢 ລະບົບ Realtime Firebase ພ້ອມໃຊ້ງານແລ້ວ!");
 
+// ---------------------------------------------------------
 // 2. ດັກຈັບ: Collection 'appointments' (ນັດໝາຍ) ແບບ Realtime
+// ---------------------------------------------------------
+let isInitialAptLoad = true; // ຕົວປ່ຽນສຳລັບເຊັກການໂຫຼດຄັ້ງທຳອິດ
+
 db.collection("appointments").onSnapshot((snapshot) => {
+    // ຖ້າເປັນການໂຫຼດໜ້າເວັບຄັ້ງທຳອິດ ໃຫ້ຂ້າມການແຈ້ງເຕືອນໄປກ່ອນ
+    if (isInitialAptLoad) {
+        isInitialAptLoad = false;
+        return; 
+    }
+
     snapshot.docChanges().forEach((change) => {
         if (change.type === "added") {
-            console.log("📅 ມີນັດໝາຍໃໝ່: ", change.doc.data());
+            const data = change.doc.data();
+            console.log("📅 ມີນັດໝາຍໃໝ່: ", data);
+            
             // ໂຫຼດຂໍ້ມູນໜ້ານັດໝາຍໃໝ່ຖ້າເປີດຢູ່
             if(document.getElementById('page-appointments').style.display === 'block') {
                 if(typeof renderAppointmentsPage === 'function') renderAppointmentsPage(); 
             }
-            window.showCustomAlert(`ມີນັດໝາຍໃໝ່ຂອງ: ${change.doc.data().patient_name || 'ບໍ່ລະບຸ'}`, '🔔 Firebase ແຈ້ງເຕືອນ', '📅');
+            
+            // ແຈ້ງເຕືອນສະເພາະຕອນມີຄົນກົດເພີ່ມເຂົ້າມາໃໝ່ແທ້ໆ
+            window.showCustomAlert(`ມີນັດໝາຍໃໝ່ຂອງ: ${data.patient_name || 'ບໍ່ລະບຸຊື່'}`, '🔔 Firebase ແຈ້ງເຕືອນ', '📅');
         }
     });
 });
