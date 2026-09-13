@@ -3608,7 +3608,7 @@ window.toggleFollowUpFields = function() {
         posCalculateTotal();
     };
 
-    // ຟັງຊັນດຶງຂໍ້ມູນຄ່າໃຊ້ຈ່າຍຕົວຈິງຈາກທຸກພະແນກ ໂດຍອ້າງອີງຈາກ Visit ID
+// ຟັງຊັນດຶງຂໍ້ມູນຄ່າໃຊ້ຈ່າຍຕົວຈິງຈາກທຸກພະແນກ ໂດຍອ້າງອີງຈາກ Visit ID
     window.posMockLoadData = function() {
         const searchVal = document.getElementById('pos_search_visit').value.trim();
         if (!searchVal) {
@@ -3627,56 +3627,56 @@ window.toggleFollowUpFields = function() {
         document.getElementById('pos_sale_items_body').innerHTML = '';
         let hasItems = false;
         
-        // 1. ຄ່າກວດພະຍາດ (Doctor Fee) - ຕັ້ງຄ່າເລີ່ມຕົ້ນ 50,000 ກີບ
-        posAddItemRow('ຄ່າກວດພະຍາດ (Consultation)', 1, 50000);
+        // 1. ຄ່າກວດພະຍາດ (Doctor Fee) - ປ່ຽນເປັນ 0 ໃຫ້ພະນັກງານປ້ອນເອງ
+        posAddItemRow('ຄ່າກວດພະຍາດ (Consultation)', 1, 0);
         hasItems = true;
 
-        // 2. ຄ່າຫັດຖະການ (Procedures) ຖ້າມີ
+        // 2. ຄ່າຫັດຖະການ (Procedures) ຖ້າມີ - ປ່ຽນເປັນ 0 ໃຫ້ພະນັກງານປ້ອນເອງ
         if(visit.procedures && visit.procedures.length > 0) {
             visit.procedures.forEach(proc => {
-                posAddItemRow(`ຄ່າຫັດຖະການ: ${proc}`, 1, 30000); // ລາຄາຫັດຖະການຕັ້ງຕົ້ນ 30,000 ກີບ
+                posAddItemRow(`ຄ່າຫັດຖະການ: ${proc}`, 1, 0);
             });
         }
 
-        // 3. ຄ່າຢາ ຈາກໃບສັ່ງຢາ (Pharmacy)
+        // 3. ຄ່າຢາ ຈາກໃບສັ່ງຢາ (Pharmacy) - ດຶງລາຄາທີ່ຕັ້ງໄວ້ໃນສາງ (Inventory) ມາອັດຕະໂນມັດ
         const rxs = JSON.parse(localStorage.getItem('clinic_prescriptions')) || [];
         const rx = rxs.find(r => r.visit_id === searchVal);
         if (rx && rx.items && rx.items.length > 0) {
             const inventory = JSON.parse(localStorage.getItem('clinic_inventory')) || [];
             rx.items.forEach(item => {
                 let price = 0;
-                // ຄົ້ນຫາລາຄາຢາຈາກສາງ Inventory
+                // ຄົ້ນຫາລາຄາຢາຈາກສາງ
                 const invItem = inventory.find(i => i.name.toLowerCase() === item.name.toLowerCase());
                 if(invItem) price = invItem.price;
                 posAddItemRow(`ຢາ: ${item.name}`, item.qty, price);
             });
         }
 
-        // 4. ຄ່າ Lab (Laboratory)
+        // 4. ຄ່າ Lab (Laboratory) - ປ່ຽນເປັນ 0 ໃຫ້ພະນັກງານປ້ອນເອງ
         const labs = JSON.parse(localStorage.getItem('clinic_lab_orders')) || [];
         const myLabs = labs.filter(l => l.visit_id === searchVal);
         myLabs.forEach(lab => {
             lab.tests.forEach(test => {
-                posAddItemRow(`ຄ່າກວດ Lab: ${test}`, 1, 40000); // ລາຄາ Lab ຕັ້ງຕົ້ນ 40,000 ກີບ/ລາຍການ
+                posAddItemRow(`ຄ່າກວດ Lab: ${test}`, 1, 0);
             });
         });
 
-        // 5. ຄ່າ X-Ray
+        // 5. ຄ່າ X-Ray - ດຶງລາຄາທີ່ແພດປ້ອນຕອນສັ່ງ, ຖ້າບໍ່ໄດ້ປ້ອນໃຫ້ເປັນ 0
         const xrays = JSON.parse(localStorage.getItem('clinic_xray_orders')) || [];
         const myXrays = xrays.filter(x => x.visit_id === searchVal);
         myXrays.forEach(xr => {
-            posAddItemRow(`ຄ່າ X-Ray: ${xr.type}`, 1, xr.price || 150000); // ດຶງລາຄາທີ່ປ້ອນຕອນສັ່ງ
+            posAddItemRow(`ຄ່າ X-Ray: ${xr.type}`, 1, xr.price || 0); 
         });
 
-        // 6. ຄ່າ Echo
+        // 6. ຄ່າ Echo - ດຶງລາຄາທີ່ແພດປ້ອນຕອນສັ່ງ, ຖ້າບໍ່ໄດ້ປ້ອນໃຫ້ເປັນ 0
         const echos = JSON.parse(localStorage.getItem('clinic_echo_orders')) || [];
         const myEchos = echos.filter(e => e.visit_id === searchVal);
         myEchos.forEach(ec => {
-            posAddItemRow(`ຄ່າ Echo: ${ec.type}`, 1, ec.price || 300000); // ດຶງລາຄາທີ່ປ້ອນຕອນສັ່ງ
+            posAddItemRow(`ຄ່າ Echo: ${ec.type}`, 1, ec.price || 0); 
         });
 
         if (hasItems) {
-            window.showCustomAlert('ດຶງຂໍ້ມູນຄ່າໃຊ້ຈ່າຍທັງໝົດສຳເລັດແລ້ວ! ລະບົບໄດ້ຄິດໄລ່ຍອດລວມໃຫ້ແລ້ວ.', 'ດຶງຂໍ້ມູນສຳເລັດ', '✅');
+            window.showCustomAlert('ດຶງຂໍ້ມູນລາຍການສຳເລັດແລ້ວ! ກະລຸນາປ້ອນລາຄາຄ່າບໍລິການຕ່າງໆໃນຕາຕະລາງ.', 'ດຶງຂໍ້ມູນສຳເລັດ', '✅');
         }
     };
 
