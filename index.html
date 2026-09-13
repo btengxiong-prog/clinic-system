@@ -5029,5 +5029,59 @@ window.toggleFollowUpFields = function() {
         });
     };
 </script>
+<script>
+    // ========================================================
+    // ແກ້ໄຂບັນຫາປຸ່ມ 📷 (X-Ray) ແລະ 🔊 (Echo) ບໍ່ທຳງານ 100%
+    // ========================================================
+    document.addEventListener('click', function(e) {
+        // ກວດສອບວ່າມີການກົດຖືກໄອຄອນ (action-icon) ຫຼື ບໍ່
+        const icon = e.target.closest('.action-icon');
+        if (!icon) return;
+
+        const iconText = icon.innerText.trim();
+
+        // 1. ກວດສອບຖ້າກົດປຸ່ມ 📷 ຂອງ X-Ray
+        if (iconText === '📷' || icon.innerHTML.includes('📷')) {
+            const row = icon.closest('tr');
+            if (row) {
+                // ຄົ້ນຫາລະຫັດ X-Ray ຈາກແຖວນັ້ນ (ດຶງຮູບແບບ XR-xxxxxx-xxx)
+                const xrayNoMatch = row.innerText.match(/XR-\d+-\d+/);
+                if (xrayNoMatch) {
+                    const xrayNo = xrayNoMatch[0];
+                    const orders = JSON.parse(localStorage.getItem('clinic_xray_orders')) || [];
+                    const index = orders.findIndex(x => x.xray_no === xrayNo);
+                    
+                    // ເອີ້ນເປີດ Modal ໂດຍກົງ
+                    if (index !== -1 && typeof window.openXrayProcessModal === 'function') {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        window.openXrayProcessModal(index);
+                    }
+                }
+            }
+        }
+
+        // 2. ກວດສອບຖ້າກົດປຸ່ມ 🔊 ຂອງ Echo
+        if (iconText === '🔊' || icon.innerHTML.includes('🔊')) {
+            const row = icon.closest('tr');
+            if (row) {
+                // ຄົ້ນຫາລະຫັດ Echo ຈາກແຖວນັ້ນ (ດຶງຮູບແບບ ECHO-xxxxxx-xxx)
+                const echoNoMatch = row.innerText.match(/ECHO-\d+-\d+/);
+                if (echoNoMatch) {
+                    const echoNo = echoNoMatch[0];
+                    const orders = JSON.parse(localStorage.getItem('clinic_echo_orders')) || [];
+                    const index = orders.findIndex(x => x.echo_no === echoNo);
+                    
+                    // ເອີ້ນເປີດ Modal ໂດຍກົງ
+                    if (index !== -1 && typeof window.openEchoProcessModal === 'function') {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        window.openEchoProcessModal(index);
+                    }
+                }
+            }
+        }
+    }, true); // ໃຊ້ capture ໃຫ້ມັນດັກຈັບໄດ້ກ່ອນ Error ອື່ນໆ
+</script>
 </body>
 </html>
