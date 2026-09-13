@@ -5537,5 +5537,53 @@ window.openEchoProcessModal = function(index) {
     });
 
 </script>
+<!-- ================= ປຸ່ມສຳລັບຍິງຂໍ້ມູນເຂົ້າ Firebase (ໃຊ້ແລ້ວລຶບຖິ້ມໄດ້) ================= -->
+<div style="position: fixed; bottom: 20px; right: 20px; z-index: 9999;">
+    <button onclick="injectSampleDataToFirebase()" style="background: #e65100; color: white; padding: 12px 20px; border-radius: 8px; cursor: pointer; border: none; font-family: inherit; font-weight: bold; box-shadow: 0 4px 10px rgba(0,0,0,0.3);">
+        🚀 ຍິງຂໍ້ມູນພະຍາດ & ຢາເຂົ້າ Firebase
+    </button>
+</div>
+
+<script>
+window.injectSampleDataToFirebase = async function() {
+    // ກວດສອບວ່າ Firebase ຖືກເຊື່ອມຕໍ່ແລ້ວຫຼືຍັງ
+    if (typeof db === 'undefined') {
+        window.showCustomAlert('ບໍ່ສາມາດເຊື່ອມຕໍ່ Firebase ໄດ້! ກະລຸນາກວດສອບການຕັ້ງຄ່າ.', 'Error', '❌');
+        return;
+    }
+
+    window.showCustomAlert('ກຳລັງສ້າງຖານຂໍ້ມູນພະຍາດ ແລະ ຢາ... ກະລຸນາລໍຖ້າຈັກໜ່ອຍ', 'ກຳລັງປະມວນຜົນ', '⏳');
+
+    try {
+        // 1. ເພີ່ມຂໍ້ມູນພະຍາດ (Diseases)
+        await db.collection("diseases").doc("dis_001").set({ icd10_code: "A97", name_la: "ໄຂ້ເລືອດອອກ", name_en: "Dengue Fever", category: "ພະຍາດຕິດເຊື້ອ", is_active: true });
+        await db.collection("diseases").doc("dis_002").set({ icd10_code: "J00", name_la: "ໄຂ້ຫວັດທຳມະດາ", name_en: "Common Cold", category: "ທາງເດີນຫາຍໃຈ", is_active: true });
+
+        // 2. ເພີ່ມຂໍ້ມູນຢາ (Medicines)
+        await db.collection("medicines").doc("med_001").set({ name_en: "Paracetamol 500mg", name_la: "ປາຣາເຊຕາໂມນ", dosage_info: "ຫຼຸດໄຂ້, ບັນເທົາປວດ", is_active: true });
+        await db.collection("medicines").doc("med_002").set({ name_en: "Amoxicillin 500mg", name_la: "ອະມັອກຊີຊິລລິນ", dosage_info: "ຢາຕ້ານເຊື້ອແບັກທີເຣຍ", is_active: true });
+        await db.collection("medicines").doc("med_003").set({ name_en: "ORS (ເກືອແຮ່)", name_la: "ໂອອາເອັສ", dosage_info: "ທົດແທນນ້ຳ ແລະ ເກືອແຮ່", is_active: true });
+
+        // 3. ເພີ່ມຂໍ້ມູນຈັບຄູ່ (Treatment Guidelines)
+        // ຈັບຄູ່: ໄຂ້ເລືອດອອກ (dis_001) + Paracetamol (med_001)
+        await db.collection("treatment_guidelines").doc("guide_001").set({
+            disease_id: "dis_001", medicine_id: "med_001", default_qty: 10, default_usage: "ກິນ 1 ເມັດ ເວລາປວດ ຫຼື ໄຂ້", default_days: 3
+        });
+        // ຈັບຄູ່: ໄຂ້ເລືອດອອກ (dis_001) + ORS (med_003)
+        await db.collection("treatment_guidelines").doc("guide_002").set({
+            disease_id: "dis_001", medicine_id: "med_003", default_qty: 5, default_usage: "ຈິບເລື້ອຍໆແທນນ້ຳ", default_days: 3
+        });
+        // ຈັບຄູ່: ໄຂ້ຫວັດທຳມະດາ (dis_002) + Paracetamol (med_001)
+        await db.collection("treatment_guidelines").doc("guide_003").set({
+            disease_id: "dis_002", medicine_id: "med_001", default_qty: 10, default_usage: "ກິນ 1 ເມັດ ເວລາປວດ ຫຼື ໄຂ້", default_days: 3
+        });
+
+        window.showCustomAlert('ສ້າງຖານຂໍ້ມູນພະຍາດ ແລະ ຢາເຂົ້າ Firebase ສຳເລັດແລ້ວ! 🎉', 'ສຳເລັດ', '✅');
+    } catch (error) {
+        console.error("Error adding document: ", error);
+        window.showCustomAlert('ເກີດຂໍ້ຜິດພາດໃນການສ້າງຖານຂໍ້ມູນ!', 'Error', '❌');
+    }
+};
+</script>
 </body>
 </html>
