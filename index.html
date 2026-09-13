@@ -4643,7 +4643,7 @@ window.toggleFollowUpFields = function() {
         });
     };
 
-    // --- ປັບປຸງການ Render Echo ໃຫ້ມີ Checkbox ແລະ ປຸ່ມລຶບອັດຕະໂນມັດ ---
+    // --- ປັບປຸງການ Render Echo ໃຫ້ມີສະເພາະ Checkbox ແລະ ປຸ່ມລຶບດ້ານເທິງ ---
     const _originalRenderEchoPage = window.renderEchoPage;
     window.renderEchoPage = function() {
         if (typeof _originalRenderEchoPage === 'function') _originalRenderEchoPage();
@@ -4666,11 +4666,6 @@ window.toggleFollowUpFields = function() {
                 tdCheck.style.textAlign = 'center';
                 tdCheck.innerHTML = `<input type="checkbox" class="echo-checkbox" value="${item.echo_no}">`;
                 tr.insertBefore(tdCheck, tr.firstChild);
-                
-                const actionTd = tr.lastElementChild;
-                if (actionTd && !actionTd.innerHTML.includes('deleteEchoOrder')) {
-                    actionTd.innerHTML += ` <span class="action-icon" title="ລຶບລາຍການ" onclick="deleteEchoOrder('${item.echo_no}')" style="color: #d32f2f;">🗑️</span>`;
-                }
             }
         });
 
@@ -4683,7 +4678,7 @@ window.toggleFollowUpFields = function() {
         }
     };
 
-    // --- ປັບປຸງການ Render X-Ray ໃຫ້ມີ Checkbox ແລະ ປຸ່ມລຶບອັດຕະໂນມັດ ---
+    // --- ປັບປຸງການ Render X-Ray ໃຫ້ມີສະເພາະ Checkbox ແລະ ປຸ່ມລຶບດ້ານເທິງ ---
     const _originalRenderXrayPage = window.renderXrayPage;
     window.renderXrayPage = function() {
         if (typeof _originalRenderXrayPage === 'function') _originalRenderXrayPage();
@@ -4706,11 +4701,6 @@ window.toggleFollowUpFields = function() {
                 tdCheck.style.textAlign = 'center';
                 tdCheck.innerHTML = `<input type="checkbox" class="xray-checkbox" value="${item.xray_no}">`;
                 tr.insertBefore(tdCheck, tr.firstChild);
-                
-                const actionTd = tr.lastElementChild;
-                if (actionTd && !actionTd.innerHTML.includes('deleteXrayOrder')) {
-                    actionTd.innerHTML += ` <span class="action-icon" title="ລຶບລາຍການ" onclick="deleteXrayOrder('${item.xray_no}')" style="color: #d32f2f;">🗑️</span>`;
-                }
             }
         });
 
@@ -4723,7 +4713,7 @@ window.toggleFollowUpFields = function() {
         }
     };
 
-    // --- ປັບປຸງການ Render Lab ໃຫ້ມີ Checkbox ແລະ ປຸ່ມລຶບອັດຕະໂນມັດ ---
+    // --- ປັບປຸງການ Render Lab ໃຫ້ມີສະເພາະ Checkbox ແລະ ປຸ່ມລຶບດ້ານເທິງ ---
     const _originalRenderLabPage = window.renderLabPage;
     window.renderLabPage = function() {
         if (typeof _originalRenderLabPage === 'function') _originalRenderLabPage();
@@ -4746,11 +4736,6 @@ window.toggleFollowUpFields = function() {
                 tdCheck.style.textAlign = 'center';
                 tdCheck.innerHTML = `<input type="checkbox" class="lab-checkbox" value="${item.lab_no}">`;
                 tr.insertBefore(tdCheck, tr.firstChild);
-                
-                const actionTd = tr.lastElementChild;
-                if (actionTd && !actionTd.innerHTML.includes('deleteLabOrder')) {
-                    actionTd.innerHTML += ` <span class="action-icon" title="ລຶບລາຍການ" onclick="deleteLabOrder('${item.lab_no}')" style="color: #d32f2f;">🗑️</span>`;
-                }
             }
         });
 
