@@ -4787,37 +4787,55 @@ window.toggleFollowUpFields = function() {
 </script>
 <script>
     // ----------------------------------------------------
-    // 2 ຄຳສັ່ງສຸດທ້າຍ: ຜູກEventListeners ໃຫ້ປຸ່ມ X-Ray (📷) ແລະ Echo (🔊)
+    // ປັບປຸງການ Render X-Ray ແລະ Echo ໃຫ້ກົດປຸ່ມດຳເນີນການໄດ້ທັນທີ 100%
     // ----------------------------------------------------
-    document.addEventListener('click', function(e) {
-        // ກວດສອບກໍລະນີກົດປຸ່ມ X-Ray Process (📷)
-        const xrayIcon = e.target.closest('#xray-table-body .action-icon');
-        if (xrayIcon && xrayIcon.innerText.includes('📷')) {
-            const tr = xrayIcon.closest('tr');
-            if (tr) {
-                const xrayNo = tr.querySelector('strong').innerText;
-                let list = JSON.parse(localStorage.getItem('clinic_xray_orders')) || [];
-                const index = list.findIndex(item => item.xray_no === xrayNo);
-                if (index !== -1 && typeof window.openXrayProcessModal === 'function') {
-                    window.openXrayProcessModal(index);
+    const _originalRenderXrayPageForAction = window.renderXrayPage;
+    window.renderXrayPage = function() {
+        if (typeof _originalRenderXrayPage === 'function') _originalRenderXrayPage();
+        const tbody = document.getElementById('xray-table-body');
+        if (!tbody) return;
+        const rows = tbody.querySelectorAll('tr');
+        let list = JSON.parse(localStorage.getItem('clinic_xray_orders')) || [];
+        list.sort((a,b) => b.xray_no.localeCompare(a.xray_no));
+        
+        rows.forEach((tr, index) => {
+            if (list[index]) {
+                const item = list[index];
+                const realIndex = list.findIndex(l => l.xray_no === item.xray_no);
+                const actionTd = tr.lastElementChild;
+                if (actionTd) {
+                    // ປັບປຸງໄອຄອນກ້ອງຖ່າຍຮູບໃຫ້ເອີ້ນຟັງຊັນ openXrayProcessModal ໂດຍກົງ
+                    if (!actionTd.innerHTML.includes('openXrayProcessModal')) {
+                        actionTd.innerHTML = actionTd.innerHTML.replace('📷', `<span class="action-icon" title="ບັນທຶກການຖ່າຍ" onclick="openXrayProcessModal(${realIndex})">📷</span>`);
+                    }
                 }
             }
-        }
+        });
+    };
 
-        // ກວດສອບກໍລະນີກົດປຸ່ມ Echo Process (🔊)
-        const echoIcon = e.target.closest('#echo-table-body .action-icon');
-        if (echoIcon && echoIcon.innerText.includes('🔊')) {
-            const tr = echoIcon.closest('tr');
-            if (tr) {
-                const echoNo = tr.querySelector('strong').innerText;
-                let list = JSON.parse(localStorage.getItem('clinic_echo_orders')) || [];
-                const index = list.findIndex(item => item.echo_no === echoNo);
-                if (index !== -1 && typeof window.openEchoProcessModal === 'function') {
-                    window.openEchoProcessModal(index);
+    const _originalRenderEchoPageForAction = window.renderEchoPage;
+    window.renderEchoPage = function() {
+        if (typeof _originalRenderEchoPage === 'function') _originalRenderEchoPage();
+        const tbody = document.getElementById('echo-table-body');
+        if (!tbody) return;
+        const rows = tbody.querySelectorAll('tr');
+        let list = JSON.parse(localStorage.getItem('clinic_echo_orders')) || [];
+        list.sort((a,b) => b.echo_no.localeCompare(a.echo_no));
+        
+        rows.forEach((tr, index) => {
+            if (list[index]) {
+                const item = list[index];
+                const realIndex = list.findIndex(l => l.echo_no === item.echo_no);
+                const actionTd = tr.lastElementChild;
+                if (actionTd) {
+                    // ປັບປຸງໄອຄອນລຳໂພງໃຫ້ເອີ້ນຟັງຊັນ openEchoProcessModal ໂດຍກົງ
+                    if (!actionTd.innerHTML.includes('openEchoProcessModal')) {
+                        actionTd.innerHTML = actionTd.innerHTML.replace('🔊', `<span class="action-icon" title="ບັນທຶກຜົນກວດ" onclick="openEchoProcessModal(${realIndex})">🔊</span>`);
+                    }
                 }
             }
-        }
-    });
+        });
+    };
 </script>
 </body>
 </html>
