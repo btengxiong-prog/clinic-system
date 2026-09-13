@@ -2144,6 +2144,59 @@ window.showCustomAlert = function(message, title = "ແຈ້ງເຕືອນ"
         document.getElementById('patientHistoryModal').style.display = 'flex';
     };
 
+// ================= ຟັງຊັນລຶບຄົນເຈັບ (ສະເພາະຄົນທີ່ບໍ່ມີປະຫວັດ) ================= //
+    window.deletePatient = function(ptId) {
+        let patients = JSON.parse(localStorage.getItem('clinic_local_patients')) || globalPatientsList || [];
+        let patientIndex = patients.findIndex(p => p.patient_code === ptId || p.id === ptId);
+        
+        if (patientIndex === -1) {
+            window.showCustomAlert('ບໍ່ພົບຂໍ້ມູນຄົນເຈັບໃນລະບົບ', 'ຜິດພາດ', '❌');
+            return;
+        }
+        
+        const patient = patients[patientIndex];
+        
+        // 1. ກວດສອບປະຫວັດໃນຫ້ອງກວດ (Visits)
+        let visits = JSON.parse(localStorage.getItem('clinic_visits')) || [];
+        let hasVisits = visits.some(v => v.patient_name === patient.fullname);
+        
+        // 2. ກວດສອບປະຫວັດໃນນັດໝາຍ (Appointments)
+        let appointments = JSON.parse(localStorage.getItem('clinic_appointments')) || [];
+        let hasAppointments = appointments.some(a => a.patient_name === patient.fullname);
+        
+        // ຖ້າມີປະຫວັດ ຫ້າມລຶບເດັດຂາດ
+        if (hasVisits || hasAppointments) {
+            window.showCustomAlert('ບໍ່ສາມາດລຶບໄດ້! ເນື່ອງຈາກຄົນເຈັບມີປະຫວັດການນັດໝາຍ ຫຼື ການປິ່ນປົວແລ້ວ. ແນະນຳໃຫ້ເຂົ້າໄປແກ້ໄຂແລ້ວປ່ຽນສະຖານະເປັນ Inactive ແທນ.', 'ແຈ້ງເຕືອນ', '⚠️');
+            return;
+        }
+        
+        // ຖ້າບໍ່ມີປະຫວັດ ໃຫ້ຖາມຢືນຢັນກ່ອນລຶບ
+        window.showCustomConfirm(`ທ່ານຕ້ອງການລຶບຂໍ້ມູນຄົນເຈັບ: <strong>${patient.fullname}</strong> ແທ້ຫຼືບໍ່?`, 'ຢືນຢັນການລຶບ', async function() {
+            // ລຶບອອກຈາກ Array
+            patients.splice(patientIndex, 1);
+            
+            // ອັບເດດລົງ LocalStorage
+            localStorage.setItem('clinic_local_patients', JSON.stringify(patients));
+            globalPatientsList = patients;
+            
+            // ລຶບອອກຈາກ Firebase (ຖ້າມີການເຊື່ອມຕໍ່)
+            try {
+                if (typeof db !== 'undefined') {
+                    await db.collection("patients").doc(ptId).delete();
+                    console.log("✅ ລຶບຂໍ້ມູນຄົນເຈັບອອກຈາກ Firebase ສຳເລັດ!");
+                }
+            } catch (error) {
+                console.error("❌ ເກີດຂໍ້ຜິດພາດໃນການລຶບອອກຈາກ Firebase:", error);
+            }
+            
+            // ແຕ້ມຕາຕະລາງໃໝ່
+            renderDashboardTable(patients);
+            if(typeof renderPatientsPage === 'function') renderPatientsPage();
+            
+            window.showCustomAlert('ລຶບຂໍ້ມູນຄົນເຈັບທົດລອງ ສຳເລັດແລ້ວ!', 'ສຳເລັດ', '✅');
+        });
+    };
+
 // ຕົວປ່ຽນເກັບໄຟລ໌ຊົ່ວຄາວຕອນກຳລັງອັບໂຫຼດ
     window.currentLabAttachments = [];
 
@@ -2358,7 +2411,7 @@ window.showCustomAlert = function(message, title = "ແຈ້ງເຕືອນ"
         }
     }
 
-    function renderDashboardTable(patients) {
+function renderDashboardTable(patients) {
         const tbody = document.getElementById('patient-table-body');
         if (!tbody) return;
         tbody.innerHTML = "";
@@ -2400,9 +2453,10 @@ window.showCustomAlert = function(message, title = "ແຈ້ງເຕືອນ"
                 <td><small>${allergy}</small></td>
                 <td><small style="color: #7b8794;">${history}</small></td>
                 <td>${statusBadge}</td>
-                <td style="text-align: center; min-width: 80px;">
+                <td style="text-align: center; min-width: 100px;">
                     <span class="action-icon" title="ເບິ່ງຂໍ້ມູນ" onclick="viewPatientQuick('${name}')">👁️</span>
                     <span class="action-icon" title="ແກ້ໄຂຂໍ້ມູນ" onclick="editPatient('${ptId}')">✏️</span>
+                    <span class="action-icon" title="ລຶບຂໍ້ມູນທົດລອງ" onclick="deletePatient('${ptId}')" style="color: #d32f2f;">🗑️</span>
                 </td>
             `;
             tbody.appendChild(tr);
@@ -2411,7 +2465,7 @@ window.showCustomAlert = function(message, title = "ແຈ້ງເຕືອນ"
 
     window.filterPatientsPage = function() { renderPatientsPage(); };
 
-    function renderPatientsPage() {
+function renderPatientsPage() {
         const tbody = document.getElementById('patients-full-table-body');
         if(!tbody) return;
         let patients = JSON.parse(localStorage.getItem('clinic_local_patients')) || globalPatientsList || [];
@@ -2466,9 +2520,10 @@ window.showCustomAlert = function(message, title = "ແຈ້ງເຕືອນ"
                 <td><small>${allergy}</small></td>
                 <td><small style="color: #7b8794;">${history}</small></td>
                 <td>${statusBadge}</td>
-                <td style="text-align: center; min-width: 80px;">
+                <td style="text-align: center; min-width: 100px;">
                     <span class="action-icon" title="ເບິ່ງຂໍ້ມູນ" onclick="viewPatientQuick('${name}')">👁️</span>
                     <span class="action-icon" title="ແກ້ໄຂຂໍ້ມູນ" onclick="editPatient('${ptId}')">✏️</span>
+                    <span class="action-icon" title="ລຶບຂໍ້ມູນທົດລອງ" onclick="deletePatient('${ptId}')" style="color: #d32f2f;">🗑️</span>
                 </td>
             `;
             tbody.appendChild(tr);
