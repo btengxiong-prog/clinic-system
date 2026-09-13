@@ -177,7 +177,8 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
 }
 </style>
 <!-- ເພີ່ມແຖວນີ້ໄວ້ກ່ອນປິດ </head> -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
 </head>
 <body>
 
@@ -2586,6 +2587,16 @@ window.showCustomAlert = function(message, title = "ແຈ້ງເຕືອນ"
             } catch (error) { 
                 console.log("Saved to local storage only."); 
             }
+        // ================= ສົ່ງຂໍ້ມູນເຂົ້າ FIREBASE (ເພີ່ມໃໝ່) ================= //
+            try {
+                // ໃຊ້ patient_code ເປັນ ID ເພື່ອບໍ່ໃຫ້ຊ້ຳກັນ
+                const docId = payload.patient_code || Date.now().toString();
+                await db.collection("patients").doc(docId).set(payload);
+                console.log("✅ ບັນທຶກລົງ Firebase ສຳເລັດ!");
+            } catch (error) {
+                console.error("❌ ເກີດຂໍ້ຜິດພາດໃນການບັນທຶກລົງ Firebase:", error);
+            }
+            // ================= ສິ້ນສຸດການສົ່ງເຂົ້າ FIREBASE ================= //
         });
     }
 
@@ -4686,6 +4697,100 @@ if (window.supabase) {
 } else {
     console.error("❌ ບໍ່ພົບ Supabase Library ກະລຸນາກວດສອບການເພີ່ມ Script ໃນ <head>");
 }
+// ================= FIREBASE REALTIME 100% (ເພີ່ມໃໝ່) ================= //
+// 1. ເອົາຄ່າ Config ຈາກ Firebase Console ມາໃສ່ບ່ອນນີ້
+const firebaseConfig = {
+    apiKey: "YOUR_API_KEY",
+    authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+    projectId: "YOUR_PROJECT_ID",
+    storageBucket: "YOUR_PROJECT_ID.appspot.com",
+    messagingSenderId: "YOUR_SENDER_ID",
+    appId: "YOUR_APP_ID"
+};
+
+// 2. ເລີ່ມຕົ້ນເຊື່ອມຕໍ່ Firebase
+if (!firebase.apps.length) {
+    firebase.initializeApp(firebaseConfig);
+}
+const db = firebase.firestore();
+console.log("🟢 ລະບົບ Realtime Firebase ພ້ອມໃຊ້ງານແລ້ວ!");
+
+// ---------------------------------------------------------
+// 3. ດັກຈັບ: Collection 'appointments' (ນັດໝາຍ) ແບບ Realtime
+// ---------------------------------------------------------
+db.collection("appointments").onSnapshot((snapshot) => {
+    snapshot.docChanges().forEach((change) => {
+        // ຖ້າມີຂໍ້ມູນນັດໝາຍໃໝ່ຖືກເພີ່ມເຂົ້າມາ
+        if (change.type === "added") {
+            console.log("ມີນັດໝາຍໃໝ່: ", change.doc.data());
+            
+            // ອັບເດດໜ້າຈໍຖ້າຜູ້ໃຊ້ເປີດໜ້ານັດໝາຍຢູ່
+            if(document.getElementById('page-appointments').style.display === 'block') {
+                // ດຶງຂໍ້ມູນຈາກ Firebase ມາລົງ Array ແລ້ວສັ່ງ renderAppointmentsPage()
+            }
+            
+            // ໂຊແຈ້ງເຕືອນ Custom Alert
+            window.showCustomAlert(`ມີນັດໝາຍໃໝ່ເຂົ້າມາ!`, '🔔 Firebase ແຈ້ງເຕືອນ', '📅');
+        }
+    });
+});
+
+// ---------------------------------------------------------
+// 4. ດັກຈັບ: Collection 'patients' (ຄົນເຈັບ) ແບບ Realtime
+// ---------------------------------------------------------
+db.collection("patients").onSnapshot((snapshot) => {
+    snapshot.docChanges().forEach((change) => {
+        if (change.type === "added" || change.type === "modified") {
+            console.log("ຂໍ້ມູນຄົນເຈັບອັບເດດ: ", change.doc.data());
+            if(document.getElementById('page-patients').style.display === 'block') {
+                // renderPatientsPage();
+            }
+        }
+    });
+});
+
+// ================= FIREBASE REALTIME 100% (ອັບເດດຄ່າ Config ຂອງທ່ານ) ================= //
+const firebaseConfig = {
+  apiKey: "AIzaSyC8QCPCsNGeRZcL-mCza74wbYB1V34qiDQ",
+  authDomain: "clinic-management-system-c245d.firebaseapp.com",
+  projectId: "clinic-management-system-c245d",
+  storageBucket: "clinic-management-system-c245d.firebasestorage.app",
+  messagingSenderId: "1096934846097",
+  appId: "1:1096934846097:web:bd571c289dc430e5fe9930",
+  measurementId: "G-HQJLCT7ZKJ"
+};
+
+// ເລີ່ມຕົ້ນເຊື່ອມຕໍ່ Firebase
+if (!firebase.apps.length) {
+    firebase.initializeApp(firebaseConfig);
+}
+const db = firebase.firestore();
+console.log("🟢 ລະບົບ Realtime Firebase ພ້ອມໃຊ້ງານແລ້ວ!");
+
+// ---------------------------------------------------------
+// ດັກຈັບ: Collection 'appointments' (ນັດໝາຍ) ແບບ Realtime
+// ---------------------------------------------------------
+db.collection("appointments").onSnapshot((snapshot) => {
+    snapshot.docChanges().forEach((change) => {
+        if (change.type === "added") {
+            console.log("📅 ມີນັດໝາຍໃໝ່: ", change.doc.data());
+            // ໂຊແຈ້ງເຕືອນ Custom Alert ເມື່ອມີນັດໝາຍໃໝ່ເຂົ້າມາ
+            window.showCustomAlert(`ມີນັດໝາຍໃໝ່ຂອງ: ${change.doc.data().patient_name || 'ບໍ່ລະບຸ'}`, '🔔 Firebase ແຈ້ງເຕືອນ', '📅');
+        }
+    });
+});
+
+// ---------------------------------------------------------
+// ດັກຈັບ: Collection 'patients' (ຄົນເຈັບ) ແບບ Realtime
+// ---------------------------------------------------------
+db.collection("patients").onSnapshot((snapshot) => {
+    snapshot.docChanges().forEach((change) => {
+        if (change.type === "added" || change.type === "modified") {
+            console.log("👥 ຂໍ້ມູນຄົນເຈັບອັບເດດ: ", change.doc.data());
+        }
+    });
+});
+
 </script>
 </body>
 </html>
