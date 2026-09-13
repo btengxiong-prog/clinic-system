@@ -282,6 +282,14 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
             <div class="card" style="overflow: hidden;">
                 <div class="card-header">
                     <h3>👥 ລາຍຊື່ຄົນເຈັບ (Database)</h3>
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <!-- ປຸ່ມສົ່ງໄປຫ້ອງກວດ (ກ່ອງສີແດງ 1) -->
+                        <button class="btn-action btn-submit" style="padding: 6px 12px; font-size: 13px;" onclick="sendSelectedPatientsToConsultation()">🩺 ส่งไปห้องตรวจ (ສົ່ງໄປຫ້ອງກວດ)</button>
+                        <button onclick="document.querySelector('.menu-item[data-page=\'patients\']').click()">ເບິ່ງທັງໝົດ →</button>
+                    </div>
+                </div>
+                <div class="card-header">
+                    <h3>👥 ລາຍຊື່ຄົນເຈັບ (Database)</h3>
                     <button onclick="document.querySelector('.menu-item[data-page=\'patients\']').click()">ເບິ່ງທັງໝົດ →</button>
                 </div>
                 <div class="table-responsive">
@@ -2144,6 +2152,65 @@ window.showCustomAlert = function(message, title = "ແຈ້ງເຕືອນ"
         document.getElementById('patientHistoryModal').style.display = 'flex';
     };
 
+// ຟັງຊັນເລືອກຕິກທັງໝົດ
+    window.toggleSelectAllPatients = function(source) {
+        checkboxes = document.querySelectorAll('.patient-checkbox:not(:disabled)');
+        checkboxes.forEach(cb => cb.checked = source.checked);
+    };
+
+    // ຟັງຊັນສົ່ງຄົນເຈັບທີ່ຕິກເລືອກ (Checkbox) ໄປຫ້ອງກວດ
+    window.sendSelectedPatientsToConsultation = function() {
+        const selectedCheckboxes = document.querySelectorAll('.patient-checkbox:checked');
+        
+        if (selectedCheckboxes.length === 0) {
+            window.showCustomAlert('ກະລຸນາຕິກເລືອກຄົນເຈັບທີ່ຕ້ອງການສົ່ງໄປຫ້ອງກວດຢ່າງໜ້ອຍ 1 ຄົນ!', 'ແຈ້ງເຕືອນ', '⚠️');
+            return;
+        }
+
+        let visits = JSON.parse(localStorage.getItem('clinic_visits')) || [];
+        let countSent = 0;
+
+        selectedCheckboxes.forEach(cb => {
+            const patientName = cb.value;
+            
+            // ປ້ອງກັນບໍ່ໃຫ້ສ້າງ Visit ຊ້ຳກັນໃນວັນດຽວກັນ
+            const todayStr = new Date().toISOString().split('T')[0];
+            const exists = visits.some(v => v.patient_name === patientName && v.date === todayStr);
+
+            if (!exists) {
+                const dateStr = todayStr.replace(/-/g, '');
+                const randomNum = Math.floor(Math.random() * 900) + 100;
+                const visitId = `V-${dateStr}-${randomNum}`;
+                
+                // ດຶງລາຍຊື່ແພດຄົນທຳອິດມາເປັນຄ່າເລີ່ມຕົ້ນ ຫຼື ໃຫ້ລະບົບຈັດການ
+                let doctors = JSON.parse(localStorage.getItem('clinic_doctors')) || [];
+                const defaultDoctor = doctors.length > 0 ? doctors[0].name : 'ດຣ. ທົ່ວໄປ';
+
+                const newVisit = {
+                    visit_id: visitId,
+                    patient_name: patientName,
+                    date: todayStr,
+                    time: new Date().toTimeString().slice(0,5),
+                    doctor: defaultDoctor,
+                    status: '🟡 ລໍຖ້າກວດ',
+                    symptoms: '', history: '', diagnosis: '', treatment: '', medicine: ''
+                };
+                visits.push(newVisit);
+                countSent++;
+            }
+        });
+
+        localStorage.setItem('clinic_visits', JSON.stringify(visits));
+        
+        // ຣີເຟຣຊຕາຕະລາງຄົນເຈັບ ເພື່ອໃຫ້ປຸ່ມລຶບ (ຖັງຂີ້ເຫຍື້ອ) ປ່ຽນເປັນສະຖານະ "ລັອກ" ທັນທີ
+        renderDashboardTable(globalPatientsList);
+        
+        window.showCustomAlert(`ສົ່ງຄົນເຈັບຈຳນວນ ${countSent} ຄົນ ເຂົ້າສູ່ຫ້ອງກວດສຳເລັດແລ້ວ! ປຸ່ມລຶບຖືກລັອກຮຽບຮ້ອຍ.`, 'ສຳເລັດ', '🩺', () => {
+            // ສັບປ່ຽນໄປໜ້າຫ້ອງກວດອັດຕະໂນມັດ (ຖ້າຕ້ອງການ)
+            document.querySelector('.menu-item[data-page="consultations"]').click();
+        });
+    };
+
 // ================= ຟັງຊັນລຶບຄົນເຈັບ (ລຶບທັງ LocalStorage ແລະ Firebase ຢ່າງເດັດຂາດ) ================= //
     window.deletePatient = function(ptId) {
         let patients = JSON.parse(localStorage.getItem('clinic_local_patients')) || globalPatientsList || [];
@@ -2425,7 +2492,7 @@ window.showCustomAlert = function(message, title = "ແຈ້ງເຕືອນ"
         }
     }
 
-    function renderDashboardTable(patients) {
+function renderDashboardTable(patients) {
         const tbody = document.getElementById('patient-table-body');
         if (!tbody) return;
         tbody.innerHTML = "";
@@ -2436,9 +2503,12 @@ window.showCustomAlert = function(message, title = "ແຈ້ງເຕືອນ"
         if(todayEl) todayEl.innerText = patients.length;
 
         if (patients.length === 0) { 
-            tbody.innerHTML = `<tr><td colspan="12" style="text-align:center; color:#7b8794; padding: 20px;">ຍັງບໍ່ມີຂໍ້ມູນຄົນເຈັບໃນລະບົບ</td></tr>`; 
+            tbody.innerHTML = `<tr><td colspan="13" style="text-align:center; color:#7b8794; padding: 20px;">ຍັງບໍ່ມີຂໍ້ມູນຄົນເຈັບໃນລະບົບ</td></tr>`; 
             return; 
         }
+
+        // ດຶງປະຫວັດການກວດມາເຊັກວ່າຄົນເຈັບຄົນໃດຖືກສົ່ງເຂົ້າຫ້ອງກວດແລ້ວ
+        let visits = JSON.parse(localStorage.getItem('clinic_visits')) || [];
 
         patients.forEach((p) => {
             const name = p.fullname || 'ບໍ່ລະບຸຊື່'; 
@@ -2454,8 +2524,17 @@ window.showCustomAlert = function(message, title = "ແຈ້ງເຕືອນ"
             const history = p.health_history || 'ບໍ່ລະບຸ';
             let statusBadge = (p.status === 'Active' || p.status === 'Active/ເຄື່ອນໄຫວ') ? '<span class="badge badge-green">Active</span>' : '<span class="badge badge-gray">Inactive</span>';
             
+            // ກວດສອບວ່າຄົນເຈັບຄົນນີ້ມີ Visit (ຖືກສົ່ງໄປຫ້ອງກວດ) ແລ້ວ ຫຼือกຍັງ?
+            const hasBeenConsulted = visits.some(v => v.patient_name === name);
+
+            // ຖ້າຖືກສົ່ງໄປຫ້ອງກວດແລ້ວ ຈະ "ເຊື່ອງປຸ່ມລຶບ" ບໍ່ໃຫ້ສະແດງ
+            let deleteButtonHtml = hasBeenConsulted 
+                ? `<span style="color: #adb5bd; font-size: 12px;" title="ສົ່ງຫ້ອງກວດແລ້ວ ບໍ່ສາມາດລຶບໄດ້">🔒 ລັອກແລ້ວ</span>` 
+                : `<span class="action-icon" title="ລຶບຂໍ້ມູນທົດລອງ" onclick="deletePatient('${ptId}')" style="color: #d32f2f;">🗑️</span>`;
+
             const tr = document.createElement('tr');
             tr.innerHTML = `
+                <td style="text-align: center;"><input type="checkbox" class="patient-checkbox" value="${name}" data-id="${ptId}" ${hasBeenConsulted ? 'disabled title="ສົ່ງຫ້ອງກວດແລ້ວ"' : ''}></td>
                 <td><strong>${ptId}</strong></td>
                 <td><small style="color: #7b8794;">${hn}</small></td>
                 <td><div class="patient"><div class="patient-avatar">${firstLetter}</div><div><strong>${name}</strong></div></div></td>
@@ -2470,7 +2549,7 @@ window.showCustomAlert = function(message, title = "ແຈ້ງເຕືອນ"
                 <td style="text-align: center; min-width: 120px; white-space: nowrap;">
                     <span class="action-icon" title="ເບິ່ງຂໍ້ມູນ" onclick="viewPatientQuick('${name}')">👁️</span>
                     <span class="action-icon" title="ແກ້ໄຂຂໍ້ມູນ" onclick="editPatient('${ptId}')">✏️</span>
-                    <span class="action-icon" title="ລຶບຂໍ້ມູນທົດລອງ" onclick="deletePatient('${ptId}')" style="color: #d32f2f;">🗑️</span>
+                    ${deleteButtonHtml}
                 </td>
             `;
             tbody.appendChild(tr);
