@@ -2580,13 +2580,13 @@ window.showCustomAlert = function(message, title = "ແຈ້ງເຕືອນ"
             document.getElementById('patientModal').style.display = 'none'; 
             window.showCustomAlert('ບັນທຶກຂໍ້ມູນຄົນເຈັບສຳເລັດແລ້ວ!', 'ສຳເລັດ', '✅');
 
-            // ================= ສົ່ງຂໍ້ມູນເຂົ້າ FIREBASE (ເພີ່ມໃໝ່) ================= //
+            // ================= ສົ່ງຂໍ້ມູນເຂົ້າ FIREBASE (ແກ້ໄຂໃຫ້ເຫຼືອຊຸດດຽວ) ================= //
             try {
                 if (typeof db !== 'undefined') {
+                    // ໃຊ້ patient_code ເປັນ ID ເພື່ອບໍ່ໃຫ້ຊ້ຳກັນ
                     const docId = payload.patient_code || Date.now().toString();
-                    db.collection("patients").doc(docId).set(payload).then(() => {
-                        console.log("✅ ບັນທຶກລົງ Firebase ສຳເລັດ!");
-                    });
+                    await db.collection("patients").doc(docId).set(payload);
+                    console.log("✅ ບັນທຶກລົງ Firebase ສຳເລັດ!");
                 }
             } catch (error) {
                 console.error("❌ ເກີດຂໍ້ຜິດພາດໃນການບັນທຶກລົງ Firebase:", error);
@@ -2600,16 +2600,6 @@ window.showCustomAlert = function(message, title = "ແຈ້ງເຕືອນ"
             } catch (error) { 
                 console.log("Saved to local storage only."); 
             }
-        // ================= ສົ່ງຂໍ້ມູນເຂົ້າ FIREBASE (ເພີ່ມໃໝ່) ================= //
-            try {
-                // ໃຊ້ patient_code ເປັນ ID ເພື່ອບໍ່ໃຫ້ຊ້ຳກັນ
-                const docId = payload.patient_code || Date.now().toString();
-                await db.collection("patients").doc(docId).set(payload);
-                console.log("✅ ບັນທຶກລົງ Firebase ສຳເລັດ!");
-            } catch (error) {
-                console.error("❌ ເກີດຂໍ້ຜິດພາດໃນການບັນທຶກລົງ Firebase:", error);
-            }
-            // ================= ສິ້ນສຸດການສົ່ງເຂົ້າ FIREBASE ================= //
         });
     }
 
