@@ -4785,5 +4785,39 @@ window.toggleFollowUpFields = function() {
         });
     };
 </script>
+<script>
+    // ----------------------------------------------------
+    // 2 ຄຳສັ່ງສຸດທ້າຍ: ຜູກEventListeners ໃຫ້ປຸ່ມ X-Ray (📷) ແລະ Echo (🔊)
+    // ----------------------------------------------------
+    document.addEventListener('click', function(e) {
+        // ກວດສອບກໍລະນີກົດປຸ່ມ X-Ray Process (📷)
+        const xrayIcon = e.target.closest('#xray-table-body .action-icon');
+        if (xrayIcon && xrayIcon.innerText.includes('📷')) {
+            const tr = xrayIcon.closest('tr');
+            if (tr) {
+                const xrayNo = tr.querySelector('strong').innerText;
+                let list = JSON.parse(localStorage.getItem('clinic_xray_orders')) || [];
+                const index = list.findIndex(item => item.xray_no === xrayNo);
+                if (index !== -1 && typeof window.openXrayProcessModal === 'function') {
+                    window.openXrayProcessModal(index);
+                }
+            }
+        }
+
+        // ກວດສອບກໍລະນີກົດປຸ່ມ Echo Process (🔊)
+        const echoIcon = e.target.closest('#echo-table-body .action-icon');
+        if (echoIcon && echoIcon.innerText.includes('🔊')) {
+            const tr = echoIcon.closest('tr');
+            if (tr) {
+                const echoNo = tr.querySelector('strong').innerText;
+                let list = JSON.parse(localStorage.getItem('clinic_echo_orders')) || [];
+                const index = list.findIndex(item => item.echo_no === echoNo);
+                if (index !== -1 && typeof window.openEchoProcessModal === 'function') {
+                    window.openEchoProcessModal(index);
+                }
+            }
+        }
+    });
+</script>
 </body>
 </html>
