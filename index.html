@@ -2580,6 +2580,19 @@ window.showCustomAlert = function(message, title = "ແຈ້ງເຕືອນ"
             document.getElementById('patientModal').style.display = 'none'; 
             window.showCustomAlert('ບັນທຶກຂໍ້ມູນຄົນເຈັບສຳເລັດແລ້ວ!', 'ສຳເລັດ', '✅');
 
+            // ================= ສົ່ງຂໍ້ມູນເຂົ້າ FIREBASE (ເພີ່ມໃໝ່) ================= //
+            try {
+                if (typeof db !== 'undefined') {
+                    const docId = payload.patient_code || Date.now().toString();
+                    db.collection("patients").doc(docId).set(payload).then(() => {
+                        console.log("✅ ບັນທຶກລົງ Firebase ສຳເລັດ!");
+                    });
+                }
+            } catch (error) {
+                console.error("❌ ເກີດຂໍ້ຜິດພາດໃນການບັນທຶກລົງ Firebase:", error);
+            }
+            // ================= ສິ້ນສຸດການສົ່ງເຂົ້າ FIREBASE ================= //
+
             try { 
                 let method = currentEditPatientId ? 'PUT' : 'POST'; 
                 let url = currentEditPatientId ? `http://127.0.0.1:5000/api/patients/${currentEditPatientId}` : 'http://127.0.0.1:5000/api/patients'; 
@@ -4621,118 +4634,7 @@ window.calcBMI = function() {
         document.getElementById('cst2_bmi').value = '';
     }
 };
-// ================= SUPABASE REALTIME 100% (ເພີ່ມໃໝ່) ================= //
-// 1. ໃສ່ URL ແລະ Anon Key ຈາກໂປຣເຈັກ Supabase ຂອງທ່ານ
-const SUPABASE_URL = 'https://YOUR_SUPABASE_PROJECT.supabase.co';
-const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
-
-if (window.supabase) {
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    console.log("🟢 ລະບົບ Realtime Supabase ພ້ອມໃຊ້ງານແລ້ວ!");
-
-    // 2. ສ້າງຊ່ອງທາງ (Channel) ເພື່ອຕິດຕາມການປ່ຽນແປງຂອງ Database
-    const realtimeChannel = supabase.channel('clinic-realtime');
-
-    // ---------------------------------------------------------
-    // ດັກຈັບ: ຕາຕະລາງ 'patients' (ຄົນເຈັບ)
-    // ---------------------------------------------------------
-    realtimeChannel.on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'patients' },
-        (payload) => {
-            console.log('🔄 Realtime [Patients]:', payload);
-            
-            // ເອີ້ນໃຊ້ຟັງຊັນເດີມຂອງທ່ານເພື່ອໂຫຼດຂໍ້ມູນໃໝ່ທັນທີ ໂດຍບໍ່ຕ້ອງ Refresh ໜ້າຈໍ
-            loadDashboardData(); 
-            if(document.getElementById('page-patients').style.display === 'block') {
-                renderPatientsPage(); 
-            }
-            // ແຈ້ງເຕືອນແບບນຽນໆໃຫ້ User ຮູ້ (ເປັນທາງເລືອກ)
-            console.log("ອັບເດດຂໍ້ມູນຄົນເຈັບລ່າສຸດອັດຕະໂນມັດ!");
-        }
-    );
-
-    // ---------------------------------------------------------
-    // ດັກຈັບ: ຕາຕະລາງ 'appointments' (ນັດໝາຍ)
-    // ---------------------------------------------------------
-    realtimeChannel.on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'appointments' },
-        (payload) => {
-            console.log('🔄 Realtime [Appointments]:', payload);
-            
-            // ຖ້າມີການຈອງຄິວໃໝ່ຈາກໜ້າຈໍອື່ນ ໃຫ້ໂຫຼດໃໝ່ທັນທີ
-            if(document.getElementById('page-appointments').style.display === 'block') {
-                // ສົມມຸດວ່າດຶງຈາກ DB ໃໝ່ (ສາມາດປັບໃຫ້ດຶງ API ຫຼື Supabase Select ໄດ້)
-                renderAppointmentsPage(); 
-            }
-            
-            // ໂຊແຈ້ງເຕືອນ Custom Alert ທີ່ທ່ານຂຽນໄວ້ (ຖ້າເປັນ INSERT ໃໝ່)
-            if (payload.eventType === 'INSERT') {
-                window.showCustomAlert(`ມີນັດໝາຍໃໝ່ເຂົ້າມາ!`, '🔔 Realtime ແຈ້ງເຕືອນ', '📅');
-            }
-        }
-    );
-
-    // ---------------------------------------------------------
-    // ດັກຈັບ: ຕາຕະລາງ 'visits' (ຫ້ອງກວດ)
-    // ---------------------------------------------------------
-    realtimeChannel.on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'visits' },
-        (payload) => {
-            console.log('🔄 Realtime [Visits]:', payload);
-            if(document.getElementById('page-consultations').style.display === 'block') {
-                renderConsultationsPage();
-            }
-        }
-    );
-
-    // 3. ເລີ່ມຕົ້ນການ Subscribe ເພື່ອຟັງການປ່ຽນແປງຕະຫຼອດເວລາ
-    realtimeChannel.subscribe((status) => {
-        if (status === 'SUBSCRIBED') {
-            console.log("✅ ເຊື່ອມຕໍ່ Realtime Channel ສຳເລັດ!");
-        }
-    });
-} else {
-    console.error("❌ ບໍ່ພົບ Supabase Library ກະລຸນາກວດສອບການເພີ່ມ Script ໃນ <head>");
-}
-
-// ---------------------------------------------------------
-// 3. ດັກຈັບ: Collection 'appointments' (ນັດໝາຍ) ແບບ Realtime
-// ---------------------------------------------------------
-db.collection("appointments").onSnapshot((snapshot) => {
-    snapshot.docChanges().forEach((change) => {
-        // ຖ້າມີຂໍ້ມູນນັດໝາຍໃໝ່ຖືກເພີ່ມເຂົ້າມາ
-        if (change.type === "added") {
-            console.log("ມີນັດໝາຍໃໝ່: ", change.doc.data());
-            
-            // ອັບເດດໜ້າຈໍຖ້າຜູ້ໃຊ້ເປີດໜ້ານັດໝາຍຢູ່
-            if(document.getElementById('page-appointments').style.display === 'block') {
-                // ດຶງຂໍ້ມູນຈາກ Firebase ມາລົງ Array ແລ້ວສັ່ງ renderAppointmentsPage()
-            }
-            
-            // ໂຊແຈ້ງເຕືອນ Custom Alert
-            window.showCustomAlert(`ມີນັດໝາຍໃໝ່ເຂົ້າມາ!`, '🔔 Firebase ແຈ້ງເຕືອນ', '📅');
-        }
-    });
-});
-
-// ---------------------------------------------------------
-// 4. ດັກຈັບ: Collection 'patients' (ຄົນເຈັບ) ແບບ Realtime
-// ---------------------------------------------------------
-db.collection("patients").onSnapshot((snapshot) => {
-    snapshot.docChanges().forEach((change) => {
-        if (change.type === "added" || change.type === "modified") {
-            console.log("ຂໍ້ມູນຄົນເຈັບອັບເດດ: ", change.doc.data());
-            if(document.getElementById('page-patients').style.display === 'block') {
-                // renderPatientsPage();
-            }
-        }
-    });
-});
-
-// ================= FIREBASE REALTIME 100% (ອັບເດດຄ່າ Config ຂອງທ່ານ) ================= //
+// ================= FIREBASE REALTIME 100% (ອັບເດດແລ້ວ) ================= //
 const firebaseConfig = {
   apiKey: "AIzaSyC8QCPCsNGeRZcL-mCza74wbYB1V34qiDQ",
   authDomain: "clinic-management-system-c245d.firebaseapp.com",
@@ -4743,33 +4645,36 @@ const firebaseConfig = {
   measurementId: "G-HQJLCT7ZKJ"
 };
 
-// ເລີ່ມຕົ້ນເຊື່ອມຕໍ່ Firebase
+// 1. ເລີ່ມຕົ້ນເຊື່ອມຕໍ່ Firebase
 if (!firebase.apps.length) {
     firebase.initializeApp(firebaseConfig);
 }
 const db = firebase.firestore();
 console.log("🟢 ລະບົບ Realtime Firebase ພ້ອມໃຊ້ງານແລ້ວ!");
 
-// ---------------------------------------------------------
-// ດັກຈັບ: Collection 'appointments' (ນັດໝາຍ) ແບບ Realtime
-// ---------------------------------------------------------
+// 2. ດັກຈັບ: Collection 'appointments' (ນັດໝາຍ) ແບບ Realtime
 db.collection("appointments").onSnapshot((snapshot) => {
     snapshot.docChanges().forEach((change) => {
         if (change.type === "added") {
             console.log("📅 ມີນັດໝາຍໃໝ່: ", change.doc.data());
-            // ໂຊແຈ້ງເຕືອນ Custom Alert ເມື່ອມີນັດໝາຍໃໝ່ເຂົ້າມາ
+            // ໂຫຼດຂໍ້ມູນໜ້ານັດໝາຍໃໝ່ຖ້າເປີດຢູ່
+            if(document.getElementById('page-appointments').style.display === 'block') {
+                if(typeof renderAppointmentsPage === 'function') renderAppointmentsPage(); 
+            }
             window.showCustomAlert(`ມີນັດໝາຍໃໝ່ຂອງ: ${change.doc.data().patient_name || 'ບໍ່ລະບຸ'}`, '🔔 Firebase ແຈ້ງເຕືອນ', '📅');
         }
     });
 });
 
-// ---------------------------------------------------------
-// ດັກຈັບ: Collection 'patients' (ຄົນເຈັບ) ແບບ Realtime
-// ---------------------------------------------------------
+// 3. ດັກຈັບ: Collection 'patients' (ຄົນເຈັບ) ແບບ Realtime
 db.collection("patients").onSnapshot((snapshot) => {
     snapshot.docChanges().forEach((change) => {
         if (change.type === "added" || change.type === "modified") {
             console.log("👥 ຂໍ້ມູນຄົນເຈັບອັບເດດ: ", change.doc.data());
+            // ໂຫຼດໜ້າຄົນເຈັບໃໝ່ຖ້າເປີດຢູ່
+            if(document.getElementById('page-patients').style.display === 'block') {
+                if(typeof renderPatientsPage === 'function') renderPatientsPage();
+            }
         }
     });
 });
