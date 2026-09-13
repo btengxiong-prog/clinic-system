@@ -3440,13 +3440,96 @@ window.toggleFollowUpFields = function() {
         if(myXr.length === 0) { container.innerHTML = 'ຍັງບໍ່ມີການສັ່ງ X-Ray ສຳລັບ Visit ນີ້'; return; }
         myXr.forEach((xr) => { let badgeColor = xr.status.includes('ສຳເລັດ') ? 'badge-green' : (xr.status.includes('ອ່ານຜົນ') ? 'badge-blue' : 'badge-yellow'); let viewBtn = xr.status.includes('ສຳເລັດ') ? `<button onclick="printXrayReport('${xr.xray_no}')" style="background:transparent; border:none; color:#1976d2; cursor:pointer;">👁️ ເບິ່ງຜົນ</button>` : ''; container.innerHTML += `<div style="display:flex; justify-content:space-between; margin-bottom: 4px; padding: 4px; background: #fff; border-radius: 4px;"><span><strong>${xr.xray_no}</strong>: ${xr.type}</span><span><span class="badge ${badgeColor}">${xr.status}</span> ${viewBtn}</span></div>`; });
     }
-    window.openXrayProcessModal = function(index) {
-        let xrayOrders = JSON.parse(localStorage.getItem('clinic_xray_orders')) || []; if(index < 0 || index >= xrayOrders.length) return; const xr = xrayOrders[index]; editingXrayIndex = index;
-        document.getElementById('xray_proc_no').innerText = xr.xray_no; document.getElementById('xray_proc_patient').innerText = xr.patient_name; document.getElementById('xray_proc_type').innerText = xr.type; document.getElementById('xray_proc_region').innerText = `${xr.region || '-'} / ${xr.side}`;
-        document.getElementById('xray_proc_time_start').value = xr.process.time_start || ''; document.getElementById('xray_proc_time_end').value = xr.process.time_end || ''; document.getElementById('xray_proc_images').value = xr.process.images || 1; document.getElementById('xray_proc_quality').value = xr.process.quality || 'ດີ (Good)'; document.getElementById('xray_proc_technician').value = xr.process.tech || ''; document.getElementById('xray_proc_notes').value = xr.process.notes || '';
-        if(xr.status === '🟡 ລໍຖ້າຖ່າຍ') document.getElementById('xray_proc_status').value = '🔵 ລໍຖ້າອ່ານຜົນ'; else document.getElementById('xray_proc_status').value = xr.status;
+window.openXrayProcessModal = function(index) {
+        let xrayOrders = JSON.parse(localStorage.getItem('clinic_xray_orders')) || []; 
+        if(index < 0 || index >= xrayOrders.length) return; 
+        const xr = xrayOrders[index]; 
+        editingXrayIndex = index;
+        
+        // ໃຊ້ if() ດັກຈັບກ່ອນປ້ອນຄ່າ ຖ້າຊ່ອງໃດບໍ່ມີໃນ HTML ຈະໄດ້ບໍ່ Error
+        const elNo = document.getElementById('xray_proc_no'); if(elNo) elNo.innerText = xr.xray_no; 
+        const elPt = document.getElementById('xray_proc_patient'); if(elPt) elPt.innerText = xr.patient_name; 
+        const elType = document.getElementById('xray_proc_type'); if(elType) elType.innerText = xr.type; 
+        const elReg = document.getElementById('xray_proc_region'); if(elReg) elReg.innerText = `${xr.region || '-'} / ${xr.side}`;
+        
+        const elStart = document.getElementById('xray_proc_time_start'); if(elStart) elStart.value = xr.process.time_start || ''; 
+        const elEnd = document.getElementById('xray_proc_time_end'); if(elEnd) elEnd.value = xr.process.time_end || ''; 
+        const elImg = document.getElementById('xray_proc_images'); if(elImg) elImg.value = xr.process.images || 1; 
+        const elQual = document.getElementById('xray_proc_quality'); if(elQual) elQual.value = xr.process.quality || 'ດີ (Good)'; 
+        const elTech = document.getElementById('xray_proc_technician'); if(elTech) elTech.value = xr.process.tech || ''; 
+        const elNotes = document.getElementById('xray_proc_notes'); if(elNotes) elNotes.value = xr.process.notes || '';
+        
+        const elStatus = document.getElementById('xray_proc_status');
+        if(elStatus) {
+            if(xr.status === '🟡 ລໍຖ້າຖ່າຍ') elStatus.value = '🔵 ລໍຖ້າອ່ານຜົນ'; 
+            else elStatus.value = xr.status;
+        }
+        
         document.getElementById('xrayProcessModal').style.display = 'flex';
-    }
+    };
+
+    window.openXrayReadModal = function(index) {
+        let xrayOrders = JSON.parse(localStorage.getItem('clinic_xray_orders')) || []; 
+        if(index < 0 || index >= xrayOrders.length) return; 
+        const xr = xrayOrders[index]; 
+        editingXrayIndex = index;
+        
+        const elNo = document.getElementById('xray_read_no'); if(elNo) elNo.innerText = xr.xray_no; 
+        const elPt = document.getElementById('xray_read_patient'); if(elPt) elPt.innerText = xr.patient_name; 
+        const elType = document.getElementById('xray_read_type'); if(elType) elType.innerText = xr.type; 
+        const elInd = document.getElementById('xray_read_indication'); if(elInd) elInd.innerText = xr.indication;
+        
+        const elFind = document.getElementById('xray_read_findings'); if(elFind) elFind.value = xr.report.findings || ''; 
+        const elImp = document.getElementById('xray_read_impression'); if(elImp) elImp.value = xr.report.impression || ''; 
+        const elRec = document.getElementById('xray_read_recommendation'); if(elRec) elRec.value = xr.report.recommendation || ''; 
+        const elRad = document.getElementById('xray_read_radiologist'); if(elRad) elRad.value = xr.report.radiologist || '';
+        
+        const elStatus = document.getElementById('xray_read_status');
+        if(elStatus) {
+            if(xr.status === '🔵 ລໍຖ້າອ່ານຜົນ') elStatus.value = '🟢 ສຳເລັດ'; 
+            else elStatus.value = xr.status;
+        }
+        
+        document.getElementById('xrayReadModal').style.display = 'flex';
+    };
+
+    window.openEchoProcessModal = function(index) {
+        let echoOrders = JSON.parse(localStorage.getItem('clinic_echo_orders')) || []; 
+        if(index < 0 || index >= echoOrders.length) return; 
+        const ec = echoOrders[index]; 
+        editingEchoIndex = index;
+        
+        const elNo = document.getElementById('echo_proc_no'); if(elNo) elNo.innerText = ec.echo_no; 
+        const elPt = document.getElementById('echo_proc_patient'); if(elPt) elPt.innerText = ec.patient_name; 
+        const elType = document.getElementById('echo_proc_type'); if(elType) elType.innerText = ec.type; 
+        const elInd = document.getElementById('echo_proc_indication'); if(elInd) elInd.innerText = ec.indication;
+        
+        const m_lvef = document.getElementById('echo_m_lvef'); if(m_lvef) m_lvef.value = ec.measurements.lvef || ''; 
+        const m_lv = document.getElementById('echo_m_lv'); if(m_lv) m_lv.value = ec.measurements.lv || ''; 
+        const m_la = document.getElementById('echo_m_la'); if(m_la) m_la.value = ec.measurements.la || ''; 
+        const m_ao = document.getElementById('echo_m_ao'); if(m_ao) m_ao.value = ec.measurements.ao || ''; 
+        const m_rv = document.getElementById('echo_m_rv'); if(m_rv) m_rv.value = ec.measurements.rv || ''; 
+        const m_oth = document.getElementById('echo_m_other'); if(m_oth) m_oth.value = ec.measurements.other || '';
+        
+        const v_left = document.getElementById('echo_v_left'); if(v_left) v_left.value = ec.valves.left || ''; 
+        const v_right = document.getElementById('echo_v_right'); if(v_right) v_right.value = ec.valves.right || ''; 
+        const c_left = document.getElementById('echo_c_left'); if(c_left) c_left.value = ec.chambers.left || ''; 
+        const c_right = document.getElementById('echo_c_right'); if(c_right) c_right.value = ec.chambers.right || ''; 
+        const c_peri = document.getElementById('echo_c_pericardium'); if(c_peri) c_peri.value = ec.chambers.peri || '';
+        
+        const r_find = document.getElementById('echo_r_findings'); if(r_find) r_find.value = ec.report.findings || ''; 
+        const r_imp = document.getElementById('echo_r_impression'); if(r_imp) r_imp.value = ec.report.impression || ''; 
+        const r_rec = document.getElementById('echo_r_recommendation'); if(r_rec) r_rec.value = ec.report.recommendation || ''; 
+        const r_doc = document.getElementById('echo_r_doctor'); if(r_doc) r_doc.value = ec.report.doc_name || '';
+        
+        const elStatus = document.getElementById('echo_proc_status');
+        if(elStatus) {
+            if(ec.status === '🟡 ລໍຖ້າກວດ') elStatus.value = '🔵 ກຳລັງກວດ'; 
+            else elStatus.value = ec.status;
+        }
+        
+        document.getElementById('echoProcessModal').style.display = 'flex';
+    };
     window.saveXrayProcess = function() {
         if(editingXrayIndex === -1) return; let xrayOrders = JSON.parse(localStorage.getItem('clinic_xray_orders')) || []; let xr = xrayOrders[editingXrayIndex];
         xr.process = { time_start: document.getElementById('xray_proc_time_start').value, time_end: document.getElementById('xray_proc_time_end').value, images: document.getElementById('xray_proc_images').value, quality: document.getElementById('xray_proc_quality').value, tech: document.getElementById('xray_proc_technician').value, notes: document.getElementById('xray_proc_notes').value }; xr.status = document.getElementById('xray_proc_status').value;
