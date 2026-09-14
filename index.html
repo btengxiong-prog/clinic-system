@@ -1542,8 +1542,11 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
 
         <div class="section-title">🩹 5. ແຜນການຮັກສາ ແລະ ຫັດຖະການ (Treatment & Procedure)</div>
         <div class="form-group">
-            <label>ແຜນການຮັກສາ (Treatment Plan)</label>
-            <textarea id="cst2_treatment_plan" rows="2" placeholder="ວິທີການຮັກສາ..."></textarea>
+            <label style="display: flex; justify-content: space-between; align-items: center;">
+                ແຜນການຮັກສາ (Treatment Plan)
+                <button type="button" class="btn-action" style="background: #16864b; color: white; padding: 4px 10px; font-size: 12px;" onclick="autoSummarizeTreatment()">✨ ສ້າງແຜນອັດຕະໂນມັດ</button>
+            </label>
+            <textarea id="cst2_treatment_plan" rows="3" placeholder="ກົດປຸ່ມ 'ສ້າງແຜນອັດຕະໂນມັດ' ຫຼື ພິມແຜນການຮັກສາ..."></textarea>
         </div>
         <div class="form-group">
             <label>ຫັດຖະການທີ່ປະຕິບັດ (Procedures Performed)</label>
@@ -5914,5 +5917,38 @@ window.autoSummarizeAssessment = function() {
     // ເດັ້ງແຈ້ງເຕືອນໜ້ອຍໜຶ່ງໃຫ້ຮູ້ວ່າເຮັດວຽກສຳເລັດ
     window.showCustomAlert('ດຶງຂໍ້ມູນມາສະຫຼຸບລົງໃນຊ່ອງປະເມີນຜົນສຳເລັດແລ້ວ!', 'ສຳເລັດ', '✨');
 };
+
+// ຟັງຊັນດຶງຂໍ້ມູນການວິນິດໄສ ແລະ ຫັດຖະການ ມາສະຫຼຸບເປັນແຜນການຮັກສາ
+window.autoSummarizeTreatment = function() {
+    // 1. ດຶງຂໍ້ມູນການວິນິດໄສ (Diagnosis) ຈາກຂໍ້ 4
+    const diagPrimary = document.getElementById('cst2_diag_primary').value.trim() || 'ບໍ່ໄດ້ລະບຸພະຍາດຫຼັກ';
+    const diagSecondary = document.getElementById('cst2_diag_secondary').value.trim();
+
+    // 2. ດຶງຂໍ້ມູນຫັດຖະການ (Procedures) ທີ່ເລືອກໄວ້ໃນຂໍ້ 5
+    let procedures = [];
+    document.querySelectorAll('#cst2_procedure_list li').forEach(li => {
+        procedures.push(li.getAttribute('data-proc'));
+    });
+    const procText = procedures.length > 0 ? procedures.join(', ') : 'ຈ່າຍຢາປິ່ນປົວຕາມອາການ';
+
+    // 3. ຮຽບຮຽງເປັນປະໂຫຍກແຜນການປິ່ນປົວ
+    let planText = `ເປົ້າໝາຍການປິ່ນປົວ: ປິ່ນປົວ ແລະ ຄວບຄຸມອາການ ${diagPrimary}`;
+    if (diagSecondary) {
+        planText += ` (ພະຍາດຮ່ວມ: ${diagSecondary})`;
+    }
+    planText += `\nແຜນການປະຕິບັດ: ${procText}`;
+    
+    // 4. ສົ່ງຂໍ້ຄວາມລົງໄປໃນ Textarea
+    const planBox = document.getElementById('cst2_treatment_plan');
+    
+    if (planBox.value.trim() !== '') {
+        planBox.value = planBox.value + '\n\n' + planText;
+    } else {
+        planBox.value = planText;
+    }
+
+    window.showCustomAlert('ສ້າງແຜນການຮັກສາອັດຕະໂນມັດສຳເລັດແລ້ວ!', 'ສຳເລັດ', '✨');
+};
+
 </body>
 </html>
