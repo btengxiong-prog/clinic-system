@@ -223,7 +223,9 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
     <div class="menu-item" data-page="reports"><div class="menu-icon">📊</div><span>Reports (ລາຍງານ)</span></div>
     
     <div class="menu-item" data-page="notifications"><div class="menu-icon">🔔</div><span>Notifications (ແຈ້ງເຕືອນ)</span></div>
-
+<!-- ວາງຕໍ່ທ້າຍເມນູ Notifications -->
+    <div class="menu-title">SETTINGS (ຕັ້ງຄ່າລະບົບ)</div>
+    <div class="menu-item" data-page="masterdata"><div class="menu-icon">⚙️</div><span>Master Data (ຖານຂໍ້ມູນຫຼັກ)</span></div>
 </aside>
 
 <!-- ================= MAIN ================= -->
@@ -1173,6 +1175,69 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
         </div>
     </div>
 </div>
+<!-- ================= MASTER DATA PAGE ================= -->
+    <section class="content" id="page-masterdata" style="display: none;">
+        <header style="margin-bottom: 20px;">
+            <h2 style="color: #102a43;">⚙️ ຈັດການຖານຂໍ້ມູນຫຼັກ (Master Data)</h2>
+            <p style="color: #7b8794;">ເພີ່ມ/ແກ້ໄຂ ພະຍາດ, ຢາ ແລະ ແນວທາງການປິ່ນປົວສຳລັບລະບົບຈ່າຍຢາອັດຕະໂນມັດ</p>
+        </header>
+
+        <div class="dashboard-grid">
+            <!-- ຕາຕະລາງພະຍາດ -->
+            <div class="card">
+                <div class="card-header">
+                    <h3>🦠 ຖານຂໍ້ມູນພະຍາດ (Diseases)</h3>
+                    <button class="btn-action btn-add" onclick="openMasterDiseaseModal()">+ ເພີ່ມພະຍາດ</button>
+                </div>
+                <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+                    <table>
+                        <thead style="position: sticky; top: 0; background: #f9fbfd;">
+                            <tr><th>ICD-10</th><th>ຊື່ພະຍາດ</th><th>ໝວດໝູ່</th></tr>
+                        </thead>
+                        <tbody id="md_disease_body">
+                            <tr><td colspan="3" style="text-align: center; padding: 15px;">ກຳລັງໂຫຼດຂໍ້ມູນ...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- ຕາຕະລາງຢາ -->
+            <div class="card">
+                <div class="card-header">
+                    <h3>💊 ຖານຂໍ້ມູນຢາ (Medicines)</h3>
+                    <button class="btn-action btn-add" onclick="openMasterMedicineModal()">+ ເພີ່ມຢາ</button>
+                </div>
+                <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+                    <table>
+                        <thead style="position: sticky; top: 0; background: #f9fbfd;">
+                            <tr><th>ຊື່ຢາ</th><th>ໝວດໝູ່</th><th>ສັບພະຄຸນ</th></tr>
+                        </thead>
+                        <tbody id="md_medicine_body">
+                            <tr><td colspan="3" style="text-align: center; padding: 15px;">ກຳລັງໂຫຼດຂໍ້ມູນ...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ຕາຕະລາງຈັບຄູ່ປິ່ນປົວ -->
+        <div class="card" style="margin-top: 20px;">
+            <div class="card-header">
+                <h3>🩺 ການຈັບຄູ່ການປິ່ນປົວ (Treatment Guidelines)</h3>
+                <button class="btn-action btn-add" onclick="openMasterGuidelineModal()" style="background: #16864b;">+ ເພີ່ມການຈັບຄູ່ໃໝ່</button>
+            </div>
+            <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+                <table>
+                    <thead style="position: sticky; top: 0; background: #f9fbfd;">
+                        <tr><th>ພະຍາດ / ອາການ</th><th>ຢາທີ່ໃຊ້ປິ່ນປົວ</th><th>ຈຳນວນຈ່າຍເລີ່ມຕົ້ນ</th><th>ວິທີໃຊ້</th></tr>
+                    </thead>
+                    <tbody id="md_guideline_body">
+                        <tr><td colspan="4" style="text-align: center; padding: 15px;">ກຳລັງໂຫຼດຂໍ້ມູນ...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
 </main>
 
 <!-- ================= ALL MODALS ================= -->
@@ -1282,6 +1347,54 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
         <div class="form-group"><label>ແພ້ຢາ / Allergy</label><textarea id="pt_allergy" rows="2"></textarea></div>
         <div class="form-group"><label>ປະຫວັດສຸຂະພາບ</label><textarea id="pt_health_history" rows="2"></textarea></div>
         <div class="modal-actions"><button class="btn-cancel" id="btnCloseModal">ຍົກເລີກ</button><button class="btn-submit" id="btnSavePatient">💾 ບັນທຶກ</button></div>
+    </div>
+</div>
+
+<!-- Modal ພະຍາດ -->
+<div class="modal-overlay" id="modalAddMasterDisease">
+    <div class="modal-card">
+        <h3>🦠 ເພີ່ມພະຍາດໃໝ່</h3>
+        <div class="form-group"><label>ລະຫັດ ICD-10</label><input type="text" id="md_icd10" placeholder="ຕົວຢ່າງ: J00"></div>
+        <div class="form-group"><label>ຊື່ພະຍາດ (ພາສາລາວ) *</label><input type="text" id="md_dis_name_la" placeholder="ຕົວຢ່າງ: ໄຂ້ຫວັດທຳມະດາ"></div>
+        <div class="form-group"><label>ຊື່ພະຍາດ (ພາສາອັງກິດ)</label><input type="text" id="md_dis_name_en" placeholder="ຕົວຢ່າງ: Common Cold"></div>
+        <div class="form-group"><label>ໝວດໝູ່ພະຍາດ</label><input type="text" id="md_dis_category" placeholder="ຕົວຢ່າງ: ທາງເດີນຫາຍໃຈ"></div>
+        <div class="modal-actions">
+            <button class="btn-cancel" onclick="document.getElementById('modalAddMasterDisease').style.display='none'">ຍົກເລີກ</button>
+            <button class="btn-submit" onclick="saveMasterDisease()">💾 ບັນທຶກພະຍາດ</button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal ຢາ -->
+<div class="modal-overlay" id="modalAddMasterMedicine">
+    <div class="modal-card">
+        <h3>💊 ເພີ່ມຢາໃໝ່ (Master Data)</h3>
+        <div class="form-group"><label>ຊື່ຢາ *</label><input type="text" id="md_med_name_en" placeholder="ຕົວຢ່າງ: Paracetamol 500mg"></div>
+        <div class="form-group"><label>ຊື່ສາມັນ (ພາສາລາວ)</label><input type="text" id="md_med_name_la" placeholder="ຕົວຢ່າງ: ປາຣາເຊຕາໂມນ"></div>
+        <div class="form-group"><label>ໝວດໝູ່ຢາ</label><input type="text" id="md_med_category" placeholder="ຕົວຢ່າງ: ແກ້ປວດ/ຫຼຸດໄຂ້"></div>
+        <div class="form-group"><label>ສັບພະຄຸນ / ການອອກລິດ</label><textarea id="md_med_dosage" rows="2"></textarea></div>
+        <div class="modal-actions">
+            <button class="btn-cancel" onclick="document.getElementById('modalAddMasterMedicine').style.display='none'">ຍົກເລີກ</button>
+            <button class="btn-submit" onclick="saveMasterMedicine()">💾 ບັນທຶກຢາ</button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal ຈັບຄູ່ -->
+<div class="modal-overlay" id="modalAddMasterGuideline">
+    <div class="modal-card">
+        <h3>🩺 ເພີ່ມການຈັບຄູ່ປິ່ນປົວ (Auto-Prescription)</h3>
+        <div class="form-group"><label>ເລືອກພະຍາດ *</label><select id="md_guide_disease"><option value="">-- ເລືອກ --</option></select></div>
+        <div class="form-group"><label>ເລືອກຢາ *</label><select id="md_guide_medicine"><option value="">-- ເລືອກ --</option></select></div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+            <div class="form-group"><label>ຈຳນວນຈ່າຍເລີ່ມຕົ້ນ *</label><input type="number" id="md_guide_qty" value="10"></div>
+            <div class="form-group"><label>ກິນຈັກວັນ *</label><input type="number" id="md_guide_days" value="3"></div>
+        </div>
+        <div class="form-group"><label>ວິທີໃຊ້ (ປາກົດໃນໃບຢາ) *</label><input type="text" id="md_guide_usage" placeholder="ຕົວຢ່າງ: ກິນ 1 ເມັດ ເຊົ້າ-ແລງ ຫຼັງອາຫານ"></div>
+        <div class="modal-actions">
+            <button class="btn-cancel" onclick="document.getElementById('modalAddMasterGuideline').style.display='none'">ຍົກເລີກ</button>
+            <button class="btn-submit" style="background: #16864b;" onclick="saveMasterGuideline()">💾 ບັນທຶກການຈັບຄູ່</button>
+        </div>
     </div>
 </div>
 
@@ -5592,6 +5705,162 @@ window.injectRealDataToFirebase = async function() {
         window.showCustomAlert('ເກີດຂໍ້ຜິດພາດໃນການອັບໂຫຼດ!', 'Error', '❌');
     }
 };
+</script>
+<script>
+    // ຕົວປ່ຽນເກັບຂໍ້ມູນຊົ່ວຄາວໃນໜ້າຈໍ
+    let mdDiseases = [];
+    let mdMedicines = [];
+
+    // --- ອັບເດດລະບົບປ່ຽນໜ້າ (Routing) ໃຫ້ຮູ້ຈັກໜ້າໃໝ່ ---
+    document.addEventListener('DOMContentLoaded', () => {
+        const menuItems = document.querySelectorAll('.menu-item');
+        menuItems.forEach(item => {
+            item.addEventListener('click', function() {
+                const pageName = this.getAttribute('data-page'); 
+                if(!pageName) return;
+                
+                // ເຊື່ອງທຸກໜ້າ
+                const allPages = ['dashboard', 'patients', 'appointments', 'consultations', 'laboratory', 'xray', 'echo', 'pharmacy', 'inventory', 'pos', 'reports', 'finance', 'employees', 'notifications', 'masterdata'];
+                allPages.forEach(id => {
+                    let el = document.getElementById('page-' + id);
+                    if(el) el.style.display = 'none';
+                });
+
+                // ສະແດງໜ້າທີ່ເລືອກ
+                let activePage = document.getElementById('page-' + pageName);
+                if(activePage) activePage.style.display = 'block';
+
+                // ຖ້າເປີດໜ້າ Master Data ໃຫ້ໂຫຼດຂໍ້ມູນຈາກ Firebase
+                if(pageName === 'masterdata') {
+                    loadMasterData();
+                }
+            });
+        });
+    });
+
+    // --- ຟັງຊັນໂຫຼດຂໍ້ມູນຈາກ Firebase ມາສະແດງໃນຕາຕະລາງ ---
+    async function loadMasterData() {
+        if (typeof db === 'undefined') return;
+        
+        // ໂຫຼດພະຍາດ
+        db.collection("diseases").onSnapshot(snapshot => {
+            mdDiseases = [];
+            const tbody = document.getElementById('md_disease_body');
+            const selectDis = document.getElementById('md_guide_disease');
+            tbody.innerHTML = ''; selectDis.innerHTML = '<option value="">-- ເລືອກພະຍາດ --</option>';
+            
+            snapshot.forEach(doc => {
+                let d = doc.data(); d.id = doc.id; mdDiseases.push(d);
+                tbody.innerHTML += `<tr><td>${d.icd10_code || '-'}</td><td><strong>${d.name_la}</strong><br><small>${d.name_en || ''}</small></td><td>${d.category || '-'}</td></tr>`;
+                selectDis.innerHTML += `<option value="${d.id}">${d.name_la}</option>`;
+            });
+            if(mdDiseases.length === 0) tbody.innerHTML = '<tr><td colspan="3" style="text-align: center;">ບໍ່ມີຂໍ້ມູນ</td></tr>';
+        });
+
+        // ໂຫຼດຢາ
+        db.collection("medicines").onSnapshot(snapshot => {
+            mdMedicines = [];
+            const tbody = document.getElementById('md_medicine_body');
+            const selectMed = document.getElementById('md_guide_medicine');
+            tbody.innerHTML = ''; selectMed.innerHTML = '<option value="">-- ເລືອກຢາ --</option>';
+            
+            snapshot.forEach(doc => {
+                let m = doc.data(); m.id = doc.id; mdMedicines.push(m);
+                tbody.innerHTML += `<tr><td><strong>${m.name_en}</strong></td><td>${m.category || '-'}</td><td>${m.dosage_info || '-'}</td></tr>`;
+                selectMed.innerHTML += `<option value="${m.id}">${m.name_en}</option>`;
+            });
+            if(mdMedicines.length === 0) tbody.innerHTML = '<tr><td colspan="3" style="text-align: center;">ບໍ່ມີຂໍ້ມູນ</td></tr>';
+        });
+
+        // ໂຫຼດການຈັບຄູ່
+        db.collection("treatment_guidelines").onSnapshot(snapshot => {
+            const tbody = document.getElementById('md_guideline_body');
+            tbody.innerHTML = '';
+            
+            let items = [];
+            snapshot.forEach(doc => { items.push(doc.data()); });
+            
+            if(items.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align: center;">ບໍ່ມີຂໍ້ມູນການຈັບຄູ່</td></tr>';
+                return;
+            }
+
+            // ລໍຖ້າໃຫ້ຢາ ແລະ ພະຍາດໂຫຼດແລ້ວຈຶ່ງ map ຊື່
+            setTimeout(() => {
+                tbody.innerHTML = '';
+                items.forEach(g => {
+                    let dName = mdDiseases.find(x => x.id === g.disease_id)?.name_la || 'ບໍ່ພົບພະຍາດ';
+                    let mName = mdMedicines.find(x => x.id === g.medicine_id)?.name_en || 'ບໍ່ພົບຢາ';
+                    tbody.innerHTML += `<tr>
+                        <td><strong>${dName}</strong></td>
+                        <td style="color:#1976d2; font-weight:bold;">${mName}</td>
+                        <td style="text-align:center;">${g.default_qty}</td>
+                        <td>${g.default_usage}</td>
+                    </tr>`;
+                });
+            }, 500);
+        });
+    }
+
+    // --- ຟັງຊັນເປີດໜ້າຈໍ ---
+    window.openMasterDiseaseModal = () => document.getElementById('modalAddMasterDisease').style.display = 'flex';
+    window.openMasterMedicineModal = () => document.getElementById('modalAddMasterMedicine').style.display = 'flex';
+    window.openMasterGuidelineModal = () => document.getElementById('modalAddMasterGuideline').style.display = 'flex';
+
+    // --- ຟັງຊັນບັນທຶກລົງ Firebase ຈິງ ---
+    window.saveMasterDisease = async function() {
+        const name_la = document.getElementById('md_dis_name_la').value;
+        if(!name_la) { window.showCustomAlert('ກະລຸນາປ້ອນຊື່ພະຍາດ!', 'ແຈ້ງເຕືອນ', '⚠️'); return; }
+        
+        await db.collection("diseases").add({
+            icd10_code: document.getElementById('md_icd10').value,
+            name_la: name_la,
+            name_en: document.getElementById('md_dis_name_en').value,
+            category: document.getElementById('md_dis_category').value,
+            is_active: true
+        });
+        document.getElementById('modalAddMasterDisease').style.display = 'none';
+        window.showCustomAlert('ບັນທຶກພະຍາດສຳເລັດ!', 'ສຳເລັດ', '✅');
+        document.getElementById('md_dis_name_la').value = '';
+    };
+
+    window.saveMasterMedicine = async function() {
+        const name_en = document.getElementById('md_med_name_en').value;
+        if(!name_en) { window.showCustomAlert('ກະລຸນາປ້ອນຊື່ຢາ!', 'ແຈ້ງເຕືອນ', '⚠️'); return; }
+        
+        await db.collection("medicines").add({
+            name_en: name_en,
+            name_la: document.getElementById('md_med_name_la').value,
+            category: document.getElementById('md_med_category').value,
+            dosage_info: document.getElementById('md_med_dosage').value,
+            is_active: true
+        });
+        document.getElementById('modalAddMasterMedicine').style.display = 'none';
+        window.showCustomAlert('ບັນທຶກຢາສຳເລັດ!', 'ສຳເລັດ', '✅');
+        document.getElementById('md_med_name_en').value = '';
+    };
+
+    window.saveMasterGuideline = async function() {
+        const d_id = document.getElementById('md_guide_disease').value;
+        const m_id = document.getElementById('md_guide_medicine').value;
+        const qty = document.getElementById('md_guide_qty').value;
+        const usage = document.getElementById('md_guide_usage').value;
+
+        if(!d_id || !m_id || !qty || !usage) { 
+            window.showCustomAlert('ກະລຸນາປ້ອນຂໍ້ມູນໃຫ້ຄົບຖ້ວນ!', 'ແຈ້ງເຕືອນ', '⚠️'); return; 
+        }
+
+        await db.collection("treatment_guidelines").add({
+            disease_id: d_id,
+            medicine_id: m_id,
+            default_qty: Number(qty),
+            default_days: Number(document.getElementById('md_guide_days').value),
+            default_usage: usage
+        });
+        document.getElementById('modalAddMasterGuideline').style.display = 'none';
+        window.showCustomAlert('ບັນທຶກການຈັບຄູ່ສຳເລັດ!', 'ສຳເລັດ', '✅');
+        document.getElementById('md_guide_usage').value = '';
+    };
 </script>
 </body>
 </html>
