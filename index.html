@@ -1601,13 +1601,18 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
             <div class="form-group">
                 <label style="color: #b42318; font-weight: bold;">Primary Diagnosis (ພະຍາດຫຼັກ) *</label>
-                <input type="text" id="cst2_diag_primary" placeholder="🔍 ຄົ້ນຫາຊື່ພະຍາດ ຫຼື ລະຫັດ ICD-10...">
+                <!-- ເພີ່ມ list="disease_list" ໃສ່ input -->
+                <input type="text" id="cst2_diag_primary" list="disease_list" placeholder="🔍 ຄົ້ນຫາຊື່ພະຍາດ ຫຼື ລະຫັດ ICD-10..." style="border: 2px solid #b42318;">
             </div>
             <div class="form-group">
                 <label>Secondary Diagnosis (ພະຍາດຮ່ວມ/ແຊກຊ້ອນ)</label>
-                <input type="text" id="cst2_diag_secondary" placeholder="🔍 ຄົ້ນຫາຊື່ພະຍາດ ຫຼື ລະຫັດ ICD-10...">
+                <!-- ເພີ່ມ list="disease_list" ໃສ່ input -->
+                <input type="text" id="cst2_diag_secondary" list="disease_list" placeholder="🔍 ຄົ້ນຫາຊື່ພະຍາດ ຫຼື ລະຫັດ ICD-10...">
             </div>
         </div>
+        
+        <!-- ເພີ່ມ Datalist ນີ້ໄວ້ລຸ່ມ input (ເປັນບ່ອນເກັບລາຍຊື່ພະຍາດໃຫ້ມັນເด้ງຂຶ້ນມາ) -->
+        <datalist id="disease_list"></datalist>
 
         <div class="section-title">🩹 5. ແຜນການຮັກສາ ແລະ ຫັດຖະການ (Treatment & Procedure)</div>
         <div class="form-group">
@@ -5933,17 +5938,27 @@ window.injectRealDataToFirebase = async function() {
     async function loadMasterData() {
         if (typeof db === 'undefined') return;
         
-        // ໂຫຼດພະຍາດ
+    // ໂຫຼດພະຍາດ
         db.collection("diseases").onSnapshot(snapshot => {
             mdDiseases = [];
             const tbody = document.getElementById('md_disease_body');
             const selectDis = document.getElementById('md_guide_disease');
+            
+            // --- ໂຄດທີ່ຕ້ອງເພີ່ມໃໝ່ (ແຖວທີ 1) ---
+            const dataList = document.getElementById('disease_list');
+            
             tbody.innerHTML = ''; selectDis.innerHTML = '<option value="">-- ເລືອກພະຍາດ --</option>';
             
+            // --- ໂຄດທີ່ຕ້ອງເພີ່ມໃໝ່ (ແຖວທີ 2) ---
+            if(dataList) dataList.innerHTML = '';
+
             snapshot.forEach(doc => {
                 let d = doc.data(); d.id = doc.id; mdDiseases.push(d);
                 tbody.innerHTML += `<tr><td>${d.icd10_code || '-'}</td><td><strong>${d.name_la}</strong><br><small>${d.name_en || ''}</small></td><td>${d.category || '-'}</td></tr>`;
                 selectDis.innerHTML += `<option value="${d.id}">${d.name_la}</option>`;
+                
+                // --- ໂຄດທີ່ຕ້ອງເພີ່ມໃໝ່ (ແຖວທີ 3) ---
+                if(dataList) dataList.innerHTML += `<option value="${d.name_la}">[${d.icd10_code || '-'}] ${d.name_en || ''}</option>`;
             });
             if(mdDiseases.length === 0) tbody.innerHTML = '<tr><td colspan="3" style="text-align: center;">ບໍ່ມີຂໍ້ມູນ</td></tr>';
         });
