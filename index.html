@@ -5537,5 +5537,61 @@ window.openEchoProcessModal = function(index) {
     });
 
 </script>
+<div style="position: fixed; bottom: 20px; right: 20px; z-index: 9999;">
+    <button onclick="injectRealDataToFirebase()" style="background: #1976d2; color: white; padding: 12px 20px; border-radius: 8px; cursor: pointer; border: none; font-weight: bold; box-shadow: 0 4px 10px rgba(0,0,0,0.3);">
+        📥 ອັບໂຫຼດຂໍ້ມູນພະຍາດ & ຢາ (ຈິງ) ເຂົ້າ Firebase
+    </button>
+</div>
+
+<script>
+window.injectRealDataToFirebase = async function() {
+    if (typeof db === 'undefined') {
+        window.showCustomAlert('ບໍ່ສາມາດເຊື່ອມຕໍ່ Firebase ໄດ້!', 'Error', '❌');
+        return;
+    }
+    window.showCustomAlert('ກຳລັງອັບໂຫຼດຂໍ້ມູນເຂົ້າ Firebase...', 'ກຳລັງປະມວນຜົນ', '⏳');
+
+    try {
+        // 1. ເພີ່ມພະຍາດ (Diseases) ຈາກເອກະສານ
+        await db.collection("diseases").doc("d_uti").set({ icd10_code: "N30", name_la: "ພົກຍ່ຽວອັກເສບ / ໝວກໝາກໄຂ່ຫຼັງອັກເສບ", name_en: "Cystitis", category: "ທາງເດີນປັດສະວະ", is_active: true });
+        await db.collection("diseases").doc("d_pneumonia").set({ icd10_code: "J18", name_la: "ພະຍາດປອດບວມ", name_en: "Pneumonia", category: "ທາງເດີນຫາຍໃຈ", is_active: true });
+        await db.collection("diseases").doc("d_asthma").set({ icd10_code: "J45", name_la: "ຫອບຫືດ", name_en: "Asthma", category: "ທາງເດີນຫາຍໃຈ", is_active: true });
+        await db.collection("diseases").doc("d_cardiac").set({ icd10_code: "I46", name_la: "ຫົວໃຈວາຍ", name_en: "Cardiac arrest", category: "ຫົວໃຈ ແລະ ເລືອດ", is_active: true });
+
+        // 2. ເພີ່ມຢາ (Medicines) ຈາກເອກະສານ
+        await db.collection("medicines").doc("m_amox").set({ name_en: "Amoxicillin", category: "Antibiotics", dosage_info: "ຢາຕ້ານເຊື້ອ", is_active: true });
+        await db.collection("medicines").doc("m_cotrim").set({ name_en: "Co-trimoxazole", category: "Antibiotics", dosage_info: "ຢາຕ້ານເຊື້ອ", is_active: true });
+        await db.collection("medicines").doc("m_salbu").set({ name_en: "Salbutamol", category: "ສຸກເສີນ ແລະ ອື່ນໆ", dosage_info: "ຂະຫຍາຍຫຼອດລົມ", is_active: true });
+        await db.collection("medicines").doc("m_adren").set({ name_en: "Adrenaline", category: "ສຸກເສີນ ແລະ ອື່ນໆ", dosage_info: "ກະຕຸ້ນຫົວໃຈ", is_active: true });
+
+        // 3. ຈັບຄູ່ການປິ່ນປົວ (Treatment Guidelines) ຕາມເອກະສານ
+        
+        // ພົກຍ່ຽວອັກເສບ -> Co-trimoxazole
+        await db.collection("treatment_guidelines").doc("g_uti_01").set({ 
+            disease_id: "d_uti", medicine_id: "m_cotrim", default_qty: 14, default_usage: "ກິນ 1 ເມັດ ເຊົ້າ-ແລງ", default_days: 7 
+        });
+        
+        // ພົກຍ່ຽວອັກເສບ -> Amoxicillin
+        await db.collection("treatment_guidelines").doc("g_uti_02").set({ 
+            disease_id: "d_uti", medicine_id: "m_amox", default_qty: 21, default_usage: "ກິນ 1 ເມັດ ເຊົ້າ-ສວຍ-ແລງ", default_days: 7 
+        });
+
+        // ຫອບຫືດ -> Salbutamol
+        await db.collection("treatment_guidelines").doc("g_asthma_01").set({ 
+            disease_id: "d_asthma", medicine_id: "m_salbu", default_qty: 1, default_usage: "ພົ່ນ 1-2 ປັ້ມ ເວລາມີອາການຫອບ", default_days: 1 
+        });
+
+        // ຫົວໃຈວາຍ -> Adrenaline
+        await db.collection("treatment_guidelines").doc("g_cardiac_01").set({ 
+            disease_id: "d_cardiac", medicine_id: "m_adren", default_qty: 1, default_usage: "ສັກ IV ສຸກເສີນ", default_days: 1 
+        });
+
+        window.showCustomAlert('ອັບໂຫຼດຂໍ້ມູນຈິງເຂົ້າ Firebase ສຳເລັດແລ້ວ! ທ່ານສາມາດເພີ່ມລາຍການອື່ນໆຕໍ່ໄດ້ໃນ Firebase Console ໂດຍກົງ.', 'ສຳເລັດ', '✅');
+    } catch (error) {
+        console.error("Error:", error);
+        window.showCustomAlert('ເກີດຂໍ້ຜິດພາດໃນການອັບໂຫຼດ!', 'Error', '❌');
+    }
+};
+</script>
 </body>
 </html>
