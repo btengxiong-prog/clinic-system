@@ -1523,8 +1523,11 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
 
     <div class="section-title">🧠 4. ການປະເມີນ ແລະ ວິນິດໄສ (Assessment & Diagnosis)</div>
         <div class="form-group">
-            <label>ການປະເມີນອາການທາງຄຼີນິກ (Clinical Assessment / Notes)</label>
-            <textarea id="cst2_assessment" rows="2" placeholder="ປະເມີນຜົນກວດ, ອາການທີ່ກ່ຽວຂ້ອງ..."></textarea>
+            <label style="display: flex; justify-content: space-between; align-items: center;">
+                ການປະເມີນອາການທາງຄຼີນິກ (Clinical Assessment / Notes)
+                <button type="button" class="btn-action" style="background: #1976d2; color: white; padding: 4px 10px; font-size: 12px;" onclick="autoSummarizeAssessment()">✨ ດຶງຂໍ້ມູນມາສະຫຼຸບອັດຕະໂນມັດ</button>
+            </label>
+            <textarea id="cst2_assessment" rows="5" placeholder="ກົດປຸ່ມ 'ດຶງຂໍ້ມູນມາສະຫຼຸບອັດຕະໂນມັດ' ຫຼື ພິມປະເມີນຜົນກວດ..."></textarea>
         </div>
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
             <div class="form-group">
@@ -5857,5 +5860,59 @@ window.injectRealDataToFirebase = async function() {
         document.getElementById('md_guide_usage').value = '';
     };
 </script>
+// ຟັງຊັນດຶງຂໍ້ມູນຈາກຂໍ້ 1, 2, 3 ມາສະຫຼຸບລົງຂໍ້ 4 ອັດຕະໂນມັດ
+window.autoSummarizeAssessment = function() {
+    // 1. ດຶງຂໍ້ມູນປະຫວັດ ແລະ ອາການ
+    const cc = document.getElementById('cst2_symptoms').value.trim() || 'ບໍ່ໄດ້ລະບຸ';
+    const history = document.getElementById('cst2_history').value.trim() || 'ບໍ່ມີປະຫວັດພິເສດ';
+
+    // 2. ດຶງຂໍ້ມູນ Vitals
+    const temp = document.getElementById('cst2_temp').value || '-';
+    const bp = document.getElementById('cst2_bp').value || '-';
+    const pulse = document.getElementById('cst2_pulse').value || '-';
+    const spo2 = document.getElementById('cst2_spo2').value || '-';
+    const pain = document.getElementById('cst2_pain').value || '-';
+
+    // 3. ດຶງຂໍ້ມູນ Physical Exam
+    const peGen = document.getElementById('cst2_pe_general').value.trim();
+    const peHeent = document.getElementById('cst2_pe_heent').value.trim();
+    const peRs = document.getElementById('cst2_pe_rs').value.trim();
+    const peCvs = document.getElementById('cst2_pe_cvs').value.trim();
+    const peGi = document.getElementById('cst2_pe_gi').value.trim();
+    const peNeuro = document.getElementById('cst2_pe_neuro').value.trim();
+    const peSum = document.getElementById('cst2_physical_exam').value.trim();
+
+    // ຮຽບຮຽງ PE ສະເພາະຊ່ອງທີ່ມີຂໍ້ມູນ
+    let peArr = [];
+    if(peGen) peArr.push(`General: ${peGen}`);
+    if(peHeent) peArr.push(`HEENT: ${peHeent}`);
+    if(peRs) peArr.push(`Respiratory: ${peRs}`);
+    if(peCvs) peArr.push(`Cardio: ${peCvs}`);
+    if(peGi) peArr.push(`GI: ${peGi}`);
+    if(peNeuro) peArr.push(`Neuro: ${peNeuro}`);
+    if(peSum) peArr.push(`ສະຫຼຸບອື່ນໆ: ${peSum}`);
+    
+    const peText = peArr.length > 0 ? peArr.join(' | ') : 'ບໍ່ໄດ້ລະບຸ';
+
+    // 4. ສ້າງຮູບແບບຂໍ້ຄວາມສະຫຼຸບ
+    const summaryText = 
+`[ອາການສຳຄັນ]: ${cc}
+[ປະຫວັດພະຍາດ]: ${history}
+[ສັນຍານຊີບ]: ອຸນຫະພູມ ${temp}°C, ຄວາມດັນ ${bp} mmHg, ຊີບຈອນ ${pulse} bpm, SpO2 ${spo2}%, Pain Score: ${pain}/10
+[ຜົນກວດຮ່າງກາຍ]: ${peText}`;
+
+    // 5. ສົ່ງຂໍ້ຄວາມລົງໄປໃນ Textarea
+    const assessmentBox = document.getElementById('cst2_assessment');
+    
+    // ຖ້າມີຂໍ້ຄວາມເກົ່າຢູ່ແລ້ວ ໃຫ້ເອົາຂໍ້ຄວາມໃໝ່ຕໍ່ທ້າຍ ເພື່ອບໍ່ໃຫ້ຂໍ້ມູນເກົ່າຫາຍ
+    if (assessmentBox.value.trim() !== '') {
+        assessmentBox.value = assessmentBox.value + '\n\n' + summaryText;
+    } else {
+        assessmentBox.value = summaryText;
+    }
+    
+    // ເດັ້ງແຈ້ງເຕືອນໜ້ອຍໜຶ່ງໃຫ້ຮູ້ວ່າເຮັດວຽກສຳເລັດ
+    window.showCustomAlert('ດຶງຂໍ້ມູນມາສະຫຼຸບລົງໃນຊ່ອງປະເມີນຜົນສຳເລັດແລ້ວ!', 'ສຳເລັດ', '✨');
+};
 </body>
 </html>
