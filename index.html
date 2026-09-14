@@ -1652,11 +1652,11 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
                     <tr><th>ເລືອກຢາ (Medicine Name)</th><th>ຈຳນວນ</th><th>ວິທີໃຊ້ / ຄວາມຖີ່ (Usage)</th><th>ລຶບ</th></tr>
                 </thead>
                 <tbody id="cst2_prescription_body">
-                    <!-- ແຖວປ້ອນຢາເລີ່ມຕົ້ນ -->
+                    <!-- ແຖວປ້ອນຢາ -->
                     <tr>
-                        <td><input type="text" class="cst-med-name" placeholder="ຊື່ຢາ... (ພິມ ຫຼື ເລືອກ)" list="medicine_list" style="width: 100%; border:1px solid #ccc; padding:6px; border-radius:4px; font-family:inherit;"></td>
-                        <td><input type="number" class="cst-med-qty" value="1" style="width: 100%; border:1px solid #ccc; padding:6px; border-radius:4px; font-family:inherit;"></td>
-                        <td><input type="text" class="cst-med-usage" placeholder="ເຊົ້າ-ແລງ ຫຼັງອາຫານ" style="width: 100%; border:1px solid #ccc; padding:6px; border-radius:4px; font-family:inherit;"></td>
+                        <td><input type="text" class="med-name" placeholder="ຊື່ຢາ... (ພິມ ຫຼື ເລືອກ)" list="medicine_list" style="width: 100%; border:1px solid #ccc; padding:6px; border-radius:4px; font-family:inherit;"></td>
+                        <td><input type="number" class="med-qty" value="1" style="width: 100%; border:1px solid #ccc; padding:6px; border-radius:4px; font-family:inherit;"></td>
+                        <td><input type="text" class="med-usage" placeholder="ເຊົ້າ-ແລງ ຫຼັງອາຫານ" style="width: 100%; border:1px solid #ccc; padding:6px; border-radius:4px; font-family:inherit;"></td>
                         <td style="text-align: center;"><span class="action-icon" onclick="this.parentElement.parentElement.remove()" style="color: #d32f2f;">🗑️</span></td>
                     </tr>
                 </tbody>
@@ -3434,10 +3434,10 @@ window.toggleFollowUpFields = function() {
         const tbody = document.getElementById('cst2_prescription_body');
         const tr = document.createElement('tr');
         tr.innerHTML = `
-            <td><input type="text" class="med-name" placeholder="ຊື່ຢາ... (ພິມ ຫຼື ເລືອກ)" value="${name}" list="medicine_list" style="width: 100%;"></td>
-            <td><input type="number" class="med-qty" value="${qty}" style="width: 60px;"></td>
-            <td><input type="text" class="med-usage" placeholder="ວິທີໃຊ້..." value="${usage}" style="width: 100%;"></td>
-            <td style="text-align: center;"><span class="action-icon" onclick="this.parentElement.parentElement.remove()" style="color: #d32f2f;">🗑️</span></td>
+            <td><input type="text" class="med-name" value="${name}" placeholder="ຊື່ຢາ... (ພິມ ຫຼື ເລືອກ)" list="medicine_list" style="width: 100%; border:1px solid #ccc; padding:6px; border-radius:4px; font-family:inherit;"></td>
+            <td><input type="number" class="med-qty" value="${qty}" style="width: 100%; border:1px solid #ccc; padding:6px; border-radius:4px; font-family:inherit;"></td>
+            <td><input type="text" class="med-usage" value="${usage}" placeholder="ເຊົ້າ-ແລງ ຫຼັງອາຫານ..." style="width: 100%; border:1px solid #ccc; padding:6px; border-radius:4px; font-family:inherit;"></td>
+            <td style="text-align:center;"><button type="button" class="btn-remove-row" style="padding: 4px;" onclick="this.closest('tr').remove()">🗑️</button></td>
         `;
         tbody.appendChild(tr);
     };
@@ -3508,12 +3508,12 @@ window.toggleFollowUpFields = function() {
 
         let prescriptions = [];
         document.querySelectorAll('#cst2_prescription_body tr').forEach(tr => {
-            let name = tr.querySelector('.cst-med-name').value.trim();
+            let name = tr.querySelector('.med-name').value.trim(); // ໃຫ້ແນ່ໃຈວ່າເປັນ .med-name
             if(name) {
                 prescriptions.push({
                     name: name,
-                    qty: tr.querySelector('.cst-med-qty').value,
-                    usage: tr.querySelector('.cst-med-usage').value
+                    qty: tr.querySelector('.med-qty').value,
+                    usage: tr.querySelector('.med-usage').value
                 });
             }
         });
