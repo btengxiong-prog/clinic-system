@@ -1639,24 +1639,32 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
             <ul id="cst2_procedure_list" style="list-style: none; padding: 0; font-size: 14px;"></ul>
         </div>
 
+    <!-- 1. ຫົວຂໍ້ (ຮັກສາໄວ້ຄືເກົ່າ) -->
         <div class="section-title" style="display: flex; justify-content: space-between; align-items: center;">
             <span>💊 6. ສັ່ງຢາ (Prescription - ສົ່ງຫາຫ້ອງຈ່າຍຢາ)</span>
             <button type="button" class="btn-action" style="background: #6a1b9a; color: white; padding: 4px 12px; font-size: 13px; border-radius: 20px; box-shadow: 0 2px 5px rgba(106, 27, 154, 0.3);" onclick="autoPrescribeAI()">🤖 ວິເຄາະ & ຈັດຢາອັດຕະໂນມັດ</button>
         </div>
+
+        <!-- 2. ຕາຕະລາງໃໝ່ (ເອົາມາວາງຕໍ່ກ້ອງຫົວຂໍ້ ເພື່ອໃຫ້ມີ Datalist ໃຫ້ເລືອກຢາ) -->
         <div class="table-responsive" style="border: 1px solid #e8edf3; border-radius: 8px; margin-bottom: 15px;">
             <table class="med-table">
                 <thead style="background: #f4f7fb;">
-                    <tr>
-                        <th style="text-align: left; padding: 8px;">ເລືອກຢາ (Medicine Name)</th>
-                        <th style="width: 15%;">ຈຳນວນ</th>
-                        <th>ວິທີໃຊ້ / ຄວາມຖີ່ (Usage)</th>
-                        <th style="width: 5%;">ລຶບ</th>
-                    </tr>
+                    <tr><th>ເລືອກຢາ (Medicine Name)</th><th>ຈຳນວນ</th><th>ວິທີໃຊ້ / ຄວາມຖີ່ (Usage)</th><th>ລຶບ</th></tr>
                 </thead>
                 <tbody id="cst2_prescription_body">
-                    <!-- ຢາຈະຖືກເພີ່ມຢູ່ບ່ອນນີ້ -->
+                    <!-- ແຖວປ້ອນຢາເລີ່ມຕົ້ນ -->
+                    <tr>
+                        <td><input type="text" class="cst-med-name" placeholder="ຊື່ຢາ... (ພິມ ຫຼື ເລືອກ)" list="medicine_list" style="width: 100%; border:1px solid #ccc; padding:6px; border-radius:4px; font-family:inherit;"></td>
+                        <td><input type="number" class="cst-med-qty" value="1" style="width: 100%; border:1px solid #ccc; padding:6px; border-radius:4px; font-family:inherit;"></td>
+                        <td><input type="text" class="cst-med-usage" placeholder="ເຊົ້າ-ແລງ ຫຼັງອາຫານ" style="width: 100%; border:1px solid #ccc; padding:6px; border-radius:4px; font-family:inherit;"></td>
+                        <td style="text-align: center;"><span class="action-icon" onclick="this.parentElement.parentElement.remove()" style="color: #d32f2f;">🗑️</span></td>
+                    </tr>
                 </tbody>
             </table>
+            
+            <!-- Datalist ສຳລັບດຶງຊື່ຢາ -->
+            <datalist id="medicine_list"></datalist>
+
             <div style="padding: 10px; text-align: center; background: #f9fbfd;">
                 <button type="button" class="btn-action" style="background: #e2e8f0; color: #333;" onclick="addConsultRxRow()">+ ເພີ່ມລາຍການຢາ</button>
             </div>
@@ -3426,10 +3434,10 @@ window.toggleFollowUpFields = function() {
         const tbody = document.getElementById('cst2_prescription_body');
         const tr = document.createElement('tr');
         tr.innerHTML = `
-            <td><input type="text" class="cst-med-name" value="${name}" placeholder="ຊື່ຢາ... (ພິມ ຫຼື ເລືອກ)" style="width: 100%; border:1px solid #ccc; padding:6px; border-radius:4px; font-family:inherit;"></td>
-            <td><input type="number" class="cst-med-qty" value="${qty}" style="width: 100%; border:1px solid #ccc; padding:6px; border-radius:4px; font-family:inherit;"></td>
-            <td><input type="text" class="cst-med-usage" value="${usage}" placeholder="ເຊົ້າ-ແລງ ຫຼັງອາຫານ..." style="width: 100%; border:1px solid #ccc; padding:6px; border-radius:4px; font-family:inherit;"></td>
-            <td style="text-align:center;"><button type="button" class="btn-remove-row" style="padding: 4px;" onclick="this.closest('tr').remove()">🗑️</button></td>
+            <td><input type="text" class="med-name" placeholder="ຊື່ຢາ... (ພິມ ຫຼື ເລືອກ)" value="${name}" list="medicine_list" style="width: 100%;"></td>
+            <td><input type="number" class="med-qty" value="${qty}" style="width: 60px;"></td>
+            <td><input type="text" class="med-usage" placeholder="ວິທີໃຊ້..." value="${usage}" style="width: 100%;"></td>
+            <td style="text-align: center;"><span class="action-icon" onclick="this.parentElement.parentElement.remove()" style="color: #d32f2f;">🗑️</span></td>
         `;
         tbody.appendChild(tr);
     };
@@ -5965,13 +5973,22 @@ window.injectRealDataToFirebase = async function() {
             mdMedicines = [];
             const tbody = document.getElementById('md_medicine_body');
             const selectMed = document.getElementById('md_guide_medicine');
+            const medDataList = document.getElementById('medicine_list'); // ດຶງ Datalist ຢາ
+            
             if(tbody) tbody.innerHTML = ''; 
             if(selectMed) selectMed.innerHTML = '<option value="">-- ເລືອກຢາ --</option>';
+            if(medDataList) medDataList.innerHTML = ''; // ລ້າງຂໍ້ມູນເກົ່າໃນ Dropdown ຢາ
             
             snapshot.forEach(doc => {
                 let m = doc.data(); m.id = doc.id; mdMedicines.push(m);
                 if(tbody) tbody.innerHTML += `<tr><td><strong>${m.name_en}</strong></td><td>${m.category || '-'}</td><td>${m.dosage_info || '-'}</td></tr>`;
                 if(selectMed) selectMed.innerHTML += `<option value="${m.id}">${m.name_en}</option>`;
+                
+                // ຍັດຂໍ້ມູນລົງໃນ Datalist ຂອງຊ່ອງສັ່ງຢາ
+                if(medDataList) {
+                    let desc = m.name_la ? `(${m.name_la})` : '';
+                    medDataList.innerHTML += `<option value="${m.name_en}">${desc} - [${m.category || 'ທົ່ວໄປ'}]</option>`;
+                }
             });
             if(mdMedicines.length === 0 && tbody) tbody.innerHTML = '<tr><td colspan="3" style="text-align: center;">ບໍ່ມີຂໍ້ມູນ</td></tr>';
         });
