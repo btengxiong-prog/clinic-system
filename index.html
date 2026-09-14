@@ -1967,8 +1967,8 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
             <!-- ດ້ານຊ້າຍ: ລາຍການສິນຄ້າ/ບໍລິການ -->
             <div>
                 <div class="filter-bar" style="padding: 10px; margin-bottom: 10px; background: #f4f7fb;">
-                    <input type="text" class="filter-input" id="pos_search_visit" placeholder="🔍 ຄົ້ນຫາ Visit ID / ເລກໃບຢາ ເພື່ອດຶງຄ່າໃຊ້ຈ່າຍ..." style="width: 100%;">
-                    <button class="btn-action" style="background: #102a43; color: white; width: 100%; margin-top: 5px;" onclick="posMockLoadData()">ດຶງຂໍ້ມູນຄ່າໃຊ້ຈ່າຍ</button>
+                    <input type="text" class="filter-input" id="pos_search_visit" placeholder="🔍 ຄົ້ນຫາ ຊື່ຄົນເຈັບ, ID ຫຼື Visit ID..." style="width: 100%;">
+                    <button class="btn-action" style="background: #102a43; color: white; width: 100%; margin-top: 5px;" onclick="posLoadVisitData()">ດຶງຂໍ້ມູນຄ່າໃຊ້ຈ່າຍທັງໝົດອັດຕະໂນມັດ</button>
                 </div>
                 <div class="table-responsive" style="border: 1px solid #e8edf3; border-radius: 8px; max-height: 320px; overflow-y: auto;">
                     <table class="med-table">
@@ -4464,8 +4464,9 @@ window.openEchoProcessModal = function(index) {
         posCalculateTotal();
     };
 
-    window.posMockLoadData = function() {
-        const searchVal = document.getElementById('pos_search_visit').value.trim();
+// ຟັງຊັນດຶງຂໍ້ມູນຄ່າໃຊ້ຈ່າຍຈາກທຸກຫ້ອງມາລວມຢູ່ POS 
+    window.posLoadVisitData = function() {
+        const searchVal = document.getElementById('pos_search_visit').value.trim().toLowerCase();
         if (!searchVal) {
             window.showCustomAlert('ກະລຸນາປ້ອນ ລະຫັດຄົນເຈັບ (PT-), ຊື່ຄົນເຈັບ ຫຼື Visit ID!', 'ແຈ້ງເຕືອນ', '⚠️');
             return;
@@ -4475,11 +4476,15 @@ window.openEchoProcessModal = function(index) {
         const patients = JSON.parse(localStorage.getItem('clinic_local_patients')) || globalPatientsList || [];
         
         let targetVisit = null;
-        targetVisit = visits.find(v => v.visit_id === searchVal);
+        
+        // 1. ຊອກຫາຈາກ Visit ID
+        targetVisit = visits.find(v => v.visit_id.toLowerCase().includes(searchVal));
 
+        // 2. ຖ້າບໍ່ພົບ, ຊອກຫາຈາກ ຊື່ຄົນເຈັບ ຫຼື ລະຫັດຄົນເຈັບ
         if (!targetVisit) {
-            const matchedPatient = patients.find(p => p.patient_code === searchVal || p.fullname === searchVal);
+            const matchedPatient = patients.find(p => p.patient_code.toLowerCase().includes(searchVal) || p.fullname.toLowerCase().includes(searchVal));
             if (matchedPatient) {
+                // ດຶງເອົາການກວດຄັ້ງລ້າສຸດຂອງຄົນເຈັບຄົນນີ້
                 const patientVisits = visits.filter(v => v.patient_name === matchedPatient.fullname);
                 if (patientVisits.length > 0) {
                     patientVisits.sort((a, b) => new Date(b.date) - new Date(a.date));
@@ -4489,7 +4494,7 @@ window.openEchoProcessModal = function(index) {
         }
         
         if (!targetVisit) {
-            window.showCustomAlert('ບໍ່ພົບປະຫວັດການກວດ ຂອງຄົນເຈັບ ຫຼື ລະຫັດນີ້ໃນມື້ນີ້!', 'ບໍ່ພົບຂໍ້ມູນ', '❌');
+            window.showCustomAlert('ບໍ່ພົບປະຫວັດການກວດຂອງຄົນເຈັບ ຫຼື ລະຫັດນີ້ໃນລະບົບ!', 'ບໍ່ພົບຂໍ້ມູນ', '❌');
             return;
         }
 
@@ -4497,49 +4502,73 @@ window.openEchoProcessModal = function(index) {
         document.getElementById('pos_sale_items_body').innerHTML = '';
         let hasItems = false;
         
-        posAddItemRow('ຄ່າກວດພະຍາດ (Consultation)', 1, 0);
+        // ==========================================
+        // 1. ດຶງຄ່າບໍລິການແພດ (Consultation Fee)
+        // ==========================================
+        posAddItemRow('ຄ່າກວດພະຍາດ (Consultation Fee)', 1, 50000); // ຕັ້ງລາຄາເລີ່ມຕົ້ນ 50,000 ກີບ
         hasItems = true;
+
+        // ==========================================
+        // 2. ດຶງຄ່າຫັດຖະການ ຈາກຂໍ້ 5 (Procedures)
+        // ==========================================
+        const procedurePrices = {
+            "ລ້າງແຜ (Wound Dressing)": 30000,
+            "ຫຍິບແຜ (Suturing)": 80000,
+            "ສັກຢາ (Injection)": 15000,
+            "ໃຫ້ນ້ຳທະເລ (IV Fluid)": 50000,
+            "ພົ່ນຢາ (Nebulization)": 40000,
+            "ອື່ນໆ (Other)": 20000
+        };
 
         if(targetVisit.procedures && targetVisit.procedures.length > 0) {
             targetVisit.procedures.forEach(proc => {
-                posAddItemRow(`ຄ່າຫັດຖະການ: ${proc}`, 1, 0);
+                let price = procedurePrices[proc] || 20000; // ຖ້າບໍ່ມີໃນລາຍການ ໃຫ້ຄິດໄລ່ 20,000 ກີບ
+                posAddItemRow(`ຫັດຖະການ: ${proc}`, 1, price);
             });
         }
 
+        // ==========================================
+        // 3. ດຶງຄ່າຢາ ຈາກຂໍ້ 6 (Prescriptions)
+        // ==========================================
         const rxs = JSON.parse(localStorage.getItem('clinic_prescriptions')) || [];
         const rx = rxs.find(r => r.visit_id === visitIdToBill);
         if (rx && rx.items && rx.items.length > 0) {
             const inventory = JSON.parse(localStorage.getItem('clinic_inventory')) || [];
             rx.items.forEach(item => {
                 let price = 0;
+                // ລະບົບແລ່ນໄປຊອກຫາລາຄາຂາຍ (Price) ຈາກຖານຂໍ້ມູນສາງຢາ (Inventory)
                 const invItem = inventory.find(i => i.name.toLowerCase() === item.name.toLowerCase());
                 if(invItem) price = invItem.price;
+
                 posAddItemRow(`ຢາ: ${item.name}`, item.qty, price);
             });
         }
 
+        // ==========================================
+        // 4. ດຶງຄ່າກວດ Lab, X-Ray, Echo
+        // ==========================================
         const labs = JSON.parse(localStorage.getItem('clinic_lab_orders')) || [];
         const myLabs = labs.filter(l => l.visit_id === visitIdToBill);
         myLabs.forEach(lab => {
             lab.tests.forEach(test => {
-                posAddItemRow(`ຄ່າກວດ Lab: ${test}`, 1, 0);
+                posAddItemRow(`ກວດ Lab: ${test}`, 1, 30000); // ຕັ້ງຄ່າກວດ Lab ເລີ່ມຕົ້ນ 30,000 ກີບ/ລາຍການ
             });
         });
 
         const xrays = JSON.parse(localStorage.getItem('clinic_xray_orders')) || [];
         const myXrays = xrays.filter(x => x.visit_id === visitIdToBill);
         myXrays.forEach(xr => {
-            posAddItemRow(`ຄ່າ X-Ray: ${xr.type}`, 1, xr.price || 0); 
+            posAddItemRow(`X-Ray: ${xr.type}`, 1, xr.price || 100000); 
         });
 
         const echos = JSON.parse(localStorage.getItem('clinic_echo_orders')) || [];
         const myEchos = echos.filter(e => e.visit_id === visitIdToBill);
         myEchos.forEach(ec => {
-            posAddItemRow(`ຄ່າ Echo: ${ec.type}`, 1, ec.price || 0); 
+            posAddItemRow(`Echo: ${ec.type}`, 1, ec.price || 150000); 
         });
 
         if (hasItems) {
-            window.showCustomAlert(`ດຶງຂໍ້ມູນຂອງຄົນເຈັບ: ${targetVisit.patient_name} ສຳເລັດແລ້ວ!`, 'ດຶງຂໍ້ມູນສຳເລັດ', '✅');
+            window.showCustomAlert(`ດຶງຄ່າໃຊ້ຈ່າຍທັງໝົດຂອງ: ${targetVisit.patient_name} ສຳເລັດແລ້ວ!`, 'ດຶງຂໍ້ມູນສຳເລັດ', '✅');
         }
     };
 
