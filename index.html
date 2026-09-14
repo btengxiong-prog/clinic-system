@@ -1565,7 +1565,10 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
             <ul id="cst2_procedure_list" style="list-style: none; padding: 0; font-size: 14px;"></ul>
         </div>
 
-        <div class="section-title">💊 6. ສັ່ງຢາ (Prescription - ສົ່ງຫາຫ້ອງຈ່າຍຢາ)</div>
+        <div class="section-title" style="display: flex; justify-content: space-between; align-items: center;">
+            <span>💊 6. ສັ່ງຢາ (Prescription - ສົ່ງຫາຫ້ອງຈ່າຍຢາ)</span>
+            <button type="button" class="btn-action" style="background: #6a1b9a; color: white; padding: 4px 12px; font-size: 13px; border-radius: 20px; box-shadow: 0 2px 5px rgba(106, 27, 154, 0.3);" onclick="autoPrescribeAI()">🤖 ວິເຄາະ & ຈັດຢາອັດຕະໂນມັດ</button>
+        </div>
         <div class="table-responsive" style="border: 1px solid #e8edf3; border-radius: 8px; margin-bottom: 15px;">
             <table class="med-table">
                 <thead style="background: #f4f7fb;">
@@ -5948,6 +5951,75 @@ window.autoSummarizeTreatment = function() {
     }
 
     window.showCustomAlert('ສ້າງແຜນການຮັກສາອັດຕະໂນມັດສຳເລັດແລ້ວ!', 'ສຳເລັດ', '✨');
+};
+
+// ຟັງຊັນ AI ວິເຄາະ ແລະ ຈັດຢາອັດຕະໂນມັດ ຈາກ Master Data
+window.autoPrescribeAI = async function() {
+    // 1. ອ່ານຄ່າຈາກຊ່ອງວິນິດໄສພະຍາດ (ຂໍ້ 4)
+    const diagText = document.getElementById('cst2_diag_primary').value.trim().toLowerCase();
+    
+    if (!diagText) {
+        window.showCustomAlert('ກະລຸນາປ້ອນ "Primary Diagnosis (ພະຍາດຫຼັກ)" ໃນຂໍ້ 4 ກ່ອນໃຫ້ລະບົບວິເຄາະຢາ!', 'ແຈ້ງເຕືອນ', '⚠️');
+        return;
+    }
+
+    window.showCustomAlert('ກຳລັງວິເຄາະພະຍາດ ແລະ ດຶງແນວທາງການປິ່ນປົວຈາກຖານຂໍ້ມູນ...', 'AI ກຳລັງປະມວນຜົນ', '🤖');
+
+    try {
+        // 2. ຄົ້ນຫາພະຍາດໃນ Firebase ທີ່ກົງກັບຄຳທີ່ແພດພິມ (ຊອກຈາກຊື່ລາວ, ອັງກິດ ຫຼື ICD-10)
+        const diseasesSnapshot = await db.collection("diseases").get();
+        let matchedDiseaseId = null;
+        
+        diseasesSnapshot.forEach(doc => {
+            const d = doc.data();
+            if (d.name_la.toLowerCase().includes(diagText) || 
+                (d.icd10_code && d.icd10_code.toLowerCase() === diagText) ||
+                (d.name_en && d.name_en.toLowerCase().includes(diagText))) {
+                matchedDiseaseId = doc.id;
+            }
+        });
+
+        if (!matchedDiseaseId) {
+            window.showCustomAlert('ບໍ່ພົບແນວທາງການປິ່ນປົວສຳລັບພະຍາດນີ້ໃນ Master Data. ກະລຸນາສັ່ງຢາດ້ວຍຕົນເອງ.', 'ບໍ່ພົບຂໍ້ມູນ', 'ℹ️');
+            return;
+        }
+
+        // 3. ດຶງຂໍ້ມູນການຈັບຄູ່ຢາ (Guidelines) ສຳລັບພະຍາດທີ່ພົບ
+        const guidelinesSnapshot = await db.collection("treatment_guidelines")
+                                        .where("disease_id", "==", matchedDiseaseId)
+                                        .get();
+        
+        if (guidelinesSnapshot.empty) {
+            window.showCustomAlert('ພົບພະຍາດນີ້ໃນລະບົບ ແຕ່ຍັງບໍ່ໄດ້ຈັບຄູ່ຢາປິ່ນປົວໄວ້ໃນ Master Data!', 'ແຈ້ງເຕືອນ', '⚠️');
+            return;
+        }
+
+        // 4. ລ້າງຕາຕະລາງຢາເກົ່າອອກກ່ອນ ແລ້ວເອົາຢາໃໝ່ມາໃສ່
+        document.getElementById('cst2_prescription_body').innerHTML = '';
+        
+        let rxCount = 0;
+        // 5. ວົນລູບເອົາຢາແຕ່ລະຕົວມາໃສ່ໃນຕາຕະລາງ
+        for (const doc of guidelinesSnapshot.docs) {
+            const guide = doc.data();
+            // ໄປດຶງຊື່ຢາຈາກ Collection medicines
+            const medDoc = await db.collection("medicines").doc(guide.medicine_id).get();
+            
+            if (medDoc.exists) {
+                const medData = medDoc.data();
+                const medName = medData.name_en || medData.name_la;
+                
+                // ເອີ້ນໃຊ້ຟັງຊັນ addConsultRxRow ທີ່ເຮົາມີຢູ່ແລ້ວໃນໂຄດ
+                addConsultRxRow(medName, guide.default_qty, guide.default_usage);
+                rxCount++;
+            }
+        }
+
+        window.showCustomAlert(`ວິເຄາະສຳເລັດ! ລະບົບໄດ້ເພີ່ມຢາ ${rxCount} ລາຍການລົງໃນໃບສັ່ງຢາອັດຕະໂນມັດ.`, 'ສຳເລັດ', '✅');
+
+    } catch (error) {
+        console.error("Error in Auto Prescription:", error);
+        window.showCustomAlert('ເກີດຂໍ້ຜິດພາດໃນການເຊື່ອມຕໍ່ຖານຂໍ້ມູນ!', 'Error', '❌');
+    }
 };
 
 </script>
