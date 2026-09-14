@@ -1842,24 +1842,25 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
 
 <div class="modal-overlay" id="echoProcessModal">
     <div class="modal-card large">
-        <h3>🔊 ບັນທຶກຜົນກວດ Echocardiography</h3>
-        <div class="info-box" style="font-size: 14px; margin-bottom: 15px;"><div style="display: flex; justify-content: space-between;"><strong>Echo No:</strong> <span id="echo_proc_no" style="color: #6a1b9a;"></span></div><div style="display: flex; justify-content: space-between;"><strong>ຄົນເຈັບ:</strong> <span id="echo_proc_patient"></span></div></div>
-        <div class="section-title">❤️ A. Cardiac Measurements</div>
-        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;"><div class="form-group"><label>LVEF (%)</label><input type="text" id="echo_m_lvef"></div><div class="form-group"><label>LV Dimensions (mm)</label><input type="text" id="echo_m_lv"></div><div class="form-group"><label>LA Size (mm)</label><input type="text" id="echo_m_la"></div><div class="form-group"><label>Aortic Root (mm)</label><input type="text" id="echo_m_ao"></div><div class="form-group"><label>RV Size (mm)</label><input type="text" id="echo_m_rv"></div><div class="form-group"><label>ອື່ນໆ (Other)</label><input type="text" id="echo_m_other"></div></div>
-        <div class="section-title">❤️ B. Heart Valves & C. Chamber/Structure</div>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;"><div class="form-group"><label>Mitral & Aortic Valve</label><textarea id="echo_v_left" rows="2"></textarea></div><div class="form-group"><label>Tricuspid & Pulmonary Valve</label><textarea id="echo_v_right" rows="2"></textarea></div><div class="form-group"><label>Left Ventricle / Atrium</label><textarea id="echo_c_left" rows="2"></textarea></div><div class="form-group"><label>Right Ventricle / Atrium & Septum</label><textarea id="echo_c_right" rows="2"></textarea></div><div class="form-group" style="grid-column: span 2;"><label>Pericardium / Others</label><input type="text" id="echo_c_pericardium"></div></div>
-        <!-- ສ່ວນທີ່ເພີ່ມໃໝ່: ອັບໂຫຼດຮູບພາບ Echo -->
-        <div class="section-title">🖼️ ອັບໂຫຼດຮູບພາບປະກອບ (Echo Images)</div>
+        <h3>🔊 Record Echo Results (ບັນທຶກຜົນກວດ Echocardiography)</h3>
+        <div class="info-box" style="font-size: 14px; margin-bottom: 15px;"><div style="display: flex; justify-content: space-between;"><strong>Echo No:</strong> <span id="echo_proc_no" style="color: #6a1b9a;"></span></div><div style="display: flex; justify-content: space-between;"><strong>Patient (ຄົນເຈັບ):</strong> <span id="echo_proc_patient"></span></div></div>
+        <div class="section-title">❤️ A. Cardiac Measurements (ການວັດແທກຫົວໃຈ)</div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;"><div class="form-group"><label>LVEF (%)</label><input type="text" id="echo_m_lvef"></div><div class="form-group"><label>LV Dimensions (mm)</label><input type="text" id="echo_m_lv"></div><div class="form-group"><label>LA Size (mm)</label><input type="text" id="echo_m_la"></div><div class="form-group"><label>Aortic Root (mm)</label><input type="text" id="echo_m_ao"></div><div class="form-group"><label>RV Size (mm)</label><input type="text" id="echo_m_rv"></div><div class="form-group"><label>Other (ອື່ນໆ)</label><input type="text" id="echo_m_other"></div></div>
+        <div class="section-title">❤️ B. Heart Valves & C. Chamber/Structure (ລິ້ນຫົວໃຈ ແລະ ຫ້ອງ/ໂຄງສ້າງຫົວໃຈ)</div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;"><div class="form-group"><label>Mitral & Aortic Valve</label><textarea id="echo_v_left" rows="2"></textarea></div><div class="form-group"><label>Tricuspid & Pulmonary Valve</label><textarea id="echo_v_right" rows="2"></textarea></div><div class="form-group"><label>Left Ventricle / Atrium</label><textarea id="echo_c_left" rows="2"></textarea></div><div class="form-group"><label>Right Ventricle / Atrium & Septum</label><textarea id="echo_c_right" rows="2"></textarea></div><div class="form-group" style="grid-column: span 2;"><label>Pericardium / Others (ເຍື່ອຫຸ້ມຫົວໃຈ / ອື່ນໆ)</label><input type="text" id="echo_c_pericardium"></div></div>
+        
+        <!-- ສ່ວນອັບໂຫຼດຮູບພາບ Echo -->
+        <div class="section-title">🖼️ Echo Images (ອັບໂຫຼດຮູບພາບປະກອບ)</div>
         <div style="background: #f9fbfd; padding: 15px; border: 1px dashed #ccc; border-radius: 8px; margin-bottom: 15px;">
             <input type="file" id="echo_file_upload" accept=".pdf, image/jpeg, image/png" style="display: none;" onchange="handleEchoFileUpload(event)">
-            <button class="btn-action" style="background: #6a1b9a; color: white;" onclick="document.getElementById('echo_file_upload').click()">📎 ເລືອກໄຟລ໌ຮູບ (JPG / PNG)</button>
+            <button class="btn-action" style="background: #6a1b9a; color: white;" onclick="document.getElementById('echo_file_upload').click()">📎 Choose File (ເລືອກໄຟລ໌ຮູບ JPG / PNG)</button>
             <div id="echo_attachments_list" style="margin-top: 10px; display: flex; flex-direction: column; gap: 5px;"></div>
         </div>
 
-        <div class="section-title">📝 D. ບົດລາຍງານ (Echo Report)</div>
-        <div class="form-group"><label>Findings (ລາຍລະອຽດທີ່ພົບ)</label><textarea id="echo_r_findings" rows="3"></textarea></div><div class="form-group"><label style="color: #6a1b9a; font-weight: bold;">Impression / Conclusion *</label><textarea id="echo_r_impression" rows="3"></textarea></div><div class="form-group"><label>Recommendation (ຄຳແນະນຳ)</label><textarea id="echo_r_recommendation" rows="2"></textarea></div>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; border-top: 1px solid #eee; padding-top: 15px;"><div class="form-group"><label>ຜູ້ກວດ/ອ່ານຜົນ</label><input type="text" id="echo_r_doctor"></div><div class="form-group"><label>ສະຖານະ</label><select id="echo_proc_status"><option value="🟡 ລໍຖ້າກວດ">🟡 ລໍຖ້າກວດ</option><option value="🔵 ກຳລັງກວດ">🔵 ກຳລັງກວດ</option><option value="🟠 ລໍຖ້າລາຍງານ">🟠 ຖ່າຍແລ້ວ / ລໍຖ້າລາຍງານ</option><option value="🟣 ລໍຖ້າຢືນຢັນ">🟣 ລໍຖ້າຢືນຢັນ (Verify)</option><option value="🟢 ສຳເລັດ">🟢 ສຳເລັດ (ສົ່ງຜົນໃຫ້ແພດ)</option></select></div></div>
-        <div class="modal-actions"><button class="btn-cancel" onclick="document.getElementById('echoProcessModal').style.display='none'">ຍົກເລີກ</button><button class="btn-submit" onclick="saveEchoProcess()" style="background: #6a1b9a;">💾 ບັນທຶກຜົນ Echo</button></div>
+        <div class="section-title">📝 D. Echo Report (ບົດລາຍງານ)</div>
+        <div class="form-group"><label>Findings (ລາຍລະອຽດທີ່ພົບ)</label><textarea id="echo_r_findings" rows="3"></textarea></div><div class="form-group"><label style="color: #6a1b9a; font-weight: bold;">Impression / Conclusion * (ສະຫຼຸບຜົນ)</label><textarea id="echo_r_impression" rows="3"></textarea></div><div class="form-group"><label>Recommendation (ຄຳແນະນຳ)</label><textarea id="echo_r_recommendation" rows="2"></textarea></div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; border-top: 1px solid #eee; padding-top: 15px;"><div class="form-group"><label>Examiner / Doctor (ຜູ້ກວດ/ອ່ານຜົນ)</label><input type="text" id="echo_r_doctor"></div><div class="form-group"><label>Status (ສະຖານະ)</label><select id="echo_proc_status"><option value="🟡 ລໍຖ້າກວດ">🟡 Waiting (ລໍຖ້າກວດ)</option><option value="🔵 ກຳລັງກວດ">🔵 In Progress (ກຳລັງກວດ)</option><option value="🟠 ລໍຖ້າລາຍງານ">🟠 Pending Report (ລໍຖ້າລາຍງານ)</option><option value="🟣 ລໍຖ້າຢືນຢັນ">🟣 Pending Verify (ລໍຖ້າຢືນຢັນ)</option><option value="🟢 ສຳເລັດ">🟢 Completed (ສຳເລັດ)</option></select></div></div>
+        <div class="modal-actions"><button class="btn-cancel" onclick="document.getElementById('echoProcessModal').style.display='none'">Cancel (ຍົກເລີກ)</button><button class="btn-submit" onclick="saveEchoProcess()" style="background: #6a1b9a;">💾 Save Echo Results (ບັນທຶກຜົນ Echo)</button></div>
     </div>
 </div>
 
@@ -1867,44 +1868,44 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
     <div class="modal-card large" style="background: #e2e8f0;">
         <div class="print-report-box" id="echo-print-area">
             <div class="print-header" style="border-bottom-color: #6a1b9a;"><h2 style="color: #6a1b9a;">ECHOCARDIOGRAPHY REPORT</h2></div>
-            <div class="print-patient-info" style="border-bottom: 2px solid #ccc; padding-bottom: 15px; margin-bottom: 20px;"><div><strong>Patient:</strong> <span id="prt_echo_patient"></span><br><strong>Age / Sex:</strong> <span id="prt_echo_age_sex"></span><br><strong>Visit ID:</strong> <span id="prt_echo_visit"></span></div><div style="text-align: right;"><strong>Echo No:</strong> <span id="prt_echo_no"></span><br><strong>Date:</strong> <span id="prt_echo_date"></span><br><strong>Ref. Doctor:</strong> <span id="prt_echo_doctor"></span></div></div>
+            <div class="print-patient-info" style="border-bottom: 2px solid #ccc; padding-bottom: 15px; margin-bottom: 20px;"><div><strong>Patient (ຄົນເຈັບ):</strong> <span id="prt_echo_patient"></span><br><strong>Age / Sex (ອາຍຸ / ເພດ):</strong> <span id="prt_echo_age_sex"></span><br><strong>Visit ID:</strong> <span id="prt_echo_visit"></span></div><div style="text-align: right;"><strong>Echo No:</strong> <span id="prt_echo_no"></span><br><strong>Date (ວັນທີ):</strong> <span id="prt_echo_date"></span><br><strong>Ref. Doctor (ແພດສົ່ງກວດ):</strong> <span id="prt_echo_doctor"></span></div></div>
             <h4 style="margin-top: 20px; border-bottom: 1px solid #eee; padding-bottom: 5px; color: #6a1b9a;">Cardiac Measurements:</h4><div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 14px; margin-bottom: 15px;"><div><strong>LVEF:</strong> <span id="prt_echo_m_lvef"></span></div><div><strong>LV Dims:</strong> <span id="prt_echo_m_lv"></span></div><div><strong>LA Size:</strong> <span id="prt_echo_m_la"></span></div><div><strong>Aortic Root:</strong> <span id="prt_echo_m_ao"></span></div><div><strong>RV Size:</strong> <span id="prt_echo_m_rv"></span></div><div><strong>Other:</strong> <span id="prt_echo_m_other"></span></div></div>
-            <h4 style="margin-top: 20px; border-bottom: 1px solid #eee; padding-bottom: 5px; color: #6a1b9a;">Findings:</h4><div id="prt_echo_findings" style="margin-bottom: 20px; white-space: pre-wrap; font-size: 14px; line-height: 1.5;"></div>
-            <h4 style="margin-top: 20px; border-bottom: 1px solid #eee; padding-bottom: 5px; color: #b42318;">Impression / Conclusion:</h4><div id="prt_echo_impression" style="margin-bottom: 20px; white-space: pre-wrap; font-size: 14px; font-weight: bold; line-height: 1.5;"></div>
-            <h4 style="margin-top: 20px; border-bottom: 1px solid #eee; padding-bottom: 5px;">Recommendation:</h4><div id="prt_echo_recommendation" style="margin-bottom: 40px; white-space: pre-wrap; font-size: 14px; line-height: 1.5;"></div>
+            <h4 style="margin-top: 20px; border-bottom: 1px solid #eee; padding-bottom: 5px; color: #6a1b9a;">Findings (ລາຍລະອຽດທີ່ພົບ):</h4><div id="prt_echo_findings" style="margin-bottom: 20px; white-space: pre-wrap; font-size: 14px; line-height: 1.5;"></div>
+            <h4 style="margin-top: 20px; border-bottom: 1px solid #eee; padding-bottom: 5px; color: #b42318;">Impression / Conclusion (ສະຫຼຸບຜົນ):</h4><div id="prt_echo_impression" style="margin-bottom: 20px; white-space: pre-wrap; font-size: 14px; font-weight: bold; line-height: 1.5;"></div>
+            <h4 style="margin-top: 20px; border-bottom: 1px solid #eee; padding-bottom: 5px;">Recommendation (ຄຳແນະນຳ):</h4><div id="prt_echo_recommendation" style="margin-bottom: 40px; white-space: pre-wrap; font-size: 14px; line-height: 1.5;"></div>
         </div>
-        <div class="modal-actions" style="background: white; margin: 0; padding: 15px;"><button class="btn-cancel" onclick="document.getElementById('echoReportModal').style.display='none'">ປິດ</button><button class="btn-print" onclick="window.print()">🖨️ ພິມລາຍງານ</button></div>
+        <div class="modal-actions" style="background: white; margin: 0; padding: 15px;"><button class="btn-cancel" onclick="document.getElementById('echoReportModal').style.display='none'">Close (ປິດ)</button><button class="btn-print" onclick="window.print()">🖨️ Print Report (ພິມລາຍງານ)</button></div>
     </div>
 </div>
 
 <!-- ================= INVENTORY MODALS ================= -->
 <div class="modal-overlay" id="invAddModal">
     <div class="modal-card large">
-        <h3>➕ ເພີ່ມລາຍການສິນຄ້າເຂົ້າລະບົບ</h3>
+        <h3>➕ Add Item to Inventory (ເພີ່ມລາຍການສິນຄ້າເຂົ້າລະບົບ)</h3>
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-            <div class="form-group"><label>Item ID (Auto)</label><input type="text" id="inv_add_id" readonly style="background: #f4f7fb; font-weight: bold; color: #102a43;"></div>
-            <div class="form-group"><label>Barcode</label><input type="text" id="inv_add_barcode" placeholder="ສະແກນ ຫຼື ປ້ອນບາໂຄດ"></div>
-            <div class="form-group" style="grid-column: span 2;"><label>ຊື່ຢາ / ສິນຄ້າ (Item Name) *</label><input type="text" id="inv_add_name" placeholder="ຕົວຢ່າງ: Paracetamol 500mg"></div>
-            <div class="form-group"><label>Generic Name</label><input type="text" id="inv_add_generic" placeholder="ຊື່ສາມັນທາງຢາ"></div>
-            <div class="form-group"><label>ປະເພດ *</label>
+            <div class="form-group"><label>Item ID (ລະຫັດສິນຄ້າ - Auto)</label><input type="text" id="inv_add_id" readonly style="background: #f4f7fb; font-weight: bold; color: #102a43;"></div>
+            <div class="form-group"><label>Barcode (ບາໂຄດ)</label><input type="text" id="inv_add_barcode" placeholder="Scan or enter barcode..."></div>
+            <div class="form-group" style="grid-column: span 2;"><label>Item Name (ຊື່ຢາ / ສິນຄ້າ) *</label><input type="text" id="inv_add_name" placeholder="Example: Paracetamol 500mg"></div>
+            <div class="form-group"><label>Generic Name (ຊື່ສາມັນທາງຢາ)</label><input type="text" id="inv_add_generic" placeholder="Enter generic name..."></div>
+            <div class="form-group"><label>Category (ປະເພດ) *</label>
                 <select id="inv_add_type">
-                    <option value="ຢາ (Medicine)">💊 ຢາ (Medicine)</option>
-                    <option value="ວັດສະດຸການແພດ">🧤 ວັດສະດຸການແພດ</option>
-                    <option value="ວັດສະດຸ Lab">🧪 ວັດສະດຸ Lab</option>
-                    <option value="ອຸປະກອນ/ຊັບສິນ">🖥️ ອຸປະກອນ/ຊັບສິນ</option>
+                    <option value="ຢາ (Medicine)">💊 Medicine (ຢາ)</option>
+                    <option value="ວັດສະດຸການແພດ">🧤 Medical Supplies (ວັດສະດຸການແພດ)</option>
+                    <option value="ວັດສະດຸ Lab">🧪 Lab Supplies (ວັດສະດຸ Lab)</option>
+                    <option value="ອຸປະກອນ/ຊັບສິນ">🖥️ Equipment / Assets (ອຸປະກອນ/ຊັບສິນ)</option>
                 </select>
             </div>
-            <div class="form-group"><label>ຮູບແບບ (Form)</label><input type="text" id="inv_add_form" placeholder="Tablet, Capsule, Injection..."></div>
-            <div class="form-group"><label>ຫົວໜ່ວຍ (Unit) *</label><input type="text" id="inv_add_unit" placeholder="ເມັດ, ແຄັບຊູນ, ຫຼອດ, ອັນ..."></div>
-            <div class="form-group"><label style="color:#b42318;">ຈຸດແຈ້ງເຕືອນ Stock ຕ່ຳ (Min Stock) *</label><input type="number" id="inv_add_min" value="20"></div>
-            <div class="form-group"><label>ຈຸດ Stock ສູງສຸດ (Max Stock)</label><input type="number" id="inv_add_max" value="1000"></div>
-            <div class="form-group"><label>ລາຄາຊື້ລ່າສຸດ (Cost)</label><input type="number" id="inv_add_cost" placeholder="0"></div>
-            <div class="form-group"><label>ລາຄາຂາຍ (Price) *</label><input type="number" id="inv_add_price" placeholder="0"></div>
+            <div class="form-group"><label>Form (ຮູບແບບ)</label><input type="text" id="inv_add_form" placeholder="Tablet, Capsule, Injection..."></div>
+            <div class="form-group"><label>Unit (ຫົວໜ່ວຍ) *</label><input type="text" id="inv_add_unit" placeholder="Tablet, Bottle, Box..."></div>
+            <div class="form-group"><label style="color:#b42318;">Min Stock (ຈຸດແຈ້ງເຕືອນ Stock ຕ່ຳ) *</label><input type="number" id="inv_add_min" value="20"></div>
+            <div class="form-group"><label>Max Stock (ຈຸດ Stock ສູງສຸດ)</label><input type="number" id="inv_add_max" value="1000"></div>
+            <div class="form-group"><label>Cost Price (ລາຄາຊື້ລ່າສຸດ)</label><input type="number" id="inv_add_cost" placeholder="0"></div>
+            <div class="form-group"><label>Selling Price (ລາຄາຂາຍ) *</label><input type="number" id="inv_add_price" placeholder="0"></div>
         </div>
-        <div class="form-group" style="margin-top: 15px;"><label>ໝາຍເຫດ (Notes)</label><textarea id="inv_add_notes" rows="2"></textarea></div>
+        <div class="form-group" style="margin-top: 15px;"><label>Notes (ໝາຍເຫດ)</label><textarea id="inv_add_notes" rows="2"></textarea></div>
         <div class="modal-actions">
-            <button class="btn-cancel" onclick="document.getElementById('invAddModal').style.display='none'">ຍົກເລີກ</button>
-            <button class="btn-submit" onclick="saveInvItem()">💾 ບັນທຶກສິນຄ້າ</button>
+            <button class="btn-cancel" onclick="document.getElementById('invAddModal').style.display='none'">Cancel (ຍົກເລີກ)</button>
+            <button class="btn-submit" onclick="saveInvItem()">💾 Save Item (ບັນທຶກສິນຄ້າ)</button>
         </div>
     </div>
 </div>
