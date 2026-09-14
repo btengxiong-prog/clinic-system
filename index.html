@@ -5934,53 +5934,52 @@ window.injectRealDataToFirebase = async function() {
         });
     });
 
-    // --- ຟັງຊັນໂຫຼດຂໍ້ມູນຈາກ Firebase ມາສະແດງໃນຕາຕະລາງ ---
+// --- ຟັງຊັນໂຫຼດຂໍ້ມູນຈາກ Firebase ມາສະແດງໃນຕາຕະລາງ ແລະ Datalist ---
     async function loadMasterData() {
         if (typeof db === 'undefined') return;
         
-    // ໂຫຼດພະຍາດ
+        // 1. ໂຫຼດພະຍາດ
         db.collection("diseases").onSnapshot(snapshot => {
             mdDiseases = [];
             const tbody = document.getElementById('md_disease_body');
             const selectDis = document.getElementById('md_guide_disease');
+            const dataList = document.getElementById('disease_list'); // ດຶງ Datalist ມາ
             
-            // --- ໂຄດທີ່ຕ້ອງເພີ່ມໃໝ່ (ແຖວທີ 1) ---
-            const dataList = document.getElementById('disease_list');
-            
-            tbody.innerHTML = ''; selectDis.innerHTML = '<option value="">-- ເລືອກພະຍາດ --</option>';
-            
-            // --- ໂຄດທີ່ຕ້ອງເພີ່ມໃໝ່ (ແຖວທີ 2) ---
-            if(dataList) dataList.innerHTML = '';
+            if(tbody) tbody.innerHTML = ''; 
+            if(selectDis) selectDis.innerHTML = '<option value="">-- ເລືອກພະຍາດ --</option>';
+            if(dataList) dataList.innerHTML = ''; // ລ້າງຂໍ້ມູນເກົ່າໃນ Dropdown
 
             snapshot.forEach(doc => {
                 let d = doc.data(); d.id = doc.id; mdDiseases.push(d);
-                tbody.innerHTML += `<tr><td>${d.icd10_code || '-'}</td><td><strong>${d.name_la}</strong><br><small>${d.name_en || ''}</small></td><td>${d.category || '-'}</td></tr>`;
-                selectDis.innerHTML += `<option value="${d.id}">${d.name_la}</option>`;
+                if(tbody) tbody.innerHTML += `<tr><td>${d.icd10_code || '-'}</td><td><strong>${d.name_la}</strong><br><small>${d.name_en || ''}</small></td><td>${d.category || '-'}</td></tr>`;
+                if(selectDis) selectDis.innerHTML += `<option value="${d.id}">${d.name_la}</option>`;
                 
-                // --- ໂຄດທີ່ຕ້ອງເພີ່ມໃໝ່ (ແຖວທີ 3) ---
+                // ຍັດຂໍ້ມູນລົງໃນ Datalist ຂອງໜ້າຫ້ອງກວດ
                 if(dataList) dataList.innerHTML += `<option value="${d.name_la}">[${d.icd10_code || '-'}] ${d.name_en || ''}</option>`;
             });
-            if(mdDiseases.length === 0) tbody.innerHTML = '<tr><td colspan="3" style="text-align: center;">ບໍ່ມີຂໍ້ມູນ</td></tr>';
+            if(mdDiseases.length === 0 && tbody) tbody.innerHTML = '<tr><td colspan="3" style="text-align: center;">ບໍ່ມີຂໍ້ມູນ</td></tr>';
         });
 
-        // ໂຫຼດຢາ
+        // 2. ໂຫຼດຢາ
         db.collection("medicines").onSnapshot(snapshot => {
             mdMedicines = [];
             const tbody = document.getElementById('md_medicine_body');
             const selectMed = document.getElementById('md_guide_medicine');
-            tbody.innerHTML = ''; selectMed.innerHTML = '<option value="">-- ເລືອກຢາ --</option>';
+            if(tbody) tbody.innerHTML = ''; 
+            if(selectMed) selectMed.innerHTML = '<option value="">-- ເລືອກຢາ --</option>';
             
             snapshot.forEach(doc => {
                 let m = doc.data(); m.id = doc.id; mdMedicines.push(m);
-                tbody.innerHTML += `<tr><td><strong>${m.name_en}</strong></td><td>${m.category || '-'}</td><td>${m.dosage_info || '-'}</td></tr>`;
-                selectMed.innerHTML += `<option value="${m.id}">${m.name_en}</option>`;
+                if(tbody) tbody.innerHTML += `<tr><td><strong>${m.name_en}</strong></td><td>${m.category || '-'}</td><td>${m.dosage_info || '-'}</td></tr>`;
+                if(selectMed) selectMed.innerHTML += `<option value="${m.id}">${m.name_en}</option>`;
             });
-            if(mdMedicines.length === 0) tbody.innerHTML = '<tr><td colspan="3" style="text-align: center;">ບໍ່ມີຂໍ້ມູນ</td></tr>';
+            if(mdMedicines.length === 0 && tbody) tbody.innerHTML = '<tr><td colspan="3" style="text-align: center;">ບໍ່ມີຂໍ້ມູນ</td></tr>';
         });
 
-        // ໂຫຼດການຈັບຄູ່
+        // 3. ໂຫຼດການຈັບຄູ່
         db.collection("treatment_guidelines").onSnapshot(snapshot => {
             const tbody = document.getElementById('md_guideline_body');
+            if(!tbody) return;
             tbody.innerHTML = '';
             
             let items = [];
@@ -5991,7 +5990,6 @@ window.injectRealDataToFirebase = async function() {
                 return;
             }
 
-            // ລໍຖ້າໃຫ້ຢາ ແລະ ພະຍາດໂຫຼດແລ້ວຈຶ່ງ map ຊື່
             setTimeout(() => {
                 tbody.innerHTML = '';
                 items.forEach(g => {
@@ -6223,7 +6221,8 @@ window.autoPrescribeAI = async function() {
         window.showCustomAlert('ເກີດຂໍ້ຜິດພາດໃນການເຊື່ອມຕໍ່ຖານຂໍ້ມູນ!', 'Error', '❌');
     }
 };
-
+// ສັ່ງໃຫ້ດຶງຂໍ້ມູນພະຍາດມາຕຽມໄວ້ໃນ Dropdown ທັນທີທີ່ເປີດລະບົບ
+    setTimeout(() => { loadMasterData(); }, 1000);
 </script>
 </body>
 </html>
