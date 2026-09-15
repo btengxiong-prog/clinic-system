@@ -2345,17 +2345,17 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
 <!-- ================= JAVASCRIPT ================= -->
 <script>
 
-// ================= LOGIN & ROLE CONTROL SYSTEM ================= //
+// ================= LOGIN & STRICT ROLE CONTROL SYSTEM ================= //
 const validUsers = {
-    "XPH-ADMIN": { name: "Super Admin", role: "ADMIN", pass: "Adm!n@99#Xph_2026", allowedPages: ['dashboard', 'patients', 'appointments', 'consultations', 'laboratory', 'xray', 'echo', 'pharmacy', 'inventory', 'pos', 'finance', 'employees', 'reports', 'notifications', 'masterdata'] },
-    "XPH-BRA": { name: "Branch Manager", role: "MANAGER", pass: "Mgr#Vt01$Secure*", allowedPages: ['dashboard', 'patients', 'appointments', 'consultations', 'pharmacy', 'inventory', 'pos', 'finance', 'employees', 'reports', 'notifications'] },
-    "XPH-RECEP": { name: "Receptionist", role: "RECEPTION", pass: "Front@Desk2026!Lao", allowedPages: ['dashboard', 'patients', 'appointments', 'notifications'] },
-    "XPH-DOCT": { name: "Doctor", role: "DOCTOR", pass: "Dr.C0re#Health$26", allowedPages: ['dashboard', 'patients', 'consultations', 'laboratory', 'xray', 'echo', 'pharmacy', 'notifications', 'masterdata'] },
-    "XPH-LAB": { name: "Lab Technician", role: "LAB", pass: "L@bTest*B10od#26", allowedPages: ['dashboard', 'laboratory', 'notifications'] },
-    "XPH-XRAY": { name: "X-Ray Technician", role: "XRAY", pass: "Xray#Scan$Ray01", allowedPages: ['dashboard', 'xray', 'notifications'] },
-    "XPH-ECHO": { name: "Echo Technician", role: "ECHO", pass: "Echo*Heart$Scan26", allowedPages: ['dashboard', 'echo', 'notifications'] },
-    "XPH-CAF": { name: "Cashier / Finance", role: "FINANCE", pass: "Cash$Pay#2026_Pos", allowedPages: ['dashboard', 'pos', 'finance', 'notifications'] },
-    "XPH-PHAR": { name: "Pharmacist", role: "PHARMACY", pass: "Pharm@acy!Med#26", allowedPages: ['dashboard', 'pharmacy', 'inventory', 'notifications'] }
+    "XPH-ADMIN": { name: "Super Admin", role: "ADMIN", pass: "Adm!n@99#Xph_2026", defaultPage: "dashboard", allowedPages: ['dashboard', 'patients', 'appointments', 'consultations', 'laboratory', 'xray', 'echo', 'pharmacy', 'inventory', 'pos', 'finance', 'employees', 'reports', 'notifications', 'masterdata'] },
+    "XPH-BRA": { name: "Branch Manager", role: "MANAGER", pass: "Mgr#Vt01$Secure*", defaultPage: "dashboard", allowedPages: ['dashboard', 'patients', 'appointments', 'consultations', 'pharmacy', 'inventory', 'pos', 'finance', 'employees', 'reports', 'notifications'] },
+    "XPH-RECEP": { name: "Receptionist", role: "RECEPTION", pass: "Front@Desk2026!Lao", defaultPage: "appointments", allowedPages: ['appointments', 'patients', 'notifications'] },
+    "XPH-DOCT": { name: "Doctor", role: "DOCTOR", pass: "Dr.C0re#Health$26", defaultPage: "consultations", allowedPages: ['patients', 'consultations', 'laboratory', 'xray', 'echo', 'pharmacy', 'notifications'] },
+    "XPH-LAB": { name: "Lab Technician", role: "LAB", pass: "L@bTest*B10od#26", defaultPage: "laboratory", allowedPages: ['laboratory', 'notifications'] },
+    "XPH-XRAY": { name: "X-Ray Technician", role: "XRAY", pass: "Xray#Scan$Ray01", defaultPage: "xray", allowedPages: ['xray', 'notifications'] },
+    "XPH-ECHO": { name: "Echo Technician", role: "ECHO", pass: "Echo*Heart$Scan26", defaultPage: "echo", allowedPages: ['echo', 'notifications'] },
+    "XPH-CAF": { name: "Cashier / Finance", role: "FINANCE", pass: "Cash$Pay#2026_Pos", defaultPage: "pos", allowedPages: ['pos', 'finance', 'reports', 'notifications'] },
+    "XPH-PHAR": { name: "Pharmacist", role: "PHARMACY", pass: "Pharm@acy!Med#26", defaultPage: "pharmacy", allowedPages: ['pharmacy', 'inventory', 'notifications'] }
 };
 
 window.handleLogin = function() {
@@ -2372,25 +2372,21 @@ window.handleLogin = function() {
         return;
     }
 
-    // Login ສຳເລັດ -> ເກັບ Session ໄວ້
+    // Login ສຳເລັດ
     const userInfo = validUsers[uInput];
     localStorage.setItem('clinic_logged_user', JSON.stringify({ username: uInput, ...userInfo }));
 
-    // ປິດໜ້າ Login Overlay
     document.getElementById('loginOverlay').style.display = 'none';
-
-    // ອັບເດດຊື່ຜູ້ໃຊ້ທີ່ Header
     document.getElementById('current_user_name').innerText = userInfo.name;
     document.querySelector('.user-info strong').innerText = userInfo.name;
     document.querySelector('.avatar').innerText = uInput.replace('XPH-', '').substring(0, 3);
 
-    // ຈຳກັດສິດ Menu Sidebar ຕາມ Role
-    applyRolePermissions(userInfo.allowedPages);
-
+    applyRolePermissions(userInfo.allowedPages, userInfo.defaultPage);
     window.showCustomAlert(`ຍິນດີຕ້ອນຮັບເຂົ້າສູ່ລະບົບ, ${userInfo.name}!`, 'ສຳເລັດ', '🟢');
 };
 
-window.applyRolePermissions = function(allowedPages) {
+window.applyRolePermissions = function(allowedPages, defaultPage) {
+    // 1. ເຊື່ອງ/ສະແດງ ເມນູໃນ Sidebar ຕາມສິດ
     const menuItems = document.querySelectorAll('.sidebar .menu-item');
     menuItems.forEach(item => {
         const page = item.getAttribute('data-page');
@@ -2400,8 +2396,30 @@ window.applyRolePermissions = function(allowedPages) {
             item.style.display = 'none';
         }
     });
+
+    // 2. ເຊື່ອງປຸ່ມ Quick Actions ໃນໜ້າ Dashboard (ປ້ອງກັນການກົດຂ້າມສິດ)
+    const btnRegPt = document.getElementById('btn-register-patient');
+    const btnRegApt = document.getElementById('btn-register-appointment');
+    const btnCst = document.getElementById('btn-quick-consult');
+    const btnRx = document.getElementById('btn-quick-pharmacy');
+    const btnPos = document.getElementById('btn-quick-pos');
+    const btnRep = document.getElementById('btn-quick-reports');
+
+    if(btnRegPt) btnRegPt.style.display = allowedPages.includes('patients') ? 'block' : 'none';
+    if(btnRegApt) btnRegApt.style.display = allowedPages.includes('appointments') ? 'block' : 'none';
+    if(btnCst) btnCst.style.display = allowedPages.includes('consultations') ? 'block' : 'none';
+    if(btnRx) btnRx.style.display = allowedPages.includes('pharmacy') ? 'block' : 'none';
+    if(btnPos) btnPos.style.display = allowedPages.includes('pos') ? 'block' : 'none';
+    if(btnRep) btnRep.style.display = allowedPages.includes('reports') ? 'block' : 'none';
+
+    // 3. Auto-Click ໄປຫາໜ້າທຳອິດທີ່ຮັບຜິດຊອບ (Default Workspace)
+    if (defaultPage) {
+        const targetMenu = document.querySelector(`.sidebar .menu-item[data-page="${defaultPage}"]`);
+        if (targetMenu) targetMenu.click();
+    }
 };
 
+// ກວດສອບຕອນໂຫຼດໜ້າຈໍ ວ່າເຄີຍ Login ແລ້ວຫຼືຍັງ
 document.addEventListener('DOMContentLoaded', () => {
     const savedUser = localStorage.getItem('clinic_logged_user');
     if (savedUser) {
@@ -2410,17 +2428,15 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('current_user_name').innerText = user.name;
         document.querySelector('.user-info strong').innerText = user.name;
         document.querySelector('.avatar').innerText = user.username.replace('XPH-', '').substring(0, 3);
-        applyRolePermissions(user.allowedPages);
+        applyRolePermissions(user.allowedPages, user.defaultPage);
     }
 });
 
 window.handleLogout = function() {
-    window.showCustomConfirm('ທ່ານຕ້ອງການອອກຈາກລະບົບແທ້ຫຼືບໍ່?', 'ຢືນຢັນການອອກຈາກລະບົບ', function() {
-        localStorage.removeItem('clinic_logged_user');
-        location.reload(); // ຣີເຟຣຊໜ້າຈໍເພື່ອໃຫ້ກັບຄືນສູ່ໜ້າ Login
-    });
+    // ອອກຈາກລະບົບທັນທີ ໂດຍບໍ່ຕ້ອງຖາມຢືນຢັນ
+    localStorage.removeItem('clinic_logged_user');
+    location.reload(); 
 };
-
 window.showCustomAlert = function(message, title = "ແຈ້ງເຕືອນ", icon = "💡", callback = null) {
         document.getElementById('customAlertTitle').innerText = title; document.getElementById('customAlertMessage').innerHTML = message; document.getElementById('customAlertIcon').innerText = icon;
         document.getElementById('customAlertActions').innerHTML = `<button class="custom-alert-btn btn-alert-ok" id="customAlertOkBtn">ຕົກລົງ</button>`;
