@@ -1203,68 +1203,66 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
     </div>
 </div>
 <!-- ================= MASTER DATA PAGE ================= -->
-    <section class="content" id="page-masterdata" style="display: none;">
-        <header style="margin-bottom: 20px;">
-            <h2 style="color: #102a43;">⚙️ ຈັດການຖານຂໍ້ມູນຫຼັກ (Master Data)</h2>
-            <p style="color: #7b8794;">ເພີ່ມ/ແກ້ໄຂ ພະຍາດ, ຢາ ແລະ ແນວທາງການປິ່ນປົວສຳລັບລະບົບຈ່າຍຢາອັດຕະໂນມັດ</p>
-        </header>
+  <section class="content" id="page-masterdata" style="display: none;">
+      <header style="margin-bottom: 20px;">
+          <h2 style="color: #102a43;">⚙️ ຈັດການຖານຂໍ້ມູນຫຼັກ (Master Data)</h2>
+          <p style="color: #7b8794;">ເພີ່ມ/ແກ້ໄຂ ພະຍາດ, ຢາ ແລະ ແນວທາງການປິ່ນປົວສຳລັບລະບົບຈ່າຍຢາອັດຕະໂນມັດ</p>
+      </header>
 
-        <div class="dashboard-grid">
-            <!-- ຕາຕະລາງພະຍາດ -->
-            <div class="card">
-                <div class="card-header">
-                    <h3>🦠 ຖານຂໍ້ມູນພະຍາດ (Diseases)</h3>
-                    <button class="btn-action btn-add" onclick="openMasterDiseaseModal()">+ ເພີ່ມພະຍາດ</button>
-                </div>
-                <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
-                    <table>
-                        <thead style="position: sticky; top: 0; background: #f9fbfd;">
-                            <tr><th>ICD-10</th><th>ຊື່ພະຍາດ</th><th>ໝວດໝູ່</th></tr>
-                        </thead>
-                        <tbody id="md_disease_body">
-                            <tr><td colspan="3" style="text-align: center; padding: 15px;">ກຳລັງໂຫຼດຂໍ້ມູນ...</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+      <!-- 1. ຕາຕະລາງພະຍາດ (Diseases) -->
+      <div class="card" style="margin-bottom: 20px;">
+          <div class="card-header">
+              <h3>🦠 ຖານຂໍ້ມູນພະຍາດ (Diseases)</h3>
+              <button class="btn-action btn-add" onclick="openMasterDiseaseModal()">+ ເພີ່ມພະຍາດ</button>
+          </div>
+          <div class="table-responsive" style="max-height: 350px; overflow-y: auto;">
+              <table>
+                  <thead style="position: sticky; top: 0; background: #f9fbfd; z-index: 2;">
+                      <tr><th>ICD-10</th><th>ຊື່ພະຍາດ</th><th>ໝວດໝູ່</th></tr>
+                  </thead>
+                  <tbody id="md_disease_body">
+                      <tr><td colspan="3" style="text-align: center; padding: 15px;">ກຳລັງໂຫຼດຂໍ້ມູນ...</td></tr>
+                  </tbody>
+              </table>
+          </div>
+      </div>
 
-            <!-- ຕາຕະລາງຢາ -->
-            <div class="card">
-                <div class="card-header">
-                    <h3>💊 ຖານຂໍ້ມູນຢາ (Medicines)</h3>
-                    <button class="btn-action btn-add" onclick="openMasterMedicineModal()">+ ເພີ່ມຢາ</button>
-                </div>
-                <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
-                    <table>
-                        <thead style="position: sticky; top: 0; background: #f9fbfd;">
-                            <tr><th>ຊື່ຢາ</th><th>ໝວດໝູ່</th><th>ສັບພະຄຸນ</th></tr>
-                        </thead>
-                        <tbody id="md_medicine_body">
-                            <tr><td colspan="3" style="text-align: center; padding: 15px;">ກຳລັງໂຫຼດຂໍ້ມູນ...</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
+      <!-- 2. ຕາຕະລາງຢາ (Medicines) - ຍ້າຍມາຢູ່ກາງ -->
+      <div class="card" style="margin-bottom: 20px;">
+          <div class="card-header">
+              <h3>💊 ຖານຂໍ້ມູນຢາ (Medicines)</h3>
+              <button class="btn-action btn-add" onclick="openMasterMedicineModal()">+ ເພີ່ມຢາ</button>
+          </div>
+          <div class="table-responsive" style="max-height: 350px; overflow-y: auto;">
+              <table>
+                  <thead style="position: sticky; top: 0; background: #f9fbfd; z-index: 2;">
+                      <tr><th>ຊື່ຢາ</th><th>ໝວດໝູ່</th><th>ສັບພະຄຸນ</th></tr>
+                  </thead>
+                  <tbody id="md_medicine_body">
+                      <tr><td colspan="3" style="text-align: center; padding: 15px;">ກຳລັງໂຫຼດຂໍ້ມູນ...</td></tr>
+                  </tbody>
+              </table>
+          </div>
+      </div>
 
-        <!-- ຕາຕະລາງຈັບຄູ່ປິ່ນປົວ -->
-        <div class="card" style="margin-top: 20px;">
-            <div class="card-header">
-                <h3>🩺 ການຈັບຄູ່ການປິ່ນປົວ (Treatment Guidelines)</h3>
-                <button class="btn-action btn-add" onclick="openMasterGuidelineModal()" style="background: #16864b; color: white;">+ ເພີ່ມການຈັບຄູ່ໃໝ່</button>
-            </div>
-            <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
-                <table>
-                    <thead style="position: sticky; top: 0; background: #f9fbfd;">
-                        <tr><th>ພະຍາດ / ອາການ</th><th>ຢາທີ່ໃຊ້ປິ່ນປົວ</th><th>ຈຳນວນຈ່າຍເລີ່ມຕົ້ນ</th><th>ວິທີໃຊ້</th></tr>
-                    </thead>
-                    <tbody id="md_guideline_body">
-                        <tr><td colspan="4" style="text-align: center; padding: 15px;">ກຳລັງໂຫຼດຂໍ້ມູນ...</td></tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </section>
+      <!-- 3. ຕາຕະລາງຈັບຄູ່ປິ່ນປົວ (Treatment Guidelines) -->
+      <div class="card">
+          <div class="card-header">
+              <h3>🩺 ການຈັບຄູ່ການປິ່ນປົວ (Treatment Guidelines)</h3>
+              <button class="btn-action btn-add" onclick="openMasterGuidelineModal()" style="background: #16864b; color: white;">+ ເພີ່ມການຈັບຄູ່ໃໝ່</button>
+          </div>
+          <div class="table-responsive" style="max-height: 350px; overflow-y: auto;">
+              <table>
+                  <thead style="position: sticky; top: 0; background: #f9fbfd; z-index: 2;">
+                      <tr><th>ພະຍາດ / ອາການ</th><th>ຢາທີ່ໃຊ້ປິ່ນປົວ</th><th>ຈຳນວນຈ່າຍເລີ່ມຕົ້ນ</th><th>ວິທີໃຊ້</th></tr>
+                  </thead>
+                  <tbody id="md_guideline_body">
+                      <tr><td colspan="4" style="text-align: center; padding: 15px;">ກຳລັງໂຫຼດຂໍ້ມູນ...</td></tr>
+                  </tbody>
+              </table>
+          </div>
+      </div>
+  </section>
 </main>
 
 <!-- ================= ALL MODALS ================= -->
