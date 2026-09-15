@@ -265,6 +265,7 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
         <div class="top-actions">
             <div class="notification" onclick="showCustomAlert('ບໍ່ມີການແຈ້ງເຕືອນໃໝ່', 'ແຈ້ງເຕືອນ', '🔔')">🔔<div class="notification-dot"></div></div>
             <div class="user"><div class="avatar">SA</div><div class="user-info"><strong>Super Admin</strong><span id="current_user_name">Administrator</span></div></div>
+            <button class="btn-action" style="background: #d32f2f; color: white; padding: 6px 12px; font-size: 13px; cursor: pointer; border-radius: 6px;" onclick="handleLogout()" title="ອອກຈາກລະບົບ">🚪 ອອກຈາກລະບົບ</button>
         </div>
     </header>
 
@@ -2401,7 +2402,6 @@ window.applyRolePermissions = function(allowedPages) {
     });
 };
 
-// ກວດສອບຕອນໂຫຼດໜ້າຈໍ ວ່າເຄີຍ Login ແລ້ວຫຼືຍັງ
 document.addEventListener('DOMContentLoaded', () => {
     const savedUser = localStorage.getItem('clinic_logged_user');
     if (savedUser) {
@@ -2413,6 +2413,13 @@ document.addEventListener('DOMContentLoaded', () => {
         applyRolePermissions(user.allowedPages);
     }
 });
+
+window.handleLogout = function() {
+    window.showCustomConfirm('ທ່ານຕ້ອງການອອກຈາກລະບົບແທ້ຫຼືບໍ່?', 'ຢືນຢັນການອອກຈາກລະບົບ', function() {
+        localStorage.removeItem('clinic_logged_user');
+        location.reload(); // ຣີເຟຣຊໜ້າຈໍເພື່ອໃຫ້ກັບຄືນສູ່ໜ້າ Login
+    });
+};
 
 window.showCustomAlert = function(message, title = "ແຈ້ງເຕືອນ", icon = "💡", callback = null) {
         document.getElementById('customAlertTitle').innerText = title; document.getElementById('customAlertMessage').innerHTML = message; document.getElementById('customAlertIcon').innerText = icon;
