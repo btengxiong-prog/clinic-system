@@ -2381,40 +2381,19 @@ const validUsers = {
     "XPH-PHAR": { name: "Pharmacist", role: "PHARMACY", pass: "Pharm@acy!Med#26", defaultPage: "pharmacy", allowedPages: ['pharmacy', 'inventory', 'notifications'] }
 };
 
-window.handleLogin = function() {
-    const uInput = document.getElementById('loginUsername').value.trim().toUpperCase();
-    const pInput = document.getElementById('loginPassword').value.trim();
-
-    // ດຶງຂໍ້ມູນ User ທີ່ສ້າງເອງຈາກ LocalStorage ມາລວມກັບ validUsers ຫຼັກ
-    const customUsers = JSON.parse(localStorage.getItem('clinic_custom_users')) || {};
-    const allValidUsers = { ...validUsers, ...customUsers };
-
-    if (!allValidUsers[uInput]) {
-        window.showCustomAlert('❌ ບໍ່ພົບຊື່ຜູ້ໃຊ້ (Username) ນີ້ໃນລະບົບ!', 'ຜິດພາດ', '⚠️');
-        return;
-    }
-
-    if (allValidUsers[uInput].pass !== pInput) {
-        window.showCustomAlert('❌ ລະຫັດຜ່ານ (Password) ບໍ່ຖືກຕ້ອງ!', 'ຜິດພາດ', '⚠️');
-        return;
-    }
-
-    // Login ສຳເລັດ
-    const userInfo = allValidUsers[uInput];
-    localStorage.setItem('clinic_logged_user', JSON.stringify({ username: uInput, ...userInfo }));
-
-    document.getElementById('loginOverlay').style.display = 'none';
-    document.getElementById('current_user_name').innerText = userInfo.name;
-    document.querySelector('.user-info strong').innerText = userInfo.name;
+// ເພີ່ມ Event Listener ເພື່ອດັກຈັບການກົດປຸ່ມ Enter ແບບ 100%
+document.addEventListener('keydown', function(event) {
+    const loginOverlay = document.getElementById('loginOverlay');
     
-    // ເອົາຕົວອັກສອນ 3 ໂຕທຳອິດມາເປັນ Avatar
-    let avatarText = uInput.replace('XPH-', '').substring(0, 3);
-    document.querySelector('.avatar').innerText = avatarText;
-
-    applyRolePermissions(userInfo.allowedPages, userInfo.defaultPage);
-    
-    // ຕັດ Alert ແຈ້ງເຕືອນເຂົ້າສູ່ລະບົບອອກ ເພື່ອໃຫ້ເຂົ້າໜ້າຫຼັກທັນທີ
-};
+    // ກວດສອບວ່າຖ້າໜ້າຈໍ Login ກຳລັງເປີດຢູ່ (ຍັງບໍ່ໄດ້ເຊື່ອງ)
+    if (loginOverlay && loginOverlay.style.display !== 'none') {
+        // ຖ້າປຸ່ມທີ່ກົດແມ່ນປຸ່ມ Enter (ຮອງຮັບທັງ event.key ແລະ keyCode)
+        if (event.key === 'Enter' || event.keyCode === 13) {
+            event.preventDefault(); // ປ້ອງກັນບໍ່ໃຫ້ໜ້າເວັບ Refresh
+            handleLogin(); // ສັ່ງໃຫ້ເຂົ້າສູ່ລະບົບທັນທີ
+        }
+    }
+});
 
 window.applyRolePermissions = function(allowedPages, defaultPage) {
     // 1. ເຊື່ອງ/ສະແດງ ເມນູໃນ Sidebar ຕາມສິດ
