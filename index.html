@@ -2413,8 +2413,7 @@ window.handleLogin = function() {
 
     applyRolePermissions(userInfo.allowedPages, userInfo.defaultPage);
     
-    let branchText = userInfo.branch ? ` (ສາຂາ: ${userInfo.branch})` : '';
-    window.showCustomAlert(`ຍິນດີຕ້ອນຮັບເຂົ້າສູ່ລະບົບ, ${userInfo.name}${branchText}!`, 'ສຳເລັດ', '🟢');
+    // ຕັດ Alert ແຈ້ງເຕືອນເຂົ້າສູ່ລະບົບອອກ ເພື່ອໃຫ້ເຂົ້າໜ້າຫຼັກທັນທີ
 };
 
 window.applyRolePermissions = function(allowedPages, defaultPage) {
