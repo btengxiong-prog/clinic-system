@@ -2413,8 +2413,9 @@ window.handleLogin = function() {
 
     applyRolePermissions(userInfo.allowedPages, userInfo.defaultPage);
     
-    let branchText = userInfo.branch ? ` (ສາຂາ: ${userInfo.branch})` : '';
-    window.showCustomAlert(`ຍິນດີຕ້ອນຮັບເຂົ້າສູ່ລະບົບ, ${userInfo.name}${branchText}!`, 'ສຳເລັດ', '🟢');
+    // ຕັດຂັ້ນຕອນການແຈ້ງເຕືອນສຳເລັດອອກ ເພື່ອໃຫ້ເຂົ້າໜ້າຫຼັກເລີຍ ໂດຍບໍ່ຕ້ອງກົດປຸ່ມຕົກລົງ
+    // let branchText = userInfo.branch ? ` (ສາຂາ: ${userInfo.branch})` : '';
+    // window.showCustomAlert(`ຍິນດີຕ້ອນຮັບເຂົ້າສູ່ລະບົບ, ${userInfo.name}${branchText}!`, 'ສຳເລັດ', '🟢');
 };
 
 window.applyRolePermissions = function(allowedPages, defaultPage) {
