@@ -198,11 +198,11 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
 
         <div class="form-group" style="text-align: left;">
             <label>👤 ລະຫັດຜູ້ໃຊ້ (Username)</label>
-            <input type="text" id="loginUsername" placeholder="ປ້ອນລະຫັດຜູ້ໃຊ້..." style="font-weight: bold; text-transform: uppercase;" onkeypress="if(event.key === 'Enter') handleLogin()">
+            <input type="text" id="loginUsername" placeholder="ປ້ອນລະຫັດຜູ້ໃຊ້..." style="font-weight: bold; text-transform: uppercase;">
         </div>
         <div class="form-group" style="text-align: left;">
             <label>🔑 ລະຫັດຜ່ານ (Password)</label>
-            <input type="password" id="loginPassword" placeholder="ປ້ອນລະຫັດຜ່ານ..." onkeypress="if(event.key === 'Enter') handleLogin()">
+            <input type="password" id="loginPassword" placeholder="ປ້ອນລະຫັດຜ່ານ...">
         </div>
 
         <button class="custom-alert-btn btn-alert-ok" style="width: 100%; padding: 12px; margin-top: 10px; font-size: 16px;" onclick="handleLogin()">🔓 ເຂົ້າສູ່ລະບົບ (Login)</button>
@@ -2381,19 +2381,41 @@ const validUsers = {
     "XPH-PHAR": { name: "Pharmacist", role: "PHARMACY", pass: "Pharm@acy!Med#26", defaultPage: "pharmacy", allowedPages: ['pharmacy', 'inventory', 'notifications'] }
 };
 
-// ເພີ່ມ Event Listener ເພື່ອດັກຈັບການກົດປຸ່ມ Enter ແບບ 100%
-document.addEventListener('keydown', function(event) {
-    const loginOverlay = document.getElementById('loginOverlay');
-    
-    // ກວດສອບວ່າຖ້າໜ້າຈໍ Login ກຳລັງເປີດຢູ່ (ຍັງບໍ່ໄດ້ເຊື່ອງ)
-    if (loginOverlay && loginOverlay.style.display !== 'none') {
-        // ຖ້າປຸ່ມທີ່ກົດແມ່ນປຸ່ມ Enter (ຮອງຮັບທັງ event.key ແລະ keyCode)
-        if (event.key === 'Enter' || event.keyCode === 13) {
-            event.preventDefault(); // ປ້ອງກັນບໍ່ໃຫ້ໜ້າເວັບ Refresh
-            handleLogin(); // ສັ່ງໃຫ້ເຂົ້າສູ່ລະບົບທັນທີ
-        }
+window.handleLogin = function() {
+    const uInput = document.getElementById('loginUsername').value.trim().toUpperCase();
+    const pInput = document.getElementById('loginPassword').value.trim();
+
+    // ດຶງຂໍ້ມູນ User ທີ່ສ້າງເອງຈາກ LocalStorage ມາລວມກັບ validUsers ຫຼັກ
+    const customUsers = JSON.parse(localStorage.getItem('clinic_custom_users')) || {};
+    const allValidUsers = { ...validUsers, ...customUsers };
+
+    if (!allValidUsers[uInput]) {
+        window.showCustomAlert('❌ ບໍ່ພົບຊື່ຜູ້ໃຊ້ (Username) ນີ້ໃນລະບົບ!', 'ຜິດພາດ', '⚠️');
+        return;
     }
-});
+
+    if (allValidUsers[uInput].pass !== pInput) {
+        window.showCustomAlert('❌ ລະຫັດຜ່ານ (Password) ບໍ່ຖືກຕ້ອງ!', 'ຜິດພາດ', '⚠️');
+        return;
+    }
+
+    // Login ສຳເລັດ
+    const userInfo = allValidUsers[uInput];
+    localStorage.setItem('clinic_logged_user', JSON.stringify({ username: uInput, ...userInfo }));
+
+    document.getElementById('loginOverlay').style.display = 'none';
+    document.getElementById('current_user_name').innerText = userInfo.name;
+    document.querySelector('.user-info strong').innerText = userInfo.name;
+    
+    // ເອົາຕົວອັກສອນ 3 ໂຕທຳອິດມາເປັນ Avatar
+    let avatarText = uInput.replace('XPH-', '').substring(0, 3);
+    document.querySelector('.avatar').innerText = avatarText;
+
+    applyRolePermissions(userInfo.allowedPages, userInfo.defaultPage);
+    
+    let branchText = userInfo.branch ? ` (ສາຂາ: ${userInfo.branch})` : '';
+    window.showCustomAlert(`ຍິນດີຕ້ອນຮັບເຂົ້າສູ່ລະບົບ, ${userInfo.name}${branchText}!`, 'ສຳເລັດ', '🟢');
+};
 
 window.applyRolePermissions = function(allowedPages, defaultPage) {
     // 1. ເຊື່ອງ/ສະແດງ ເມນູໃນ Sidebar ຕາມສິດ
@@ -5242,8 +5264,7 @@ window.editStaff = function(staffId) {
 window.saveStaff = function() {
     const name = document.getElementById('stf_name').value.trim();
     const role = document.getElementById('stf_role').value;
-    const branchEl = document.getElementById('stf_branch');
-    const branch = branchEl ? branchEl.value : 'HQ';
+    const branch = document.getElementById('stf_branch').value;
     const phone = document.getElementById('stf_phone').value;
     const spec = document.getElementById('stf_specialty').value;
     const status = document.getElementById('stf_status').value;
@@ -5256,21 +5277,37 @@ window.saveStaff = function() {
     }
 
     let staffList = JSON.parse(localStorage.getItem('clinic_doctors')) || [];
+    
+    // ກວດສອບ Username ຊ້ຳ
     let allCustomUsers = JSON.parse(localStorage.getItem('clinic_custom_users')) || {};
-
-    let staffId = window.currentEditStaffId;
-
-    // ກວດສອບ Username ຊ້ຳ (ສຳລັບເພີ່ມໃໝ່ເທົ່ານັ້ນ, ຖ້າແກ້ໄຂຈະຂ້າມການກວດນີ້)
-    if (!staffId && (allCustomUsers[username] || validUsers[username])) {
+    if(allCustomUsers[username] || validUsers[username]) {
         window.showCustomAlert('Username ນີ້ມີໃນລະບົບແລ້ວ ກະລຸນາໃຊ້ຊື່ອື່ນ!', 'ຜິດພາດ', '❌');
         return;
     }
 
-    // ກຳນົດສິດ (Permissions)
+    let prefix = role.includes('ແພດ') ? 'DR-' : 'STF-';
+    const staffId = prefix + Date.now().toString().slice(-6);
+
+    const newStaff = {
+        id: staffId,
+        name: name,
+        role: role,
+        branch: branch,
+        phone: phone,
+        specialty: role.includes('ແພດ') ? (spec || 'ທົ່ວໄປ') : '-',
+        status: status,
+        username: username
+    };
+
+    staffList.push(newStaff);
+    localStorage.setItem('clinic_doctors', JSON.stringify(staffList));
+
+    // ກຳນົດສິດ (Permissions) ຕາມຕຳແໜ່ງ
     let allowedPages = [];
     let defaultPage = 'dashboard';
+    
     if(role.includes('ຜູ້ບໍລິຫານ')) {
-        allowedPages = ['dashboard', 'patients', 'appointments', 'consultations', 'pharmacy', 'inventory', 'pos', 'finance', 'employees', 'reports', 'notifications', 'masterdata'];
+        allowedPages = ['dashboard', 'patients', 'appointments', 'consultations', 'pharmacy', 'inventory', 'pos', 'finance', 'employees', 'reports', 'notifications'];
     } else if(role.includes('ແພດ')) {
         allowedPages = ['patients', 'consultations', 'laboratory', 'xray', 'echo', 'pharmacy', 'notifications'];
         defaultPage = 'consultations';
@@ -5282,40 +5319,19 @@ window.saveStaff = function() {
         defaultPage = 'pos';
     }
 
-    if (staffId) {
-        // Mode: 📝 ແກ້ໄຂ (Update)
-        let idx = staffList.findIndex(s => s.id === staffId);
-        if(idx !== -1) {
-            staffList[idx] = { 
-                ...staffList[idx], 
-                name, role, branch, phone, 
-                specialty: role.includes('ແພດ') ? (spec || 'ທົ່ວໄປ') : '-', 
-                status, username 
-            };
-        }
-    } else {
-        // Mode: ➕ ເພີ່ມໃໝ່ (Create)
-        let prefix = role.includes('ແພດ') ? 'DR-' : 'STF-';
-        staffId = prefix + Date.now().toString().slice(-6);
-        staffList.push({ 
-            id: staffId, name, role, branch, phone, 
-            specialty: role.includes('ແພດ') ? (spec || 'ທົ່ວໄປ') : '-', 
-            status, username 
-        });
-    }
-
-    // ອັບເດດ/ສ້າງ User Account ໃນ LocalStorage
-    allCustomUsers[username] = { name, role, branch, pass: password, defaultPage, allowedPages };
-    
-    localStorage.setItem('clinic_doctors', JSON.stringify(staffList));
+    // ບັນທຶກບັນຊີ Login ລົງ LocalStorage ແຍກໄວ້ຕ່າງຫາກ
+    allCustomUsers[username] = {
+        name: name,
+        role: role,
+        branch: branch,
+        pass: password,
+        defaultPage: defaultPage,
+        allowedPages: allowedPages
+    };
     localStorage.setItem('clinic_custom_users', JSON.stringify(allCustomUsers));
 
     document.getElementById('staffModal').style.display = 'none';
-    
-    let msg = window.currentEditStaffId ? 'ອັບເດດຂໍ້ມູນພະນັກງານສຳເລັດແລ້ວ!' : 'ເພີ່ມພະນັກງານ ແລະ ສ້າງບັນຊີສຳເລັດແລ້ວ!';
-    window.showCustomAlert(msg, 'ສຳເລັດ', '✅');
-    
-    window.currentEditStaffId = null; // ຣີເຊັດຄ່າຫຼັງບັນທຶກສຳເລັດ
+    window.showCustomAlert('ເພີ່ມພະນັກງານ ແລະ ສ້າງບັນຊີ Login ສຳເລັດແລ້ວ!', 'ສຳເລັດ', '✅');
     renderEmployeesPage();
     window.loadDoctorsList(); 
 };
