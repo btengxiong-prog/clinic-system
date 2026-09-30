@@ -2443,21 +2443,39 @@ window.handleLogin = async function() {
         return;
     }
 
-    // 2. ກວດສອບຈາກ Firebase ອອນລາຍ 100% (ບໍ່ສົນໃຈ Cache ເກົ່າ)
+    // 2. ຄົ້ນຫາບັນຊີຈາກຂໍ້ມູນທີ່ Sync ມາຈາກ Firebase ແລ້ວ (ຮອງຮັບການ Login ດ້ວຍທັງ ID ແລະ Username)
+    let staffList = JSON.parse(localStorage.getItem('clinic_doctors')) || [];
+    let foundUser = staffList.find(s => s.username === uInput || s.id === uInput);
+
+    if (foundUser) {
+        if (foundUser.pass === pInput || foundUser.password === pInput) {
+            if (foundUser.status === 'Inactive') {
+                window.showCustomAlert('❌ ບັນຊີນີ້ຖືກລະງັບການໃຊ້ງານແລ້ວ!', 'ຜິດພາດ', '⚠️');
+                return;
+            }
+            
+            document.getElementById('customAlertModal').style.display = 'none';
+            processLoginSuccess(foundUser.username || uInput, foundUser);
+        } else {
+            window.showCustomAlert('❌ ລະຫັດຜ່ານ (Password) ບໍ່ຖືກຕ້ອງ!', 'ຜິດພາດ', '⚠️');
+        }
+        return;
+    }
+
+    // 3. ຖ້າບໍ່ພົບເລີຍ ໃຫ້ລອງດຶງຈາກ Firebase ອີກຄັ້ງເພື່ອຄວາມຊົວ (ກໍລະນີແນັດຊ້າ ຫຼື ໃຊ້ເຄື່ອງໃໝ່)
     document.getElementById('customAlertModal').style.display = 'none';
-    window.showCustomAlert('ກຳລັງກວດສອບຂໍ້ມູນ...', 'ກະລຸນາລໍຖ້າ', '⏳');
+    window.showCustomAlert('ກຳລັງກວດສອບຖານຂໍ້ມູນອອນລາຍ...', 'ກະລຸນາລໍຖ້າ', '⏳');
     
     try {
         if (typeof db !== 'undefined') {
             const userDoc = await db.collection("users").doc(uInput).get();
             if (userDoc.exists) {
                 const userData = userDoc.data();
-                if (userData.pass === pInput) {
+                if (userData.pass === pInput || userData.password === pInput) {
                     if (userData.status === 'Inactive') {
                         window.showCustomAlert('❌ ບັນຊີນີ້ຖືກລະງັບການໃຊ້ງານແລ້ວ!', 'ຜິດພາດ', '⚠️');
                         return;
                     }
-                    
                     document.getElementById('customAlertModal').style.display = 'none';
                     processLoginSuccess(uInput, userData);
                 } else {
