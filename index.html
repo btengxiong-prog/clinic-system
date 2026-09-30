@@ -2433,8 +2433,6 @@ window.handleLogin = async function() {
         return;
     }
 
-    document.getElementById('customAlertModal').style.display = 'none';
-
     // 1. ກວດສອບບັນຊີ Admin ຫຼັກທີ່ຝັງໃນລະບົບກ່ອນ
     if (validUsers[uInput]) {
         if (validUsers[uInput].pass === pInput) {
@@ -2445,22 +2443,43 @@ window.handleLogin = async function() {
         return;
     }
 
-    // 2. ຖ້າເປັນບັນຊີສາຂາ ໃຫ້ກວດສອບໃນ Firebase
+    // 2. ກວດສອບຈາກ LocalStorage ໃນເຄື່ອງກ່ອນ (ປ້ອງກັນກໍລະນີອິນເຕີເນັດຊ້າ)
+    const localCustomUsers = JSON.parse(localStorage.getItem('clinic_custom_users')) || {};
+    if (localCustomUsers[uInput] && localCustomUsers[uInput].pass === pInput) {
+        if (localCustomUsers[uInput].status === 'Inactive') {
+            window.showCustomAlert('❌ ບັນຊີນີ້ຖືກລະງັບການໃຊ້ງານແລ້ວ!', 'ຜິດພາດ', '⚠️');
+            return;
+        }
+        processLoginSuccess(uInput, localCustomUsers[uInput]);
+        return;
+    }
+
+    // 3. ຖ້າບໍ່ພົບໃນ Local ໃຫ້ກວດສອບໃນ Firebase ອອນລາຍ
+    document.getElementById('customAlertModal').style.display = 'none';
     window.showCustomAlert('ກຳລັງກວດສອບຂໍ້ມູນ...', 'ກະລຸນາລໍຖ້າ', '⏳');
     
     try {
-        const userDoc = await db.collection("users").doc(uInput).get();
-        if (userDoc.exists) {
-            const userData = userDoc.data();
-            if (userData.pass === pInput) {
-                if (userData.status === 'Inactive') {
-                    window.showCustomAlert('❌ ບັນຊີນີ້ຖືກລະງັບການໃຊ້ງານແລ້ວ!', 'ຜິດພາດ', '⚠️');
-                    return;
+        if (typeof db !== 'undefined') {
+            const userDoc = await db.collection("users").doc(uInput).get();
+            if (userDoc.exists) {
+                const userData = userDoc.data();
+                if (userData.pass === pInput) {
+                    if (userData.status === 'Inactive') {
+                        window.showCustomAlert('❌ ບັນຊີນີ້ຖືກລະງັບການໃຊ້ງານແລ້ວ!', 'ຜິດພາດ', '⚠️');
+                        return;
+                    }
+                    
+                    // ເຊບລົງ Local ໄວ້ເພື່ອໃຫ້ເຂົ້າຄັ້ງໜ້າໄດ້ໄວຂຶ້ນ
+                    localCustomUsers[uInput] = userData;
+                    localStorage.setItem('clinic_custom_users', JSON.stringify(localCustomUsers));
+                    
+                    document.getElementById('customAlertModal').style.display = 'none';
+                    processLoginSuccess(uInput, userData);
+                } else {
+                    window.showCustomAlert('❌ ລະຫັດຜ່ານ (Password) ບໍ່ຖືກຕ້ອງ!', 'ຜິດພາດ', '⚠️');
                 }
-                document.getElementById('customAlertModal').style.display = 'none';
-                processLoginSuccess(uInput, userData);
             } else {
-                window.showCustomAlert('❌ ລະຫັດຜ່ານ (Password) ບໍ່ຖືກຕ້ອງ!', 'ຜິດພາດ', '⚠️');
+                window.showCustomAlert('❌ ບໍ່ພົບຊື່ຜູ້ໃຊ້ (Username) ນີ້ໃນລະບົບ!', 'ຜິດພາດ', '⚠️');
             }
         } else {
             window.showCustomAlert('❌ ບໍ່ພົບຊື່ຜູ້ໃຊ້ (Username) ນີ້ໃນລະບົບ!', 'ຜິດພາດ', '⚠️');
@@ -5336,21 +5355,23 @@ window.saveStaff = async function() {
         return;
     }
 
-    // 1. ກວດສອບ Username ຊ້ຳ (ສຳລັບການສ້າງໃໝ່)
+    let allCustomUsers = JSON.parse(localStorage.getItem('clinic_custom_users')) || {};
+
+    // 1. ກວດສອບ Username ຊ້ຳ
     if (!window.currentEditStaffId) {
-        if(validUsers[username]) {
-            window.showCustomAlert('Username ນີ້ເປັນຂອງລະບົບ ກະລຸນາໃຊ້ຊື່ອື່ນ!', 'ຜິດພາດ', '❌');
+        if(validUsers[username] || allCustomUsers[username]) {
+            window.showCustomAlert('Username ນີ້ມີໃນລະບົບແລ້ວ ກະລຸນາໃຊ້ຊື່ອື່ນ!', 'ຜິດພາດ', '❌');
             return;
         }
         try {
-            const existUser = await db.collection("users").doc(username).get();
-            if (existUser.exists) {
-                window.showCustomAlert('Username ນີ້ມີໃນລະບົບແລ້ວ ກະລຸນາໃຊ້ຊື່ອື່ນ!', 'ຜິດພາດ', '❌');
-                return;
+            if (typeof db !== 'undefined') {
+                const existUser = await db.collection("users").doc(username).get();
+                if (existUser.exists) {
+                    window.showCustomAlert('Username ນີ້ມີໃນຖານຂໍ້ມູນອອນລາຍແລ້ວ ກະລຸນາໃຊ້ຊື່ອື່ນ!', 'ຜິດພາດ', '❌');
+                    return;
+                }
             }
-        } catch(e) {
-            console.error(e);
-        }
+        } catch(e) { console.error(e); }
     }
 
     // 2. ກຳນົດສິດການເຂົ້າເຖິງ
@@ -5370,7 +5391,7 @@ window.saveStaff = async function() {
         defaultPage = 'pos';
     }
 
-    // 3. ກຽມຂໍ້ມູນບັນທຶກລົງ Firebase
+    // 3. ກຽມຂໍ້ມູນ
     let prefix = role.includes('ແພດ') ? 'DR-' : 'STF-';
     const staffId = window.currentEditStaffId ? window.currentEditStaffId : (prefix + Date.now().toString().slice(-6));
 
@@ -5388,22 +5409,37 @@ window.saveStaff = async function() {
         allowedPages: allowedPages
     };
 
-    window.showCustomAlert('ກຳລັງບັນທຶກຂໍ້ມູນລົງເຊີເວີກາງ...', 'ກະລຸນາລໍຖ້າ', '⏳');
+    window.showCustomAlert('ກຳລັງບັນທຶກຂໍ້ມູນ...', 'ກະລຸນາລໍຖ້າ', '⏳');
 
     try {
-        // ບັນທຶກຂໍ້ມູນທຸກຢ່າງລົງ Firebase
-        await db.collection("users").doc(username).set(customUser);
+        // ບັນທຶກລົງ Firebase
+        if (typeof db !== 'undefined') {
+            await db.collection("users").doc(username).set(customUser);
+        }
+
+        // ບັນທຶກລົງ LocalStorage ເພື່ອຮັບປະກັນວ່າມີຂໍ້ມູນໃນເຄື່ອງແນ່ນອນເຖິງແນັດຈະຫຼຸດ
+        allCustomUsers[username] = customUser;
+        localStorage.setItem('clinic_custom_users', JSON.stringify(allCustomUsers));
+
+        let staffList = JSON.parse(localStorage.getItem('clinic_doctors')) || [];
+        if (window.currentEditStaffId) {
+            let idx = staffList.findIndex(s => s.id === window.currentEditStaffId);
+            if (idx !== -1) staffList[idx] = customUser;
+        } else {
+            staffList.push(customUser);
+        }
+        localStorage.setItem('clinic_doctors', JSON.stringify(staffList));
 
         document.getElementById('staffModal').style.display = 'none';
-        
-        const successMsg = window.currentEditStaffId ? 'ແກ້ໄຂຂໍ້ມູນພະນັກງານສຳເລັດແລ້ວ!' : 'ສ້າງບັນຊີສຳເລັດ! ພະນັກງານສາມາດໃຊ້ບັນຊີນີ້ນຳໄປລັອກອິນໄດ້ທຸກເຄື່ອງທົ່ວໂລກ.';
+        const successMsg = window.currentEditStaffId ? 'ແກ້ໄຂຂໍ້ມູນສຳເລັດແລ້ວ!' : 'ສ້າງບັນຊີສຳເລັດ! ພະນັກງານສາມາດໃຊ້ລັອກອິນໄດ້ທຸກເຄື່ອງທົ່ວໂລກ.';
         window.showCustomAlert(successMsg, 'ສຳເລັດ', '✅');
         
-        // ໝາຍເຫດ: ບໍ່ຈຳເປັນຕ້ອງສັ່ງ renderEmployeesPage ຢູ່ບ່ອນນີ້ ເພາະ Firebase Listener ຈະເຮັດວຽກອັດຕະໂນມັດແລ້ວ
+        if(typeof renderEmployeesPage === 'function') renderEmployeesPage();
+        if(typeof window.loadDoctorsList === 'function') window.loadDoctorsList();
 
     } catch (error) {
         console.error(error);
-        window.showCustomAlert('ບໍ່ສາມາດບັນທຶກລົງຖານຂໍ້ມູນໄດ້ (ກວດສອບອິນເຕີເນັດ)!', 'ຜິດພາດ', '❌');
+        window.showCustomAlert('ບໍ່ສາມາດບັນທຶກໄດ້ ກະລຸນາກວດສອບອິນເຕີເນັດ!', 'ຜິດພາດ', '❌');
     }
 };
 
