@@ -5347,6 +5347,61 @@ window.openStaffModal = function() {
     document.getElementById('staffModal').style.display = 'flex';
 };
 
+window.editStaff = function(editKey) {
+    try {
+        let staffList = JSON.parse(localStorage.getItem('clinic_doctors')) || [];
+        const staff = staffList.find(s => s.username === editKey || s.id === editKey);
+        
+        if (!staff) {
+            window.showCustomAlert('ບໍ່ພົບຂໍ້ມູນພະນັກງານ (ກະລຸນາລໍຖ້າລະບົບໂຫຼດຂໍ້ມູນຈັກໜ້ອຍ)!', 'ແຈ້ງເຕືອນ', '⚠️');
+            return;
+        }
+
+        // ບັນທຶກ ID ຫຼື Username ໄວ້ເປັນຕົວອ້າງອີງຕອນ Save
+        window.currentEditStaffId = staff.id ? staff.id : staff.username;
+        
+        // ດຶງຂໍ້ມູນມາຍັດໃສ່ຟອມ
+        if (document.getElementById('stf_name')) document.getElementById('stf_name').value = staff.name || '';
+        
+        const roleEl = document.getElementById('stf_role');
+        if (roleEl) {
+            roleEl.value = staff.role || 'ແພດ (Doctor)';
+            if (roleEl.selectedIndex === -1) roleEl.selectedIndex = 0; 
+        }
+        
+        const branchEl = document.getElementById('stf_branch');
+        if (branchEl) branchEl.value = staff.branch || 'HQ';
+        
+        if (document.getElementById('stf_phone')) document.getElementById('stf_phone').value = staff.phone || '';
+        if (document.getElementById('stf_specialty')) document.getElementById('stf_specialty').value = staff.specialty || '';
+        if (document.getElementById('stf_status')) document.getElementById('stf_status').value = staff.status || 'Active';
+
+        const userEl = document.getElementById('stf_username');
+        if (userEl) {
+            userEl.value = staff.username || '';
+            userEl.disabled = true; // ລັອກ Username ບໍ່ໃຫ້ແກ້ໄຂ
+        }
+        
+        const passEl = document.getElementById('stf_password');
+        if (passEl) passEl.value = staff.pass || staff.password || '';
+
+        if (typeof toggleSpecialty === 'function') toggleSpecialty();
+        
+        const modalH3 = document.querySelector('#staffModal h3');
+        if (modalH3) modalH3.innerText = '✏️ ແກ້ໄຂຂໍ້ມູນພະນັກງານ';
+        
+        const staffModal = document.getElementById('staffModal');
+        if (staffModal) {
+            staffModal.style.zIndex = '9999'; // ບັງຄັບໃຫ້ຢູ່ໜ້າສຸດກັນບັກ
+            staffModal.style.display = 'flex';
+        }
+        
+    } catch (error) {
+        console.error("Error in editStaff:", error);
+        window.showCustomAlert('ເກີດຂໍ້ຜິດພາດບາງຢ່າງໃນການເປີດຟອມແກ້ໄຂ!', 'ຜິດພາດ', '❌');
+    }
+};
+
 window.saveStaff = async function() {
     const name = document.getElementById('stf_name').value.trim();
     const role = document.getElementById('stf_role').value;
