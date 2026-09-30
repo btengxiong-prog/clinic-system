@@ -5245,20 +5245,39 @@ window.openEchoProcessModal = function(index) {
         renderFinancePage();
     };
 
-    window.renderEmployeesPage = function() {
+window.renderEmployeesPage = function() {
     let staffList = JSON.parse(localStorage.getItem('clinic_doctors')) || [];
     const search = document.getElementById('emp-search').value.toLowerCase();
     const roleFilter = document.getElementById('emp-filter-role').value;
 
+    // 1. ດຶງຂໍ້ມູນຜູ້ທີ່ກຳລັງລັອກອິນຢູ່ປະຈຸບັນ
+    const loggedUser = JSON.parse(localStorage.getItem('clinic_logged_user')) || {};
+    const isSuperAdmin = loggedUser.username === 'XPH-ADMIN' || loggedUser.role === 'ADMIN';
+    const userBranch = loggedUser.branch || 'HQ';
+
+    // 2. ເຊື່ອງປຸ່ມ "+ ເພີ່ມພະນັກງານໃໝ່" ຖ້າບໍ່ແມ່ນ Super Admin ຫຼັກ
+    const btnAddStaff = document.querySelector('#page-employees .btn-add');
+    if (btnAddStaff) {
+        btnAddStaff.style.display = isSuperAdmin ? 'inline-block' : 'none';
+    }
+
+    // 3. ກັ່ນຕອງຂໍ້ມູນໃຫ້ເຫັນສະເພາະສາຂາຂອງຕົນເອງ (ຍົກເວັ້ນ Super Admin ເຫັນໝົດ)
     let filtered = staffList.filter(s => {
+        let matchBranch = true;
+        if (!isSuperAdmin) {
+            matchBranch = (s.branch === userBranch);
+        }
+
         let matchSearch = (s.name && s.name.toLowerCase().includes(search)) || (s.id && s.id.toLowerCase().includes(search)) || (s.username && s.username.toLowerCase().includes(search));
         let matchRole = roleFilter === '' || (s.role && s.role === roleFilter) || (!s.role && roleFilter === 'ແພດ (Doctor)');
-        return matchSearch && matchRole;
+        
+        return matchBranch && matchSearch && matchRole;
     });
 
-    let total = staffList.length;
-    let doctorsCount = staffList.filter(s => !s.role || s.role === 'ແພດ (Doctor)').length;
-    let activeCount = staffList.filter(s => s.status === 'Active').length;
+    // 4. ອັບເດດສະຖິຕິໃຫ້ສະແດງສະເພາະຍອດລວມຂອງພະນັກງານທີ່ຖືກກັ່ນຕອງມາແລ້ວ (ບໍ່ເອົາຍອດທັງໝົດໃນລະບົບ)
+    let total = filtered.length;
+    let doctorsCount = filtered.filter(s => !s.role || s.role === 'ແພດ (Doctor)').length;
+    let activeCount = filtered.filter(s => s.status === 'Active').length;
 
     document.getElementById('emp-stat-total').innerText = total;
     document.getElementById('emp-stat-doctor').innerText = doctorsCount;
@@ -5268,7 +5287,7 @@ window.openEchoProcessModal = function(index) {
     tbody.innerHTML = '';
 
     if(filtered.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;">ບໍ່ພົບລາຍຊື່ພະນັກງານ</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;">ບໍ່ພົບລາຍຊື່ພະນັກງານໃນສາຂາຂອງທ່ານ</td></tr>`;
     } else {
         filtered.forEach(s => {
             const role = s.role || 'ແພດ (Doctor)';
@@ -5276,9 +5295,16 @@ window.openEchoProcessModal = function(index) {
             const phone = s.phone || '-';
             const badge = s.status === 'Active' ? '<span class="badge badge-green">Active</span>' : '<span class="badge badge-gray">Inactive</span>';
             
-            // ໃຊ້ Username ເປັນກຸນແຈຫຼັກໃນການກົດປຸ່ມແກ້ໄຂ ເພື່ອປ້ອງກັນບັນຫາ ID ວ່າງເປົ່າ
             const editKey = s.username || s.id;
             const displayId = s.id && s.id !== 'undefined' ? s.id : s.username;
+
+            // 5. ຈຳກັດສິດປຸ່ມແກ້ໄຂ ໃຫ້ສະເພາະ Super Admin ເທົ່ານັ້ນທີ່ກົດແກ້ໄຂໄດ້
+            let actionHtml = '';
+            if (isSuperAdmin) {
+                actionHtml = `<span class="action-icon" title="ແກ້ໄຂ" onclick="editStaff('${editKey}')">✏️</span>`;
+            } else {
+                actionHtml = `<span style="color: #adb5bd; font-size: 13px;" title="ສະເພາະ Admin ຫຼັກເທົ່ານັ້ນທີ່ແກ້ໄຂໄດ້">🔒 ບໍ່ມີສິດ</span>`;
+            }
 
             let tr = document.createElement('tr');
             tr.innerHTML = `
@@ -5288,7 +5314,7 @@ window.openEchoProcessModal = function(index) {
                 <td>${spec}</td>
                 <td>${phone}</td>
                 <td>${badge}</td>
-                <td style="text-align:center;"><span class="action-icon" title="ແກ້ໄຂ" onclick="editStaff('${editKey}')">✏️</span></td>
+                <td style="text-align:center;">${actionHtml}</td>
             `;
             tbody.appendChild(tr);
         });
