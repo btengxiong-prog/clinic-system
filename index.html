@@ -5230,50 +5230,54 @@ window.openEchoProcessModal = function(index) {
     };
 
     window.renderEmployeesPage = function() {
-        let staffList = JSON.parse(localStorage.getItem('clinic_doctors')) || [];
-        const search = document.getElementById('emp-search').value.toLowerCase();
-        const roleFilter = document.getElementById('emp-filter-role').value;
+    let staffList = JSON.parse(localStorage.getItem('clinic_doctors')) || [];
+    const search = document.getElementById('emp-search').value.toLowerCase();
+    const roleFilter = document.getElementById('emp-filter-role').value;
 
-        let filtered = staffList.filter(s => {
-            let matchSearch = (s.name && s.name.toLowerCase().includes(search)) || (s.id && s.id.toLowerCase().includes(search));
-            let matchRole = roleFilter === '' || (s.role && s.role === roleFilter) || (!s.role && roleFilter === 'ແພດ (Doctor)');
-            return matchSearch && matchRole;
+    let filtered = staffList.filter(s => {
+        let matchSearch = (s.name && s.name.toLowerCase().includes(search)) || (s.id && s.id.toLowerCase().includes(search)) || (s.username && s.username.toLowerCase().includes(search));
+        let matchRole = roleFilter === '' || (s.role && s.role === roleFilter) || (!s.role && roleFilter === 'ແພດ (Doctor)');
+        return matchSearch && matchRole;
+    });
+
+    let total = staffList.length;
+    let doctorsCount = staffList.filter(s => !s.role || s.role === 'ແພດ (Doctor)').length;
+    let activeCount = staffList.filter(s => s.status === 'Active').length;
+
+    document.getElementById('emp-stat-total').innerText = total;
+    document.getElementById('emp-stat-doctor').innerText = doctorsCount;
+    document.getElementById('emp-stat-active').innerText = activeCount;
+
+    const tbody = document.getElementById('employees-table-body');
+    tbody.innerHTML = '';
+
+    if(filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;">ບໍ່ພົບລາຍຊື່ພະນັກງານ</td></tr>`;
+    } else {
+        filtered.forEach(s => {
+            const role = s.role || 'ແພດ (Doctor)';
+            const spec = s.specialty || '-';
+            const phone = s.phone || '-';
+            const badge = s.status === 'Active' ? '<span class="badge badge-green">Active</span>' : '<span class="badge badge-gray">Inactive</span>';
+            
+            // ໃຊ້ Username ເປັນກຸນແຈຫຼັກໃນການກົດປຸ່ມແກ້ໄຂ ເພື່ອປ້ອງກັນບັນຫາ ID ວ່າງເປົ່າ
+            const editKey = s.username || s.id;
+            const displayId = s.id && s.id !== 'undefined' ? s.id : s.username;
+
+            let tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td><strong>${displayId}</strong></td>
+                <td>${s.name}</td>
+                <td>${role}</td>
+                <td>${spec}</td>
+                <td>${phone}</td>
+                <td>${badge}</td>
+                <td style="text-align:center;"><span class="action-icon" title="ແກ້ໄຂ" onclick="editStaff('${editKey}')">✏️</span></td>
+            `;
+            tbody.appendChild(tr);
         });
-
-        let total = staffList.length;
-        let doctorsCount = staffList.filter(s => !s.role || s.role === 'ແພດ (Doctor)').length;
-        let activeCount = staffList.filter(s => s.status === 'Active').length;
-
-        document.getElementById('emp-stat-total').innerText = total;
-        document.getElementById('emp-stat-doctor').innerText = doctorsCount;
-        document.getElementById('emp-stat-active').innerText = activeCount;
-
-        const tbody = document.getElementById('employees-table-body');
-        tbody.innerHTML = '';
-
-        if(filtered.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;">ບໍ່ພົບລາຍຊື່ພະນັກງານ</td></tr>`;
-        } else {
-            filtered.forEach(s => {
-                const role = s.role || 'ແພດ (Doctor)';
-                const spec = s.specialty || '-';
-                const phone = s.phone || '-';
-                const badge = s.status === 'Active' ? '<span class="badge badge-green">Active</span>' : '<span class="badge badge-gray">Inactive</span>';
-
-                let tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td><strong>${s.id}</strong></td>
-                    <td>${s.name}</td>
-                    <td>${role}</td>
-                    <td>${spec}</td>
-                    <td>${phone}</td>
-                    <td>${badge}</td>
-                    <td style="text-align:center;"><span class="action-icon" title="ແກ້ໄຂ" onclick="editStaff('${s.id}')">✏️</span></td>
-                `;
-                tbody.appendChild(tr);
-            });
-        }
-    };
+    }
+};
 
     window.toggleSpecialty = function() {
         const role = document.getElementById('stf_role').value;
@@ -5307,16 +5311,18 @@ window.openEchoProcessModal = function(index) {
 
 window.currentEditStaffId = null; // ຕົວປ່ຽນເກັບສະຖານະວ່າກຳລັງແກ້ໄຂໃຜຢູ່
 
-window.editStaff = function(staffId) {
+window.editStaff = function(editKey) {
     let staffList = JSON.parse(localStorage.getItem('clinic_doctors')) || [];
-    const staff = staffList.find(s => s.id === staffId);
+    // ຄົ້ນຫາທັງຈາກ ID ແລະ Username ເພື່ອຄວາມຊົວ
+    const staff = staffList.find(s => s.username === editKey || s.id === editKey);
     
     if (!staff) {
         window.showCustomAlert('ບໍ່ພົບຂໍ້ມູນພະນັກງານ!', 'ແຈ້ງເຕືອນ', '⚠️');
         return;
     }
 
-    window.currentEditStaffId = staffId;
+    // ບັນທຶກ ID ຫຼື Username ໄວ້ເປັນຕົວອ້າງອີງຕອນ Save
+    window.currentEditStaffId = staff.id && staff.id !== 'undefined' ? staff.id : staff.username;
     
     document.getElementById('stf_name').value = staff.name || '';
     document.getElementById('stf_role').value = staff.role || 'ແພດ (Doctor)';
@@ -5328,7 +5334,6 @@ window.editStaff = function(staffId) {
     document.getElementById('stf_specialty').value = staff.specialty || '';
     document.getElementById('stf_status').value = staff.status || 'Active';
 
-    // ດຶງຂໍ້ມູນ Username ແລະ Password ຈາກຂໍ້ມູນທີ່ດຶງມາຈາກ Firebase
     document.getElementById('stf_username').value = staff.username || '';
     document.getElementById('stf_password').value = staff.pass || '';
 
