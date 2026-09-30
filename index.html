@@ -5297,12 +5297,11 @@ window.editStaff = function(staffId) {
         return;
     }
 
-    window.currentEditStaffId = staffId; // ໝາຍວ່າກຳລັງແກ້ໄຂ
+    window.currentEditStaffId = staffId;
     
     document.getElementById('stf_name').value = staff.name || '';
     document.getElementById('stf_role').value = staff.role || 'ແພດ (Doctor)';
     
-    // ຖ້າເຄີຍມີສາຂາໃຫ້ດຶງມາ, ຖ້າບໍ່ມີໃຫ້ເປັນ HQ
     const branchEl = document.getElementById('stf_branch');
     if(branchEl) branchEl.value = staff.branch || 'HQ';
     
@@ -5310,17 +5309,11 @@ window.editStaff = function(staffId) {
     document.getElementById('stf_specialty').value = staff.specialty || '';
     document.getElementById('stf_status').value = staff.status || 'Active';
 
-    // ດຶງຂໍ້ມູນ Login ຖ້າມີ
-    let customUsers = JSON.parse(localStorage.getItem('clinic_custom_users')) || {};
-    if (staff.username && customUsers[staff.username]) {
-        document.getElementById('stf_username').value = staff.username;
-        document.getElementById('stf_password').value = customUsers[staff.username].pass || '';
-    } else {
-        document.getElementById('stf_username').value = staff.username || '';
-        document.getElementById('stf_password').value = '';
-    }
+    // ດຶງຂໍ້ມູນ Username ແລະ Password ຈາກຂໍ້ມູນທີ່ດຶງມາຈາກ Firebase
+    document.getElementById('stf_username').value = staff.username || '';
+    document.getElementById('stf_password').value = staff.pass || '';
 
-    // ລັອກຊ່ອງ Username ບໍ່ໃຫ້ປ່ຽນຊື່ຜູ້ໃຊ້ຕອນແກ້ໄຂ ເພື່ອປ້ອງກັນບັນຫາ
+    // ລັອກຊ່ອງ Username ບໍ່ໃຫ້ປ່ຽນຊື່ຜູ້ໃຊ້ຕອນແກ້ໄຂ
     document.getElementById('stf_username').disabled = true;
 
     toggleSpecialty();
@@ -5378,43 +5371,35 @@ window.saveStaff = async function() {
     }
 
     // 3. ກຽມຂໍ້ມູນບັນທຶກລົງ Firebase
+    let prefix = role.includes('ແພດ') ? 'DR-' : 'STF-';
+    const staffId = window.currentEditStaffId ? window.currentEditStaffId : (prefix + Date.now().toString().slice(-6));
+
     const customUser = {
+        id: staffId,
         name: name,
         role: role,
         branch: branch,
+        phone: phone,
+        specialty: role.includes('ແພດ') ? (spec || 'ທົ່ວໄປ') : '-',
+        status: status,
+        username: username,
         pass: password,
         defaultPage: defaultPage,
-        allowedPages: allowedPages,
-        status: status
+        allowedPages: allowedPages
     };
 
-    window.showCustomAlert('ກຳລັງບັນທຶກຂໍ້ມູນ...', 'ກະລຸນາລໍຖ້າ', '⏳');
+    window.showCustomAlert('ກຳລັງບັນທຶກຂໍ້ມູນລົງເຊີເວີກາງ...', 'ກະລຸນາລໍຖ້າ', '⏳');
 
     try {
-        // ບັນທຶກ Username ແລະ Password ຂຶ້ນອອນລາຍ (Firebase)
+        // ບັນທຶກຂໍ້ມູນທຸກຢ່າງລົງ Firebase
         await db.collection("users").doc(username).set(customUser);
-
-        // ບັນທຶກລາຍຊື່ພະນັກງານທົ່ວໄປລົງ Local (ສຳລັບສະແດງໃນຕາຕະລາງພະນັກງານ)
-        let prefix = role.includes('ແພດ') ? 'DR-' : 'STF-';
-        const staffId = window.currentEditStaffId ? window.currentEditStaffId : (prefix + Date.now().toString().slice(-6));
-        const newStaff = { id: staffId, name: name, role: role, branch: branch, phone: phone, specialty: role.includes('ແພດ') ? (spec || 'ທົ່ວໄປ') : '-', status: status, username: username };
-        
-        let staffList = JSON.parse(localStorage.getItem('clinic_doctors')) || [];
-        if (window.currentEditStaffId) {
-            let idx = staffList.findIndex(s => s.id === window.currentEditStaffId);
-            if (idx !== -1) staffList[idx] = newStaff;
-        } else {
-            staffList.push(newStaff);
-        }
-        localStorage.setItem('clinic_doctors', JSON.stringify(staffList));
 
         document.getElementById('staffModal').style.display = 'none';
         
-        const successMsg = window.currentEditStaffId ? 'ແກ້ໄຂຂໍ້ມູນພະນັກງານສຳເລັດແລ້ວ!' : 'ສ້າງບັນຊີສຳເລັດ! ພະນັກງານສາມາດໃຊ້ບັນຊີນີ້ນຳໄປ Login ໄດ້ເລີຍ.';
+        const successMsg = window.currentEditStaffId ? 'ແກ້ໄຂຂໍ້ມູນພະນັກງານສຳເລັດແລ້ວ!' : 'ສ້າງບັນຊີສຳເລັດ! ພະນັກງານສາມາດໃຊ້ບັນຊີນີ້ນຳໄປລັອກອິນໄດ້ທຸກເຄື່ອງທົ່ວໂລກ.';
         window.showCustomAlert(successMsg, 'ສຳເລັດ', '✅');
         
-        renderEmployeesPage();
-        window.loadDoctorsList(); 
+        // ໝາຍເຫດ: ບໍ່ຈຳເປັນຕ້ອງສັ່ງ renderEmployeesPage ຢູ່ບ່ອນນີ້ ເພາະ Firebase Listener ຈະເຮັດວຽກອັດຕະໂນມັດແລ້ວ
 
     } catch (error) {
         console.error(error);
@@ -5845,6 +5830,25 @@ window.saveStaff = async function() {
                 if(typeof renderPatientsPage === 'function') renderPatientsPage();
             }
         }
+    });
+
+    // 3. ພະນັກງານ/ຜູ້ໃຊ້ Realtime (ອັບເດດຕາຕະລາງລາຍຊື່ ແລະ Dropdown ແພດ ທົ່ວໂລກ)
+    db.collection("users").onSnapshot((snapshot) => {
+        let staffList = [];
+        snapshot.forEach((doc) => {
+            staffList.push(doc.data());
+        });
+        
+        // ເຊບລົງ LocalStorage ເພື່ອໃຫ້ຟັງຊັນອື່ນໆດຶງໄປໃຊ້ງານຕໍ່ (ເຊັ່ນ: Dropdown ໝໍ, ຕາຕະລາງ)
+        localStorage.setItem('clinic_doctors', JSON.stringify(staffList));
+        
+        // ອັບເດດໜ້າຈໍພະນັກງານ (ຕາຕະລາງ) ແບບ Realtime ທັນທີທີ່ມີການປ່ຽນແປງ
+        if(document.getElementById('page-employees').style.display === 'block') {
+            if(typeof renderEmployeesPage === 'function') renderEmployeesPage();
+        }
+        
+        // ອັບເດດ Dropdown ລາຍຊື່ແພດ ໃນໜ້ານັດໝາຍ ແລະ ໜ້າຫ້ອງກວດ
+        if(typeof loadDoctorsList === 'function') window.loadDoctorsList();
     });
 
     // ================= ຟັງຊັນລຶບຂໍ້ມູນການກວດ (ໃນໜ້າຫ້ອງກວດ) ================= //
