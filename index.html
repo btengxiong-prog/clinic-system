@@ -1161,12 +1161,8 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
                 </select>
             </div>
             <div class="form-group">
-                <label>ສາຂາປະຈຳການ (Branch)</label>
-                <select id="stf_branch">
-                    <option value="HQ">ສຳນັກງານໃຫຍ່ (HQ)</option>
-                    <option value="BR01">ສາຂາ 1 (ດົງໂດກ)</option>
-                    <option value="BR02">ສາຂາ 2 (ໄຊທານີ)</option>
-                </select>
+                <label>ສາຂາປະຈຳການ (Branch) *</label>
+                <input type="text" id="stf_branch" placeholder="ປ້ອນຊື່ສາຂາ (ຕົວຢ່າງ: ສາຂາ ດົງໂດກ)" style="font-weight: bold; color: #1976d2;">
             </div>
         </div>
         <div class="form-group">
@@ -5250,19 +5246,21 @@ window.renderEmployeesPage = function() {
     const search = document.getElementById('emp-search').value.toLowerCase();
     const roleFilter = document.getElementById('emp-filter-role').value;
 
-    // 1. ດຶງຂໍ້ມູນຜູ້ທີ່ກຳລັງລັອກອິນຢູ່ປະຈຸບັນ
     const loggedUser = JSON.parse(localStorage.getItem('clinic_logged_user')) || {};
     const isSuperAdmin = loggedUser.username === 'XPH-ADMIN' || loggedUser.role === 'ADMIN';
     const userBranch = loggedUser.branch || 'HQ';
 
-    // 2. ເຊື່ອງປຸ່ມ "+ ເພີ່ມພະນັກງານໃໝ່" ຖ້າບໍ່ແມ່ນ Super Admin ຫຼັກ
     const btnAddStaff = document.querySelector('#page-employees .btn-add');
     if (btnAddStaff) {
         btnAddStaff.style.display = isSuperAdmin ? 'inline-block' : 'none';
     }
 
-    // 3. ກັ່ນຕອງຂໍ້ມູນໃຫ້ເຫັນສະເພາະສາຂາຂອງຕົນເອງ (ຍົກເວັ້ນ Super Admin ເຫັນໝົດ)
     let filtered = staffList.filter(s => {
+        // ຖ້າບໍ່ແມ່ນ Super Admin ໃຫ້ເຊື່ອງບັນຊີຫຼັກຂອງລະບົບ (XPH-...) ຖິ້ມເລີຍ ບໍ່ໃຫ້ເຫັນໃນຕາຕະລາງ
+        if (!isSuperAdmin && s.username && s.username.toUpperCase().startsWith('XPH-')) {
+            return false;
+        }
+
         let matchBranch = true;
         if (!isSuperAdmin) {
             matchBranch = (s.branch === userBranch);
@@ -5274,7 +5272,6 @@ window.renderEmployeesPage = function() {
         return matchBranch && matchSearch && matchRole;
     });
 
-    // 4. ອັບເດດສະຖິຕິໃຫ້ສະແດງສະເພາະຍອດລວມຂອງພະນັກງານທີ່ຖືກກັ່ນຕອງມາແລ້ວ (ບໍ່ເອົາຍອດທັງໝົດໃນລະບົບ)
     let total = filtered.length;
     let doctorsCount = filtered.filter(s => !s.role || s.role === 'ແພດ (Doctor)').length;
     let activeCount = filtered.filter(s => s.status === 'Active').length;
@@ -5298,7 +5295,6 @@ window.renderEmployeesPage = function() {
             const editKey = s.username || s.id;
             const displayId = s.id && s.id !== 'undefined' ? s.id : s.username;
 
-            // 5. ຈຳກັດສິດປຸ່ມແກ້ໄຂ ໃຫ້ສະເພາະ Super Admin ເທົ່ານັ້ນທີ່ກົດແກ້ໄຂໄດ້
             let actionHtml = '';
             if (isSuperAdmin) {
                 actionHtml = `<span class="action-icon" title="ແກ້ໄຂ" onclick="editStaff('${editKey}')">✏️</span>`;
@@ -5328,14 +5324,15 @@ window.renderEmployeesPage = function() {
         else specGroup.style.display = 'none';
     };
 
-    window.openStaffModal = function() {
-    window.currentEditStaffId = null; // ຣີເຊັດເປັນສະຖານະເພີ່ມໃໝ່
+window.openStaffModal = function() {
+    window.currentEditStaffId = null;
     document.querySelector('#staffModal h3').innerText = '👤 ຈັດການຂໍ້ມູນພະນັກງານ & ສ້າງບັນຊີຜູ້ໃຊ້';
 
     document.getElementById('stf_name').value = '';
     document.getElementById('stf_role').value = 'ແພດ (Doctor)';
     
-    if(document.getElementById('stf_branch')) document.getElementById('stf_branch').value = 'HQ';
+    // ເຮັດໃຫ້ຊ່ອງສາຂາວ່າງເປົ່າ ເພື່ອບັງຄັບໃຫ້ພິມ
+    if(document.getElementById('stf_branch')) document.getElementById('stf_branch').value = '';
     
     document.getElementById('stf_phone').value = '';
     document.getElementById('stf_specialty').value = '';
@@ -5344,68 +5341,33 @@ window.renderEmployeesPage = function() {
     document.getElementById('stf_username').value = '';
     document.getElementById('stf_password').value = '';
     
-    // ປົດລັອກຊ່ອງ Username ໃຫ້ພິມໄດ້ຕອນສ້າງໃໝ່
     document.getElementById('stf_username').disabled = false; 
 
     toggleSpecialty();
     document.getElementById('staffModal').style.display = 'flex';
 };
 
-window.currentEditStaffId = null; // ຕົວປ່ຽນເກັບສະຖານະວ່າກຳລັງແກ້ໄຂໃຜຢູ່
-
-window.editStaff = function(editKey) {
-    let staffList = JSON.parse(localStorage.getItem('clinic_doctors')) || [];
-    // ຄົ້ນຫາທັງຈາກ ID ແລະ Username ເພື່ອຄວາມຊົວ
-    const staff = staffList.find(s => s.username === editKey || s.id === editKey);
-    
-    if (!staff) {
-        window.showCustomAlert('ບໍ່ພົບຂໍ້ມູນພະນັກງານ!', 'ແຈ້ງເຕືອນ', '⚠️');
-        return;
-    }
-
-    // ບັນທຶກ ID ຫຼື Username ໄວ້ເປັນຕົວອ້າງອີງຕອນ Save
-    window.currentEditStaffId = staff.id && staff.id !== 'undefined' ? staff.id : staff.username;
-    
-    document.getElementById('stf_name').value = staff.name || '';
-    document.getElementById('stf_role').value = staff.role || 'ແພດ (Doctor)';
-    
-    const branchEl = document.getElementById('stf_branch');
-    if(branchEl) branchEl.value = staff.branch || 'HQ';
-    
-    document.getElementById('stf_phone').value = staff.phone || '';
-    document.getElementById('stf_specialty').value = staff.specialty || '';
-    document.getElementById('stf_status').value = staff.status || 'Active';
-
-    document.getElementById('stf_username').value = staff.username || '';
-    document.getElementById('stf_password').value = staff.pass || '';
-
-    // ລັອກຊ່ອງ Username ບໍ່ໃຫ້ປ່ຽນຊື່ຜູ້ໃຊ້ຕອນແກ້ໄຂ
-    document.getElementById('stf_username').disabled = true;
-
-    toggleSpecialty();
-    document.querySelector('#staffModal h3').innerText = '✏️ ແກ້ໄຂຂໍ້ມູນພະນັກງານ';
-    document.getElementById('staffModal').style.display = 'flex';
-};
-
 window.saveStaff = async function() {
     const name = document.getElementById('stf_name').value.trim();
     const role = document.getElementById('stf_role').value;
-    const branch = document.getElementById('stf_branch').value;
+    const branch = document.getElementById('stf_branch').value.trim(); // ດຶງຄ່າສາຂາທີ່ພິມ
     const phone = document.getElementById('stf_phone').value;
     const spec = document.getElementById('stf_specialty').value;
     const status = document.getElementById('stf_status').value;
     const username = document.getElementById('stf_username').value.trim().toUpperCase();
     const password = document.getElementById('stf_password').value.trim();
 
-    if(!name || !username || !password) {
-        window.showCustomAlert('ກະລຸນາປ້ອນຊື່, Username ແລະ Password ໃຫ້ຄົບຖ້ວນ!', 'ແຈ້ງເຕືອນ', '⚠️️');
+    // ກວດສອບບັງຄັບໃຫ້ປ້ອນ ສາຂາ
+    if(!name || !username || !password || !branch) {
+        window.showCustomAlert('ກະລຸນາປ້ອນຊື່, ສາຂາ, Username ແລະ Password ໃຫ້ຄົບຖ້ວນ!', 'ແຈ້ງເຕືອນ', '⚠️');
         return;
     }
 
-    // 1. ກວດສອບ Username ຊ້ຳຜ່ານອອນລາຍຢ່າງດຽວ
+    let allCustomUsers = JSON.parse(localStorage.getItem('clinic_custom_users')) || {};
+
     if (!window.currentEditStaffId) {
-        if(validUsers[username]) {
-            window.showCustomAlert('Username ນີ້ເປັນຂອງລະບົບ ກະລຸນາໃຊ້ຊື່ອື່ນ!', 'ຜິດພາດ', '❌');
+        if(validUsers[username] || allCustomUsers[username]) {
+            window.showCustomAlert('Username ນີ້ມີໃນລະບົບແລ້ວ ກະລຸນາໃຊ້ຊື່ອື່ນ!', 'ຜິດພາດ', '❌');
             return;
         }
         try {
@@ -5419,7 +5381,6 @@ window.saveStaff = async function() {
         } catch(e) { console.error(e); }
     }
 
-    // 2. ກຳນົດສິດການເຂົ້າເຖິງ
     let allowedPages = [];
     let defaultPage = 'dashboard';
     
@@ -5436,7 +5397,6 @@ window.saveStaff = async function() {
         defaultPage = 'pos';
     }
 
-    // 3. ກຽມຂໍ້ມູນ
     let prefix = role.includes('ແພດ') ? 'DR-' : 'STF-';
     const staffId = window.currentEditStaffId ? window.currentEditStaffId : (prefix + Date.now().toString().slice(-6));
 
@@ -5457,12 +5417,10 @@ window.saveStaff = async function() {
     window.showCustomAlert('ກຳລັງບັນທຶກຂໍ້ມູນລົງເຊີເວີກາງ...', 'ກະລຸນາລໍຖ້າ', '⏳');
 
     try {
-        // ບັນທຶກລົງ Firebase ໂດຍກົງ
         if (typeof db !== 'undefined') {
             await db.collection("users").doc(username).set(customUser);
         }
 
-        // ລຶບ Cache ຕົວເກົ່າທີ່ມີບັນຫາຖິ້ມ ເພື່ອໃຫ້ລະບົບສະອາດ 100%
         localStorage.removeItem('clinic_custom_users');
 
         document.getElementById('staffModal').style.display = 'none';
