@@ -2424,41 +2424,64 @@ const validUsers = {
     "XPH-PHAR": { name: "Pharmacist", role: "PHARMACY", pass: "Pharm@acy!Med#26", defaultPage: "pharmacy", allowedPages: ['pharmacy', 'inventory', 'notifications'] }
 };
 
-window.handleLogin = function() {
+window.handleLogin = async function() {
     const uInput = document.getElementById('loginUsername').value.trim().toUpperCase();
     const pInput = document.getElementById('loginPassword').value.trim();
 
-    // ດຶງຂໍ້ມູນ User ທີ່ສ້າງເອງຈາກ LocalStorage ມາລວມກັບ validUsers ຫຼັກ
-    const customUsers = JSON.parse(localStorage.getItem('clinic_custom_users')) || {};
-    const allValidUsers = { ...validUsers, ...customUsers };
-
-    if (!allValidUsers[uInput]) {
-        window.showCustomAlert('❌ ບໍ່ພົບຊື່ຜູ້ໃຊ້ (Username) ນີ້ໃນລະບົບ!', 'ຜິດພາດ', '⚠️');
+    if (!uInput || !pInput) {
+        window.showCustomAlert('ກະລຸນາປ້ອນ Username ແລະ Password!', 'ແຈ້ງເຕືອນ', '⚠️');
         return;
     }
 
-    if (allValidUsers[uInput].pass !== pInput) {
-        window.showCustomAlert('❌ ລະຫັດຜ່ານ (Password) ບໍ່ຖືກຕ້ອງ!', 'ຜິດພາດ', '⚠️');
+    document.getElementById('customAlertModal').style.display = 'none';
+
+    // 1. ກວດສອບບັນຊີ Admin ຫຼັກທີ່ຝັງໃນລະບົບກ່ອນ
+    if (validUsers[uInput]) {
+        if (validUsers[uInput].pass === pInput) {
+            processLoginSuccess(uInput, validUsers[uInput]);
+        } else {
+            window.showCustomAlert('❌ ລະຫັດຜ່ານ (Password) ບໍ່ຖືກຕ້ອງ!', 'ຜິດພາດ', '⚠️');
+        }
         return;
     }
 
-    // Login ສຳເລັດ
-    const userInfo = allValidUsers[uInput];
+    // 2. ຖ້າເປັນບັນຊີສາຂາ ໃຫ້ກວດສອບໃນ Firebase
+    window.showCustomAlert('ກຳລັງກວດສອບຂໍ້ມູນ...', 'ກະລຸນາລໍຖ້າ', '⏳');
+    
+    try {
+        const userDoc = await db.collection("users").doc(uInput).get();
+        if (userDoc.exists) {
+            const userData = userDoc.data();
+            if (userData.pass === pInput) {
+                if (userData.status === 'Inactive') {
+                    window.showCustomAlert('❌ ບັນຊີນີ້ຖືກລະງັບການໃຊ້ງານແລ້ວ!', 'ຜິດພາດ', '⚠️');
+                    return;
+                }
+                document.getElementById('customAlertModal').style.display = 'none';
+                processLoginSuccess(uInput, userData);
+            } else {
+                window.showCustomAlert('❌ ລະຫັດຜ່ານ (Password) ບໍ່ຖືກຕ້ອງ!', 'ຜິດພາດ', '⚠️');
+            }
+        } else {
+            window.showCustomAlert('❌ ບໍ່ພົບຊື່ຜູ້ໃຊ້ (Username) ນີ້ໃນລະບົບ!', 'ຜິດພາດ', '⚠️');
+        }
+    } catch (error) {
+        console.error(error);
+        window.showCustomAlert('❌ ບໍ່ສາມາດເຊື່ອມຕໍ່ຖານຂໍ້ມູນໄດ້ ກະລຸນາກວດສອບອິນເຕີເນັດ!', 'ຜິດພາດ', '⚠️');
+    }
+};
+
+// ແຍກຟັງຊັນຕອນ Login ສຳເລັດອອກມາເພື່ອໃຊ້ຮ່ວມກັນ
+window.processLoginSuccess = function(uInput, userInfo) {
     localStorage.setItem('clinic_logged_user', JSON.stringify({ username: uInput, ...userInfo }));
-
     document.getElementById('loginOverlay').style.display = 'none';
     document.getElementById('current_user_name').innerText = userInfo.name;
     document.querySelector('.user-info strong').innerText = userInfo.name;
     
-    // ເອົາຕົວອັກສອນ 3 ໂຕທຳອິດມາເປັນ Avatar
     let avatarText = uInput.replace('XPH-', '').substring(0, 3);
     document.querySelector('.avatar').innerText = avatarText;
 
     applyRolePermissions(userInfo.allowedPages, userInfo.defaultPage);
-    
-    // ຕັດຂັ້ນຕອນການແຈ້ງເຕືອນສຳເລັດອອກ ເພື່ອໃຫ້ເຂົ້າໜ້າຫຼັກເລີຍ ໂດຍບໍ່ຕ້ອງກົດປຸ່ມຕົກລົງ
-    // let branchText = userInfo.branch ? ` (ສາຂາ: ${userInfo.branch})` : '';
-    // window.showCustomAlert(`ຍິນດີຕ້ອນຮັບເຂົ້າສູ່ລະບົບ, ${userInfo.name}${branchText}!`, 'ສຳເລັດ', '🟢');
 };
 
 window.applyRolePermissions = function(allowedPages, defaultPage) {
@@ -5305,7 +5328,7 @@ window.editStaff = function(staffId) {
     document.getElementById('staffModal').style.display = 'flex';
 };
 
-window.saveStaff = function() {
+window.saveStaff = async function() {
     const name = document.getElementById('stf_name').value.trim();
     const role = document.getElementById('stf_role').value;
     const branch = document.getElementById('stf_branch').value;
@@ -5320,43 +5343,24 @@ window.saveStaff = function() {
         return;
     }
 
-    let staffList = JSON.parse(localStorage.getItem('clinic_doctors')) || [];
-    let allCustomUsers = JSON.parse(localStorage.getItem('clinic_custom_users')) || {};
-    
-    // 1. ກວດສອບ Username ຊ້ຳ (ຂ້າມຂັ້ນຕອນນີ້ຖ້າເປັນການ "ແກ້ໄຂ" ພະນັກງານເກົ່າ)
+    // 1. ກວດສອບ Username ຊ້ຳ (ສຳລັບການສ້າງໃໝ່)
     if (!window.currentEditStaffId) {
-        if(allCustomUsers[username] || validUsers[username]) {
-            window.showCustomAlert('Username ນີ້ມີໃນລະບົບແລ້ວ ກະລຸນາໃຊ້ຊື່ອື່ນ!', 'ຜິດພາດ', '❌');
+        if(validUsers[username]) {
+            window.showCustomAlert('Username ນີ້ເປັນຂອງລະບົບ ກະລຸນາໃຊ້ຊື່ອື່ນ!', 'ຜິດພາດ', '❌');
             return;
+        }
+        try {
+            const existUser = await db.collection("users").doc(username).get();
+            if (existUser.exists) {
+                window.showCustomAlert('Username ນີ້ມີໃນລະບົບແລ້ວ ກະລຸນາໃຊ້ຊື່ອື່ນ!', 'ຜິດພາດ', '❌');
+                return;
+            }
+        } catch(e) {
+            console.error(e);
         }
     }
 
-    // 2. ກຳນົດ ID ພະນັກງານ (ໃຊ້ ID ເກົ່າຖ້າແກ້ໄຂ, ສ້າງໃໝ່ຖ້າເພີ່ມໃໝ່)
-    let prefix = role.includes('ແພດ') ? 'DR-' : 'STF-';
-    const staffId = window.currentEditStaffId ? window.currentEditStaffId : (prefix + Date.now().toString().slice(-6));
-
-    const newStaff = {
-        id: staffId,
-        name: name,
-        role: role,
-        branch: branch,
-        phone: phone,
-        specialty: role.includes('ແພດ') ? (spec || 'ທົ່ວໄປ') : '-',
-        status: status,
-        username: username
-    };
-
-    // 3. ບັນທຶກລົງ staffList (ແຍກກໍລະນີແກ້ໄຂ ກັບ ສ້າງໃໝ່)
-    if (window.currentEditStaffId) {
-        let idx = staffList.findIndex(s => s.id === window.currentEditStaffId);
-        if (idx !== -1) staffList[idx] = newStaff;
-    } else {
-        staffList.push(newStaff);
-    }
-    
-    localStorage.setItem('clinic_doctors', JSON.stringify(staffList));
-
-    // 4. ກຳນົດສິດ (Permissions) ຕາມຕຳແໜ່ງ
+    // 2. ກຳນົດສິດການເຂົ້າເຖິງ
     let allowedPages = [];
     let defaultPage = 'dashboard';
     
@@ -5373,25 +5377,49 @@ window.saveStaff = function() {
         defaultPage = 'pos';
     }
 
-    // 5. ບັນທຶກບັນຊີ Login ລົງ LocalStorage
-    allCustomUsers[username] = {
+    // 3. ກຽມຂໍ້ມູນບັນທຶກລົງ Firebase
+    const customUser = {
         name: name,
         role: role,
         branch: branch,
         pass: password,
         defaultPage: defaultPage,
-        allowedPages: allowedPages
+        allowedPages: allowedPages,
+        status: status
     };
-    localStorage.setItem('clinic_custom_users', JSON.stringify(allCustomUsers));
 
-    document.getElementById('staffModal').style.display = 'none';
-    
-    // ແຈ້ງເຕືອນໃຫ້ກົງກັບສະຖານະ
-    const successMsg = window.currentEditStaffId ? 'ແກ້ໄຂຂໍ້ມູນພະນັກງານສຳເລັດແລ້ວ!' : 'ເພີ່ມພະນັກງານ ແລະ ສ້າງບັນຊີ Login ສຳເລັດແລ້ວ!';
-    window.showCustomAlert(successMsg, 'ສຳເລັດ', '✅');
-    
-    renderEmployeesPage();
-    window.loadDoctorsList(); 
+    window.showCustomAlert('ກຳລັງບັນທຶກຂໍ້ມູນ...', 'ກະລຸນາລໍຖ້າ', '⏳');
+
+    try {
+        // ບັນທຶກ Username ແລະ Password ຂຶ້ນອອນລາຍ (Firebase)
+        await db.collection("users").doc(username).set(customUser);
+
+        // ບັນທຶກລາຍຊື່ພະນັກງານທົ່ວໄປລົງ Local (ສຳລັບສະແດງໃນຕາຕະລາງພະນັກງານ)
+        let prefix = role.includes('ແພດ') ? 'DR-' : 'STF-';
+        const staffId = window.currentEditStaffId ? window.currentEditStaffId : (prefix + Date.now().toString().slice(-6));
+        const newStaff = { id: staffId, name: name, role: role, branch: branch, phone: phone, specialty: role.includes('ແພດ') ? (spec || 'ທົ່ວໄປ') : '-', status: status, username: username };
+        
+        let staffList = JSON.parse(localStorage.getItem('clinic_doctors')) || [];
+        if (window.currentEditStaffId) {
+            let idx = staffList.findIndex(s => s.id === window.currentEditStaffId);
+            if (idx !== -1) staffList[idx] = newStaff;
+        } else {
+            staffList.push(newStaff);
+        }
+        localStorage.setItem('clinic_doctors', JSON.stringify(staffList));
+
+        document.getElementById('staffModal').style.display = 'none';
+        
+        const successMsg = window.currentEditStaffId ? 'ແກ້ໄຂຂໍ້ມູນພະນັກງານສຳເລັດແລ້ວ!' : 'ສ້າງບັນຊີສຳເລັດ! ພະນັກງານສາມາດໃຊ້ບັນຊີນີ້ນຳໄປ Login ໄດ້ເລີຍ.';
+        window.showCustomAlert(successMsg, 'ສຳເລັດ', '✅');
+        
+        renderEmployeesPage();
+        window.loadDoctorsList(); 
+
+    } catch (error) {
+        console.error(error);
+        window.showCustomAlert('ບໍ່ສາມາດບັນທຶກລົງຖານຂໍ້ມູນໄດ້ (ກວດສອບອິນເຕີເນັດ)!', 'ຜິດພາດ', '❌');
+    }
 };
 
     window.executeCustomPrint = function(type) {
