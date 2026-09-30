@@ -5278,16 +5278,19 @@ window.saveStaff = function() {
     }
 
     let staffList = JSON.parse(localStorage.getItem('clinic_doctors')) || [];
-    
-    // ກວດສອບ Username ຊ້ຳ
     let allCustomUsers = JSON.parse(localStorage.getItem('clinic_custom_users')) || {};
-    if(allCustomUsers[username] || validUsers[username]) {
-        window.showCustomAlert('Username ນີ້ມີໃນລະບົບແລ້ວ ກະລຸນາໃຊ້ຊື່ອື່ນ!', 'ຜິດພາດ', '❌');
-        return;
+    
+    // 1. ກວດສອບ Username ຊ້ຳ (ຂ້າມຂັ້ນຕອນນີ້ຖ້າເປັນການ "ແກ້ໄຂ" ພະນັກງານເກົ່າ)
+    if (!window.currentEditStaffId) {
+        if(allCustomUsers[username] || validUsers[username]) {
+            window.showCustomAlert('Username ນີ້ມີໃນລະບົບແລ້ວ ກະລຸນາໃຊ້ຊື່ອື່ນ!', 'ຜິດພາດ', '❌');
+            return;
+        }
     }
 
+    // 2. ກຳນົດ ID ພະນັກງານ (ໃຊ້ ID ເກົ່າຖ້າແກ້ໄຂ, ສ້າງໃໝ່ຖ້າເພີ່ມໃໝ່)
     let prefix = role.includes('ແພດ') ? 'DR-' : 'STF-';
-    const staffId = prefix + Date.now().toString().slice(-6);
+    const staffId = window.currentEditStaffId ? window.currentEditStaffId : (prefix + Date.now().toString().slice(-6));
 
     const newStaff = {
         id: staffId,
@@ -5300,10 +5303,17 @@ window.saveStaff = function() {
         username: username
     };
 
-    staffList.push(newStaff);
+    // 3. ບັນທຶກລົງ staffList (ແຍກກໍລະນີແກ້ໄຂ ກັບ ສ້າງໃໝ່)
+    if (window.currentEditStaffId) {
+        let idx = staffList.findIndex(s => s.id === window.currentEditStaffId);
+        if (idx !== -1) staffList[idx] = newStaff;
+    } else {
+        staffList.push(newStaff);
+    }
+    
     localStorage.setItem('clinic_doctors', JSON.stringify(staffList));
 
-    // ກຳນົດສິດ (Permissions) ຕາມຕຳແໜ່ງ
+    // 4. ກຳນົດສິດ (Permissions) ຕາມຕຳແໜ່ງ
     let allowedPages = [];
     let defaultPage = 'dashboard';
     
@@ -5320,7 +5330,7 @@ window.saveStaff = function() {
         defaultPage = 'pos';
     }
 
-    // ບັນທຶກບັນຊີ Login ລົງ LocalStorage ແຍກໄວ້ຕ່າງຫາກ
+    // 5. ບັນທຶກບັນຊີ Login ລົງ LocalStorage
     allCustomUsers[username] = {
         name: name,
         role: role,
@@ -5332,7 +5342,11 @@ window.saveStaff = function() {
     localStorage.setItem('clinic_custom_users', JSON.stringify(allCustomUsers));
 
     document.getElementById('staffModal').style.display = 'none';
-    window.showCustomAlert('ເພີ່ມພະນັກງານ ແລະ ສ້າງບັນຊີ Login ສຳເລັດແລ້ວ!', 'ສຳເລັດ', '✅');
+    
+    // ແຈ້ງເຕືອນໃຫ້ກົງກັບສະຖານະ
+    const successMsg = window.currentEditStaffId ? 'ແກ້ໄຂຂໍ້ມູນພະນັກງານສຳເລັດແລ້ວ!' : 'ເພີ່ມພະນັກງານ ແລະ ສ້າງບັນຊີ Login ສຳເລັດແລ້ວ!';
+    window.showCustomAlert(successMsg, 'ສຳເລັດ', '✅');
+    
     renderEmployeesPage();
     window.loadDoctorsList(); 
 };
