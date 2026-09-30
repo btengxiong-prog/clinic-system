@@ -175,12 +175,55 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
 .print-patient-info { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 14px; margin-bottom: 20px; }
 
 /* ================= RESPONSIVE ================= */
+@media(max-width:1024px) {
+    .stats-5 { grid-template-columns: repeat(3, 1fr); }
+    .dashboard-grid, .bottom-grid { grid-template-columns: 1fr; }
+}
+
 @media(max-width:900px) {
     .sidebar { width: 80px; padding: 20px 10px; }
     .logo-text, .menu-title, .menu-item span { display: none; }
     .main { margin-left: 80px; }
-    .dashboard-grid, .bottom-grid { grid-template-columns: 1fr; }
-    .vital-signs-grid, .stats-5, .pos-stats-grid { grid-template-columns: repeat(2, 1fr); }
+    .stats, .stats-5, .pos-stats-grid { grid-template-columns: repeat(2, 1fr); }
+    .vital-signs-grid { grid-template-columns: repeat(2, 1fr); }
+    .top-actions { gap: 10px; }
+    .page-title h1 { font-size: 16px; }
+    .page-title p { font-size: 12px; }
+    
+    /* Responsive ສຳລັບ Master Catalog */
+    .catalog-container { flex-direction: column; height: auto; max-height: 85vh; }
+    .catalog-sidebar { width: 100%; border-right: none; border-bottom: 1px solid #e8edf3; display: flex; overflow-x: auto; flex-shrink: 0; }
+    .catalog-tab { white-space: nowrap; }
+    .catalog-content { max-height: 60vh; }
+}
+
+@media(max-width:600px) {
+    body { font-size: 14px; }
+    .sidebar { width: 60px; padding: 15px 5px; }
+    .main { margin-left: 60px; }
+    .topbar { flex-direction: column; justify-content: center; height: auto; padding: 10px; gap: 10px; text-align: center; }
+    .top-actions { width: 100%; justify-content: space-between; }
+    .user-info { display: none; } /* ເຊື່ອງຊື່ໃນມືຖື ສະແດງແຕ່ຮູບ Profile */
+    
+    .stats, .stats-5, .pos-stats-grid, .vital-signs-grid, .quick-actions { grid-template-columns: 1fr; gap: 10px; }
+    
+    /* ປັບ Filter Bar ໃຫ້ລຽງເປັນແຖວດຽວໃນມືຖື */
+    .filter-bar { flex-direction: column; align-items: stretch; padding: 10px; }
+    .filter-group { flex-direction: column; width: 100%; }
+    .filter-input, .btn-action { width: 100%; text-align: center; }
+    
+    /* ປັບ Modal ໃຫ້ເຕັມຈໍໃນມືຖື */
+    .modal-card { width: 95% !important; margin: 10px auto; padding: 15px; }
+    .modal-card.large, .modal-card.xlarge { width: 95% !important; }
+    
+    /* Force ປ່ຽນ Grid ທີ່ຂຽນຕິດໃນ Style HTML ໃຫ້ກາຍເປັນ 1 ແຖວ */
+    div[style*="grid-template-columns: 1fr 1fr"] { grid-template-columns: 1fr !important; }
+    div[style*="grid-template-columns: 1fr 1fr 1fr"] { grid-template-columns: 1fr !important; }
+    div[style*="grid-template-columns: 1fr 1fr 2fr"] { grid-template-columns: 1fr !important; }
+    div[style*="grid-template-columns: 2fr 1fr"] { grid-template-columns: 1fr !important; }
+    
+    .table-responsive { width: 100%; overflow-x: auto; }
+    table { min-width: 800px; } /* ຍັງຮັກສາຄວາມກວ້າງຕາຕະລາງໄວ້ ເພື່ອໃຫ້ປັດຊ້າຍຂວາໄດ້ ບໍ່ໃຫ້ຕົວໜັງສືບຽດກັນເກີນໄປ */
 }
 </style>
 <!-- ເພີ່ມແຖວນີ້ໄວ້ກ່ອນປິດ </head> -->
