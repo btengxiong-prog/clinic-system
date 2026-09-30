@@ -1098,6 +1098,8 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
                             <th>ຕຳແໜ່ງ (Role)</th>
                             <th>ຊ່ຽວຊານ/ພະແນກ</th>
                             <th>ເບີໂທຕິດຕໍ່</th>
+                            <th>Username</th>
+                            <th>Password</th>
                             <th>ສະຖານະ</th>
                             <th style="text-align: center;">ຈັດການ</th>
                         </tr>
@@ -5284,7 +5286,7 @@ window.renderEmployeesPage = function() {
     tbody.innerHTML = '';
 
     if(filtered.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;">ບໍ່ພົບລາຍຊື່ພະນັກງານໃນສາຂາຂອງທ່ານ</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="9" style="text-align:center;">ບໍ່ພົບລາຍຊື່ພະນັກງານໃນສາຂາຂອງທ່ານ</td></tr>`;
     } else {
         filtered.forEach(s => {
             const role = s.role || 'ແພດ (Doctor)';
@@ -5294,6 +5296,10 @@ window.renderEmployeesPage = function() {
             
             const editKey = s.username || s.id;
             const displayId = s.id && s.id !== 'undefined' ? s.id : s.username;
+            
+            // ດຶງຂໍ້ມູນ Username ແລະ Password ມາສະແດງ
+            const usernameDisplay = s.username || '-';
+            const passwordDisplay = s.pass || s.password || '-';
 
             let actionHtml = '';
             if (isSuperAdmin) {
@@ -5309,6 +5315,8 @@ window.renderEmployeesPage = function() {
                 <td>${role}</td>
                 <td>${spec}</td>
                 <td>${phone}</td>
+                <td><strong style="color: #1976d2;">${usernameDisplay}</strong></td>
+                <td><code style="background: #f4f7fb; padding: 4px 6px; border-radius: 4px; border: 1px solid #e8edf3;">${passwordDisplay}</code></td>
                 <td>${badge}</td>
                 <td style="text-align:center;">${actionHtml}</td>
             `;
