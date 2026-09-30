@@ -2443,7 +2443,7 @@ window.handleLogin = async function() {
         return;
     }
 
-    // 2. ຄົ້ນຫາບັນຊີຈາກຂໍ້ມູນທີ່ Sync ມາຈາກ Firebase ແລ້ວ (ຮອງຮັບການ Login ດ້ວຍທັງ ID ແລະ Username)
+    // 2. ຄົ້ນຫາບັນຊີຈາກຂໍ້ມູນທີ່ Sync ມາຈາກ Firebase ທີ່ຢູ່ໃນເຄື່ອງ
     let staffList = JSON.parse(localStorage.getItem('clinic_doctors')) || [];
     let foundUser = staffList.find(s => s.username === uInput || s.id === uInput);
 
@@ -2462,27 +2462,40 @@ window.handleLogin = async function() {
         return;
     }
 
-    // 3. ຖ້າບໍ່ພົບເລີຍ ໃຫ້ລອງດຶງຈາກ Firebase ອີກຄັ້ງເພື່ອຄວາມຊົວ (ກໍລະນີແນັດຊ້າ ຫຼື ໃຊ້ເຄື່ອງໃໝ່)
+    // 3. ຖ້າເຄື່ອງໃໝ່/ມືຖື ຍັງບໍ່ມີຂໍ້ມູນໃນເຄື່ອງ ໃຫ້ດຶງຈາກ Firebase ອອນລາຍ (ຮອງຮັບທັງ Username ແລະ ID)
     document.getElementById('customAlertModal').style.display = 'none';
     window.showCustomAlert('ກຳລັງກວດສອບຖານຂໍ້ມູນອອນລາຍ...', 'ກະລຸນາລໍຖ້າ', '⏳');
     
     try {
         if (typeof db !== 'undefined') {
+            let userData = null;
+            
+            // 3.1 ລອງຄົ້ນຫາຈາກ Username ກ່ອນ
             const userDoc = await db.collection("users").doc(uInput).get();
+            
             if (userDoc.exists) {
-                const userData = userDoc.data();
+                userData = userDoc.data();
+            } else {
+                // 3.2 ຖ້າບໍ່ພົບ ໃຫ້ລອງຄົ້ນຫາຈາກຊ່ອງ "ລະຫັດພະນັກງານ (id)"
+                const querySnapshot = await db.collection("users").where("id", "==", uInput).get();
+                if (!querySnapshot.empty) {
+                    userData = querySnapshot.docs[0].data();
+                }
+            }
+
+            if (userData) {
                 if (userData.pass === pInput || userData.password === pInput) {
                     if (userData.status === 'Inactive') {
                         window.showCustomAlert('❌ ບັນຊີນີ້ຖືກລະງັບການໃຊ້ງານແລ້ວ!', 'ຜິດພາດ', '⚠️');
                         return;
                     }
                     document.getElementById('customAlertModal').style.display = 'none';
-                    processLoginSuccess(uInput, userData);
+                    processLoginSuccess(userData.username || uInput, userData);
                 } else {
                     window.showCustomAlert('❌ ລະຫັດຜ່ານ (Password) ບໍ່ຖືກຕ້ອງ!', 'ຜິດພາດ', '⚠️');
                 }
             } else {
-                window.showCustomAlert('❌ ບໍ່ພົບຊື່ຜູ້ໃຊ້ (Username) ນີ້ໃນລະບົບ!', 'ຜິດພາດ', '⚠️');
+                window.showCustomAlert('❌ ບໍ່ພົບຊື່ຜູ້ໃຊ້ ຫຼື ລະຫັດພະນັກງານ (Username/ID) ນີ້ໃນລະບົບ!', 'ຜິດພາດ', '⚠️');
             }
         } else {
             window.showCustomAlert('❌ ລະບົບຖານຂໍ້ມູນບໍ່ພ້ອມໃຊ້ງານ!', 'ຜິດພາດ', '⚠️');
