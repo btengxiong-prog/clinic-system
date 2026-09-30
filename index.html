@@ -5871,8 +5871,37 @@ window.saveStaff = async function() {
     // 3. ພະນັກງານ/ຜູ້ໃຊ້ Realtime (ອັບເດດຕາຕະລາງລາຍຊື່ ແລະ Dropdown ແພດ ທົ່ວໂລກ)
     db.collection("users").onSnapshot((snapshot) => {
         let staffList = [];
+
+        // 1. ດຶງເອົາບັນຊີຫຼັກ (Default Users) ທີ່ຝັງໃນລະບົບ ມາສະແດງໃນຕາຕະລາງກ່ອນສະເໝີ
+        for (const username in validUsers) {
+            const u = validUsers[username];
+            // ແປງ Role ໃຫ້ກົງກັບຮູບແບບທີ່ຈະສະແດງໃນຕາຕະລາງ
+            let displayRole = 'ພະນັກງານທົ່ວໄປ';
+            if (u.role === 'ADMIN' || u.role === 'MANAGER') displayRole = 'ຜູ້ບໍລິຫານ (Admin)';
+            if (u.role === 'DOCTOR') displayRole = 'ແພດ (Doctor)';
+            if (u.role === 'RECEPTION' || u.role === 'LAB' || u.role === 'XRAY' || u.role === 'ECHO' || u.role === 'PHARMACY') displayRole = 'ພະຍາບານ (Nurse)'; // ຈັດກຸ່ມຊົ່ວຄາວໃຫ້ສະແດງງ່າຍ
+            if (u.role === 'FINANCE') displayRole = 'ການເງິນ / POS';
+
+            staffList.push({
+                id: username, // ໃຊ້ Username ເປັນ ID ສຳລັບບັນຊີຫຼັກ
+                name: u.name,
+                role: displayRole,
+                branch: 'HQ',
+                phone: '-',
+                specialty: u.role === 'DOCTOR' ? 'ທົ່ວໄປ' : '-',
+                status: 'Active',
+                username: username,
+                pass: u.pass
+            });
+        }
+
+        // 2. ດຶງເອົາບັນຊີທີ່ສ້າງໃໝ່ຈາກ Firebase ມາລວມເຂົ້າກັນ
         snapshot.forEach((doc) => {
-            staffList.push(doc.data());
+            let data = doc.data();
+            // ປ້ອງກັນການຊ້ຳຊ້ອນ ຖ້າບັນຊີນັ້ນເປັນບັນຊີຫຼັກຢູ່ແລ້ວ
+            if (!validUsers[data.username]) {
+                staffList.push(data);
+            }
         });
         
         // ເຊບລົງ LocalStorage ເພື່ອໃຫ້ຟັງຊັນອື່ນໆດຶງໄປໃຊ້ງານຕໍ່ (ເຊັ່ນ: Dropdown ໝໍ, ຕາຕະລາງ)
