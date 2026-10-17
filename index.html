@@ -427,15 +427,6 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
 
     <!-- ================= PATIENTS PAGE ================= -->
     <section class="content" id="page-patients" style="display: none;">
-        <div class="stats" style="margin-bottom: 20px;">
-            <div class="card stat-card" style="padding: 15px;">
-                <div><div class="stat-label">👥 ຄົນເຈັບທັງໝົດ</div><div class="stat-number" id="pat-page-total">0</div></div>
-            </div>
-            <div class="card stat-card" style="padding: 15px;">
-                <div><div class="stat-label">🟢 ສະຖານະ Active</div><div class="stat-number" id="pat-page-active">0</div></div>
-            </div>
-        </div>
-
         <div class="card">
             <div class="filter-bar">
                 <div class="filter-group">
@@ -444,6 +435,13 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
                         <option value="">-- ເພດທັງໝົດ --</option>
                         <option value="ຊາຍ">ຊາຍ</option>
                         <option value="ຍິງ">ຍິງ</option>
+                    </select>
+                    <!-- ເພີ່ມໃໝ່: ກ່ອງຕອງສະຖານະ -->
+                    <select class="filter-input" id="pat-filter-status" onchange="filterPatientsPage()">
+                        <option value="">📌 ສະຖານະທັງໝົດ</option>
+                        <option value="ລໍຖ້າກວດ">🔵 ລໍຖ້າກວດ</option>
+                        <option value="ກຳລັງກວດ">🟡 ກຳລັງກວດ</option>
+                        <option value="ສຳເລັດ">🟢 ສຳເລັດ</option>
                     </select>
                 </div>
                 <div class="filter-group">
@@ -1675,8 +1673,44 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
 
         <div class="section-title">📋 1. ປະຫວັດ ແລະ ອາການ (Chief Complaint & History)</div>
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-            <div class="form-group"><label>ອາການສຳຄັນ (Chief Complaint) *</label><textarea id="cst2_symptoms" rows="2" placeholder="ຕົວຢ່າງ: ໄຂ້, ໄອ 3 ມື້"></textarea></div>
-            <div class="form-group"><label>ປະຫວັດການເຈັບປ່ວຍ (Present/Past History)</label><textarea id="cst2_history" rows="2" placeholder="ປະຫວັດພະຍາດປະຈຳຕົວ, ການກິນຢາ, ການແພ້..."></textarea></div>
+            <div class="form-group">
+                <label style="display: flex; justify-content: space-between; align-items: center;">
+                    ອາການສຳຄັນ (Chief Complaint) *
+                    <select onchange="document.getElementById('cst2_symptoms').value += (document.getElementById('cst2_symptoms').value ? ', ' : '') + this.value; this.value='';" style="width: auto; padding: 3px 8px; font-size: 12px; border-radius: 6px; border: 1px solid #ccc; background: #e3f2fd; color: #1976d2; font-weight: bold; cursor: pointer;">
+                        <option value="">+ ເລືອກອາການທົ່ວໄປ...</option>
+                        <option value="ໄຂ້">ໄຂ້</option>
+                        <option value="ໄອ">ໄອ</option>
+                        <option value="ເຈັບຄໍ">ເຈັບຄໍ</option>
+                        <option value="ນ້ຳມູກໄຫຼ">ນ້ຳມູກໄຫຼ</option>
+                        <option value="ຫາຍໃຈຍາກ / ຫອບ">ຫາຍໃຈຍາກ / ຫອບ</option>
+                        <option value="ເຈັບຫົວ">ເຈັບຫົວ</option>
+                        <option value="ວິນຫົວ / ໜ້າມືດ">ວິນຫົວ / ໜ້າມືດ</option>
+                        <option value="ເຈັບທ້ອງ">ເຈັບທ້ອງ</option>
+                        <option value="ຖອກທ້ອງ">ຖອກທ້ອງ</option>
+                        <option value="ປວດຮາກ / ຮາກ">ປວດຮາກ / ຮາກ</option>
+                        <option value="ເຈັບຕົນຕົວ / ປວດກ້າມຊີ້ນ">ເຈັບຕົນຕົວ / ປວດກ້າມຊີ້ນ</option>
+                        <option value="ຜື່ນຄັນ">ຜື່ນຄັນ</option>
+                    </select>
+                </label>
+                <textarea id="cst2_symptoms" rows="2" placeholder="ພິມອາການ ຫຼື ເລືອກຈາກດ໋ອບດາວດ້ານເທິງ..."></textarea>
+            </div>
+            <div class="form-group">
+                <label style="display: flex; justify-content: space-between; align-items: center;">
+                    ປະຫວັດການເຈັບປ່ວຍ (Present/Past History)
+                    <select onchange="document.getElementById('cst2_history').value += (document.getElementById('cst2_history').value ? ', ' : '') + this.value; this.value='';" style="width: auto; padding: 3px 8px; font-size: 12px; border-radius: 6px; border: 1px solid #ccc; background: #e3f2fd; color: #1976d2; font-weight: bold; cursor: pointer;">
+                        <option value="">+ ເລືອກປະຫວັດພະຍາດ...</option>
+                        <option value="ບໍ່ມີປະຫວັດພະຍາດປະຈຳຕົວ">ບໍ່ມີປະຫວັດພະຍາດປະຈຳຕົວ</option>
+                        <option value="ພະຍາດເບົາຫວານ">ພະຍາດເບົາຫວານ</option>
+                        <option value="ພະຍາດຄວາມດັນເລືອດສູງ">ພະຍາດຄວາມດັນເລືອດສູງ</option>
+                        <option value="ພະຍາດຫົວໃຈ">ພະຍາດຫົວໃຈ</option>
+                        <option value="ພະຍາດຫອບຫືດ">ພະຍາດຫອບຫືດ</option>
+                        <option value="ພະຍາດກະເພາະອາຫານ">ພະຍາດກະເພາະອາຫານ</option>
+                        <option value="ເຄີຍຜ່າຕັດມາກ່ອນ">ເຄີຍຜ່າຕັດມາກ່ອນ</option>
+                        <option value="ມີປະຫວັດແພ້ຢາ">ມີປະຫວັດແພ້ຢາ</option>
+                    </select>
+                </label>
+                <textarea id="cst2_history" rows="2" placeholder="ພິມປະຫວັດ ຫຼື ເລືອກຈາກດ໋ອບດາວດ້ານເທິງ..."></textarea>
+            </div>
         </div>
 
         <div class="section-title">❤️ 2. ສັນຍານຊີບ ແລະ ປະເມີນຄວາມປວດ (Vital Signs & Pain) <span style="font-size: 12px; color: #7b8794; font-weight: normal;">(ຂໍ້ມູນຈາກຈຸດຊັ່ງນ້ຳໜັກ/ວັດແທກ)</span></div>
@@ -1694,12 +1728,67 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
         <div class="section-title">🔬 3. ການກວດຮ່າງກາຍ (Physical Examination)</div>
         <div style="background: #f9fbfd; padding: 15px; border: 1px solid #e8edf3; border-radius: 8px; margin-bottom: 15px;">
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                <div class="form-group"><label>👤 General (ສະພາບທົ່ວໄປ)</label><input type="text" id="cst2_pe_general" placeholder="ຮູ້ສຶກຕົວດີ, ອ່ອນເພຍ, ຊີດ..."></div>
-                <div class="form-group"><label>👁️👂 HEENT (ຫົວ, ຕາ, ຫູ, ຄໍ, ດັງ)</label><input type="text" id="cst2_pe_heent" placeholder="ຄໍແດງ, ຕ່ອມທອນຊິນໂຕ, ຕາເຫຼືອງ..."></div>
-                <div class="form-group"><label>🫁 Respiratory (ປອດ/ຫາຍໃຈ)</label><input type="text" id="cst2_pe_rs" placeholder="ຟັງປອດໃສດີ, ຫາຍໃຈມີສຽງວີດ, ມີສຽງຂີ້ກະເທີ່..."></div>
-                <div class="form-group"><label>❤️ Cardiovascular (ຫົວໃຈ/ເລືອດ)</label><input type="text" id="cst2_pe_cvs" placeholder="ສຽງຫົວໃຈເຕັ້ນປົກກະຕິ, ບໍ່ມີສຽງຟູ່..."></div>
-                <div class="form-group"><label>🩺 Abdomen / GI (ຊ່ອງທ້ອງ)</label><input type="text" id="cst2_pe_gi" placeholder="ທ້ອງອ່ອນ, ບໍ່ກົດເຈັບ, ສຽງລຳໄສ້ປົກກະຕິ..."></div>
-                <div class="form-group"><label>🧠 Neuro / 🦴 Musculoskeletal</label><input type="text" id="cst2_pe_neuro" placeholder="ການເຄື່ອນໄຫວປົກກະຕິ, ການຕອບສະໜອງປົກກະຕິ..."></div>
+                <div class="form-group">
+                    <label>👤 General (ສະພາບທົ່ວໄປ)</label>
+                    <select id="cst2_pe_general">
+                        <option value="">-- ເລືອກອາການ --</option>
+                        <option value="ປົກກະຕິ (ຮູ້ສຶກຕົວດີ)">ປົກກະຕິ (ຮູ້ສຶກຕົວດີ)</option>
+                        <option value="ອ່ອນເພຍ">ອ່ອນເພຍ</option>
+                        <option value="ຊີດ">ຊີດ</option>
+                        <option value="ມີໄຂ້">ມີໄຂ້</option>
+                        <option value="ບວມ">ບວມ</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>👁️👂 HEENT (ຫົວ, ຕາ, ຫູ, ຄໍ, ດັງ)</label>
+                    <select id="cst2_pe_heent">
+                        <option value="">-- ເລືອກອາການ --</option>
+                        <option value="ປົກກະຕິ">ປົກກະຕິ</option>
+                        <option value="ຕາເຫຼືອງ">ຕາເຫຼືອງ</option>
+                        <option value="ຕາຊີດ">ຕາຊີດ</option>
+                        <option value="ຄໍແດງ (Pharyngitis)">ຄໍແດງ (Pharyngitis)</option>
+                        <option value="ຕ່ອມທອນຊິນໂຕໂຕ / ມີໜອງ">ຕ່ອມທອນຊິນໂຕໂຕ / ມີໜອງ</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>🫁 Respiratory (ປອດ/ຫາຍໃຈ)</label>
+                    <select id="cst2_pe_rs">
+                        <option value="">-- ເລືອກອາການ --</option>
+                        <option value="ປົກກະຕິ (ຟັງປອດໃສດີ)">ປົກກະຕິ (ຟັງປອດໃສດີ)</option>
+                        <option value="ຫາຍໃຈມີສຽງວີດ (Wheezing)">ຫາຍໃຈມີສຽງວີດ (Wheezing)</option>
+                        <option value="ຫາຍໃຈມີສຽງຂີ້ກະເທີ່ (Crepitation)">ຫາຍໃຈມີສຽງຂີ້ກະເທີ່ (Crepitation)</option>
+                        <option value="ຫາຍໃຈຫອບອິດເມື່ອຍ">ຫາຍໃຈຫອບອິດເມື່ອຍ</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>❤️ Cardiovascular (ຫົວໃຈ/ເລືອດ)</label>
+                    <select id="cst2_pe_cvs">
+                        <option value="">-- ເລືອກອາການ --</option>
+                        <option value="ປົກກະຕິ (ສຽງເຕັ້ນປົກກະຕິ)">ປົກກະຕິ (ສຽງເຕັ້ນປົກກະຕິ)</option>
+                        <option value="ສຽງຫົວໃຈເຕັ້ນຜິດຈັງຫວະ">ສຽງຫົວໃຈເຕັ້ນຜິດຈັງຫວະ</option>
+                        <option value="ມີສຽງຟູ່ (Murmur)">ມີສຽງຟູ່ (Murmur)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>🩺 Abdomen / GI (ຊ່ອງທ້ອງ)</label>
+                    <select id="cst2_pe_gi">
+                        <option value="">-- ເລືອກອາການ --</option>
+                        <option value="ປົກກະຕິ (ທ້ອງອ່ອນ ບໍ່ກົດເຈັບ)">ປົກກະຕິ (ທ້ອງອ່ອນ ບໍ່ກົດເຈັບ)</option>
+                        <option value="ທ້ອງອືດ / ແໜ້ນທ້ອງ">ທ້ອງອືດ / ແໜ້ນທ້ອງ</option>
+                        <option value="ກົດເຈັບ (Tenderness)">ກົດເຈັບ (Tenderness)</option>
+                        <option value="ຕັບໂຕ / ມ້າມໂຕ">ຕັບໂຕ / ມ້າມໂຕ</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>🧠 Neuro / 🦴 Musculoskeletal</label>
+                    <select id="cst2_pe_neuro">
+                        <option value="">-- ເລືອກອາການ --</option>
+                        <option value="ປົກກະຕິ (ເຄື່ອນໄຫວໄດ້ດີ)">ປົກກະຕິ (ເຄື່ອນໄຫວໄດ້ດີ)</option>
+                        <option value="ອ່ອນແຮງເຄິ່ງຊີກ / ກ້າມຊີ້ນອ່ອນແຮງ">ອ່ອນແຮງເຄິ່ງຊີກ / ກ້າມຊີ້ນອ່ອນແຮງ</option>
+                        <option value="ປວດຂໍ້ / ຂໍ້ບວມແດງ">ປວດຂໍ້ / ຂໍ້ບວມແດງ</option>
+                        <option value="ຊາຕາມປາຍມືປາຍຕີນ">ຊາຕາມປາຍມືປາຍຕີນ</option>
+                    </select>
+                </div>
             </div>
             
             <div class="form-group" style="margin-top: 10px; margin-bottom: 0;">
@@ -1707,6 +1796,8 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
                     📝 ສະຫຼຸບຜົນກວດຮ່າງກາຍ (PE Summary & Skin)
                     <select id="cst2_pe_template" onchange="insertPETemplate()" style="width: auto; padding: 3px 8px; font-size: 13px; border-radius: 6px; border: 1px solid #ccc; background: #e3f2fd; color: #1976d2; font-weight: bold; cursor: pointer;">
                         <option value="">+ ເລືອກແມ່ແບບອາການ...</option>
+                        <option value="auto_summary">✨ ດຶງອາການທັງໝົດທີ່ເລືອກ (Auto Summary)</option>
+                        <option disabled>──────────────</option>
                         <option value="ປົກກະຕິ (Normal): ຄົນເຈັບຮູ້ສຶກຕົວດີ, ຕາບໍ່ເຫຼືອງ ບໍ່ຈືດມ່ານ. ຟັງປອດໃສດີທັງສອງຂ້າງ, ຫົວໃຈເຕັ້ນປົກກະຕິ. ທ້ອງອ່ອນ ບໍ່ກົດເຈັບ.">🟢 ປົກກະຕິທົ່ວໄປ (Normal)</option>
                         <option value="HEENT: ຄໍແດງອັກເສບ (Pharyngitis), ຕ່ອມທອນຊິນໂຕມີໜອງ.">👀 ຫູ, ຕາ, ຄໍ, ດັງ (HEENT)</option>
                         <option value="ລະບົບຫາຍໃຈຜິດປົກກະຕິ: ຫາຍໃຈຫອບອິດເມື່ອຍ, ຟັງປອດໄດ້ຍິນສຽງ Wheezing.">🫁 ລະບົບຫາຍໃຈ (Respiratory)</option>
@@ -1725,15 +1816,17 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
             </label>
             <textarea id="cst2_assessment" rows="5" placeholder="ກົດປຸ່ມ 'ດຶງຂໍ້ມູນມາສະຫຼຸບອັດຕະໂນມັດ' ຫຼື ພິມປະເມີນຜົນກວດ..."></textarea>
         </div>
+        <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 5px;">
+            <strong style="color: #102a43; font-size: 14px;">ການວິນິດໄສພະຍາດ (Diagnosis)</strong>
+            <button type="button" class="btn-action" style="background: #e65100; color: white; padding: 4px 10px; font-size: 12px; border-radius: 6px; box-shadow: 0 2px 4px rgba(230, 81, 0, 0.2);" onclick="autoSuggestDiagnosis()">🤖 ວິເຄາະພະຍາດເບື້ອງຕົ້ນ</button>
+        </div>
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-            <div class="form-group">
+            <div class="form-group" style="margin-bottom: 0;">
                 <label style="color: #b42318; font-weight: bold;">Primary Diagnosis (ພະຍາດຫຼັກ) *</label>
-                <!-- ເພີ່ມ list="disease_list" ໃສ່ input -->
                 <input type="text" id="cst2_diag_primary" list="disease_list" placeholder="🔍 ຄົ້ນຫາຊື່ພະຍາດ ຫຼື ລະຫັດ ICD-10..." style="border: 2px solid #b42318;">
             </div>
-            <div class="form-group">
+            <div class="form-group" style="margin-bottom: 0;">
                 <label>Secondary Diagnosis (ພະຍາດຮ່ວມ/ແຊກຊ້ອນ)</label>
-                <!-- ເພີ່ມ list="disease_list" ໃສ່ input -->
                 <input type="text" id="cst2_diag_secondary" list="disease_list" placeholder="🔍 ຄົ້ນຫາຊື່ພະຍາດ ຫຼື ລະຫັດ ICD-10...">
             </div>
         </div>
@@ -3183,12 +3276,18 @@ function renderDashboardTable(patients) {
     function renderPatientsPage() {
         const tbody = document.getElementById('patients-full-table-body');
         if(!tbody) return;
+        
         let patients = JSON.parse(localStorage.getItem('clinic_local_patients')) || globalPatientsList || [];
+        let visits = JSON.parse(localStorage.getItem('clinic_visits')) || [];
+        const todayStr = new Date().toISOString().split('T')[0];
         
         const searchEl = document.getElementById('pat-search-input');
         const genderEl = document.getElementById('pat-filter-gender');
+        const statusEl = document.getElementById('pat-filter-status'); // ກ່ອງສະຖານະໃໝ່
+        
         const search = searchEl ? searchEl.value.toLowerCase() : '';
         const genderFilter = genderEl ? genderEl.value : '';
+        const statusFilter = statusEl ? statusEl.value : ''; // ຄ່າຈາກກ່ອງສະຖານະໃໝ່
         
         let filtered = patients.filter(p => {
             let matchSearch = true;
@@ -3196,12 +3295,20 @@ function renderDashboardTable(patients) {
                 matchSearch = (p.fullname && p.fullname.toLowerCase().includes(search)) || (p.patient_code && p.patient_code.toLowerCase().includes(search)) || (p.phone && p.phone.includes(search));
             }
             let matchGender = genderFilter ? p.gender === genderFilter : true;
-            return matchSearch && matchGender;
-        });
+            
+            // ກວດສອບສະຖານະການກວດໃນມື້ນີ້ (ສຳລັບ Filter)
+            let matchStatus = true;
+            if (statusFilter) {
+                const visitToday = visits.find(v => v.patient_name === p.fullname && v.date === todayStr);
+                if (visitToday) {
+                    matchStatus = visitToday.status.includes(statusFilter);
+                } else {
+                    matchStatus = false; // ຖ້າເລືອກສະຖານະ ແຕ່ບໍ່ມີຄິວມື້ນີ້ ໃຫ້ເຊື່ອງໄວ້
+                }
+            }
 
-        const activeCount = filtered.filter(p => p.status === 'Active').length;
-        if(document.getElementById('pat-page-total')) document.getElementById('pat-page-total').innerText = filtered.length;
-        if(document.getElementById('pat-page-active')) document.getElementById('pat-page-active').innerText = activeCount;
+            return matchSearch && matchGender && matchStatus;
+        });
 
         tbody.innerHTML = "";
         if (filtered.length === 0) { 
@@ -3220,9 +3327,18 @@ function renderDashboardTable(patients) {
             const address = p.address || '-'; 
             const allergy = p.allergy || 'ບໍ່ລະບຸ'; 
             const history = p.health_history || 'ບໍ່ລະບຸ'; 
+            
+            // ດຶງຂໍ້ມູນການກວດໃນມື້ນີ້ ມາສະແດງເປັນປ້າຍ Badge ແທນປ້າຍ Active ເກົ່າ
+            let visitToday = visits.find(v => v.patient_name === name && v.date === todayStr);
             let statusBadge = (p.status === 'Active') ? '<span class="badge badge-green">Active</span>' : '<span class="badge badge-gray">Inactive</span>';
             
-            // 1. ກວດສອບສິດ (Role) ຂອງຜູ້ໃຊ້ປະຈຸບັນ
+            if (visitToday) {
+                if (visitToday.status.includes('ລໍຖ້າກວດ')) statusBadge = '<span class="badge badge-blue">🔵 ລໍຖ້າກວດ</span>';
+                else if (visitToday.status.includes('ກຳລັງກວດ')) statusBadge = '<span class="badge badge-yellow">🟡 ກຳລັງກວດ</span>';
+                else if (visitToday.status.includes('ສຳເລັດ')) statusBadge = '<span class="badge badge-green">🟢 ສຳເລັດ</span>';
+            }
+
+            // ກວດສອບສິດ (Role) ຂອງຜູ້ໃຊ້ປະຈຸບັນ
             const loggedUser = JSON.parse(localStorage.getItem('clinic_logged_user')) || {};
             const userRole = loggedUser.role || '';
             const isReceptionist = userRole === 'RECEPTION';
@@ -3231,11 +3347,15 @@ function renderDashboardTable(patients) {
             let actionButtons = '';
             
             if (isReceptionist) {
-                // ສຳລັບ ພະນັກງານຕ້ອນຮັບ: ເຫັນແຕ່ປຸ່ມ "ສົ່ງກວດເລີຍ"
-                actionButtons = `<button class="btn-action" style="background: #16864b; color: white; padding: 4px 10px; font-size: 13px; border-radius: 6px; margin-right: 5px; box-shadow: 0 2px 4px rgba(22, 134, 75, 0.2);" onclick="sendPatientToQueue('${name}')">🩺 ສົ່ງກວດເລີຍ</button>`;
+                // ຖ້າຄົນເຈັບຢູ່ໃນຄິວແລ້ວ ປ່ຽນປຸ່ມໃຫ້ເປັນສີເທົາ (ປ້ອງກັນກົດສົ່ງຊ້ຳ)
+                if (visitToday && !visitToday.status.includes('ສຳເລັດ')) {
+                    actionButtons = `<button class="btn-action" style="background: #e2e8f0; color: #7b8794; padding: 4px 10px; font-size: 13px; border-radius: 6px; margin-right: 5px; cursor: not-allowed;" disabled>⏳ ຢູ່ໃນຄິວແລ້ວ</button>`;
+                } else {
+                    actionButtons = `<button class="btn-action" style="background: #16864b; color: white; padding: 4px 10px; font-size: 13px; border-radius: 6px; margin-right: 5px; box-shadow: 0 2px 4px rgba(22, 134, 75, 0.2);" onclick="sendPatientToQueue('${name}')">🩺 ສົ່ງກວດເລີຍ</button>`;
+                }
             } else if (isDoctor) {
-                // ສຳລັບ ແພດ: ເຫັນແຕ່ປຸ່ມ "ເບິ່ງຂໍ້ມູນ (👁️)" ຢ່າງດຽວ
-                actionButtons = `<span class="action-icon" title="ເບິ່ງຂໍ້ມູນ" onclick="viewPatientQuick('${name}')">👁️</span>`;
+                // ສຳລັບ ແພດ: ບໍ່ໃຫ້ເຫັນປຸ່ມໃດໆເລີຍໃນໜ້ານີ້ (ຕັດອອກ)
+                actionButtons = '';
             } else {
                 // ສຳລັບ Admin ຫລື ຜູ້ບໍລິຫານອື່ນໆ: ເຫັນທຸກປຸ່ມທັງໝົດ
                 actionButtons = `
@@ -4101,43 +4221,85 @@ window.renderConsultationsPage = function() {
         const tbody = document.getElementById('consultation-table-body'); 
         tbody.innerHTML = ''; 
         
-        if(visits.length === 0) { 
-            tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding: 20px;">ຍັງບໍ່ມີຂໍ້ມູນການກວດ</td></tr>'; 
-        } else { 
-            visits.sort((a,b) => (b.date + b.time).localeCompare(a.date + a.time)); 
-            visits.forEach((v, index) => { 
-                const dArr = v.date.split('-'); 
-                const displayDate = dArr.length === 3 ? `${dArr[2]}/${dArr[1]}/${dArr[0]}` : v.date; 
-                let badgeClass = 'badge-gray'; 
-                if(v.status.includes('ກຳລັງກວດ')) badgeClass = 'badge-yellow'; 
-                else if(v.status.includes('ສຳເລັດ')) badgeClass = 'badge-green'; 
-                else if(v.status.includes('ລໍຖ້າ')) badgeClass = 'badge-blue'; 
-                
-                const displaySymDiag = (v.diagnosis) ? `<strong>${v.diagnosis}</strong>` : (v.symptoms || '-'); 
-                const originalVisits = JSON.parse(localStorage.getItem('clinic_visits')) || []; 
-                const trueIndex = originalVisits.findIndex(ov => ov.visit_id === v.visit_id); 
-                
-                // ເພີ່ມປຸ່ມ ອອກໃບຮັບຮອງແພດ ສະເພາະຜູ້ທີ່ກວດສຳເລັດແລ້ວ
-                let medCertBtn = v.status.includes('ສຳເລັດ') ? `<span class="action-icon" title="ອອກໃບຮັບຮອງແພດ" onclick="openMedCertModal('${trueIndex}')">📜</span>` : '';
+        window.renderConsultationsPage = function() { 
+    const visits = JSON.parse(localStorage.getItem('clinic_visits')) || []; 
+    const todayDate = new Date().toISOString().split('T')[0]; 
+    let countToday = 0; let countProgress = 0; let countCompleted = 0; let countWaiting = 0; 
+    
+    // ນັບສະຖິຕິສະຫຼຸບດ້ານເທິງ
+    visits.forEach(v => { 
+        if(v.date === todayDate) countToday++; 
+        if(v.status.includes('ກຳລັງກວດ')) countProgress++; 
+        if(v.status.includes('ສຳເລັດ')) countCompleted++; 
+        if(v.status.includes('ລໍຖ້າ')) countWaiting++; 
+    }); 
+    
+    document.getElementById('cst-stat-today').innerText = countToday + ' ຄັ້ງ'; 
+    document.getElementById('cst-stat-progress').innerText = countProgress + ' ຄົນ'; 
+    document.getElementById('cst-stat-completed').innerText = countCompleted + ' ຄົນ'; 
+    document.getElementById('cst-stat-waiting').innerText = countWaiting + ' ຄົນ'; 
+    
+    const tbody = document.getElementById('consultation-table-body'); 
+    tbody.innerHTML = ''; 
+    
+    // 💡 ຕອງເອົາສະເພາະຄົນເຈັບທີ່ "ຍັງບໍ່ສຳເລັດ" ມາສະແດງໃນຕາຕະລາງເທົ່ານັ້ນ
+    let activeVisits = visits.filter(v => !v.status.includes('ສຳເລັດ'));
 
-                const tr = document.createElement('tr'); 
-                tr.innerHTML = `
-                    <td><strong>${v.visit_id}</strong></td>
-                    <td>${v.patient_name}</td>
-                    <td>${displayDate}</td>
-                    <td style="font-weight:bold;">${v.time}</td>
-                    <td>${v.doctor}</td>
-                    <td>${displaySymDiag}</td>
-                    <td><span class="badge ${badgeClass}">${v.status}</span></td>
-                    <td style="text-align: center; white-space: nowrap;">
-                        <span class="action-icon" title="ບັນທຶກຜົນການກວດ / ແກ້ໄຂ" onclick="openConsultationStep2(${trueIndex})">✏️</span>
-                        ${medCertBtn}
-                        <span class="action-icon" title="ລຶບຂໍ້ມູນການກວດ" onclick="deleteConsultation(${trueIndex})" style="color: #d32f2f;">🗑️</span>
-                    </td>
-                `; 
-                tbody.appendChild(tr); 
-            }); 
-        } 
+    if(activeVisits.length === 0) { 
+        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding: 20px; color:#7b8794;">ບໍ່ມີຄິວຄົນເຈັບທີ່ລໍຖ້າກວດ</td></tr>'; 
+    } else { 
+        activeVisits.sort((a,b) => (b.date + b.time).localeCompare(a.date + a.time)); 
+        activeVisits.forEach((v) => { 
+            const dArr = v.date.split('-'); 
+            const displayDate = dArr.length === 3 ? `${dArr[2]}/${dArr[1]}/${dArr[0]}` : v.date; 
+            let badgeClass = 'badge-gray'; 
+            if(v.status.includes('ກຳລັງກວດ')) badgeClass = 'badge-yellow'; 
+            else if(v.status.includes('ລໍຖ້າ')) badgeClass = 'badge-blue'; 
+            
+            const displaySymDiag = (v.diagnosis) ? `<strong>${v.diagnosis}</strong>` : (v.symptoms || '-'); 
+            const originalVisits = JSON.parse(localStorage.getItem('clinic_visits')) || []; 
+            
+            // ຕ້ອງອ້າງອີງ Index ຕົວຈິງຈາກອາເຣຫຼັກ (originalVisits) ເພື່ອໃຫ້ກົດແກ້ໄຂຖືກຄົນ
+            const trueIndex = originalVisits.findIndex(ov => ov.visit_id === v.visit_id); 
+
+            // 1. ກວດສອບສິດ (Role) ຂອງຜູ້ໃຊ້ປະຈຸບັນ
+            const loggedUser = JSON.parse(localStorage.getItem('clinic_logged_user')) || {};
+            const userRole = loggedUser.role || '';
+            const isDoctor = userRole === 'DOCTOR' || userRole === 'ແພດ (Doctor)';
+
+            let actionButtons = '';
+            
+            if (isDoctor) {
+                // ສຳລັບແພດ: ປ່ຽນເປັນປຸ່ມກົດເຂົ້າກວດຢ່າງດຽວ (ເຊື່ອງປຸ່ມລຶບຖິ້ມ)
+                let btnText = v.status.includes('ກຳລັງກວດ') ? 'ສືບຕໍ່ກວດ' : 'ເລີ່ມກວດ';
+                let btnColor = v.status.includes('ກຳລັງກວດ') ? '#f59e0b' : '#1976d2'; // ສີສົ້ມສຳລັບກຳລັງກວດ, ສີຟ້າສຳລັບເລີ່ມກວດ
+                
+                actionButtons = `<button class="btn-action" style="background: ${btnColor}; color: white; padding: 4px 12px; font-size: 13px; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);" onclick="openConsultationStep2(${trueIndex})">🩺 ${btnText}</button>`;
+            } else {
+                // ສຳລັບ Admin: ເຫັນປຸ່ມແກ້ໄຂ ແລະ ລຶບຄືເກົ່າ
+                actionButtons = `
+                    <span class="action-icon" title="ບັນທຶກຜົນການກວດ / ແກ້ໄຂ" onclick="openConsultationStep2(${trueIndex})">✏️</span>
+                    <span class="action-icon" title="ລຶບຂໍ້ມູນການກວດ" onclick="deleteConsultation(${trueIndex})" style="color: #d32f2f;">🗑️</span>
+                `;
+            }
+
+            const tr = document.createElement('tr'); 
+            tr.innerHTML = `
+                <td><strong>${v.visit_id}</strong></td>
+                <td>${v.patient_name}</td>
+                <td>${displayDate}</td>
+                <td style="font-weight:bold;">${v.time}</td>
+                <td>${v.doctor}</td>
+                <td>${displaySymDiag}</td>
+                <td><span class="badge ${badgeClass}">${v.status}</span></td>
+                <td style="text-align: center; white-space: nowrap;">
+                    ${actionButtons}
+                </td>
+            `; 
+            tbody.appendChild(tr);
+        }); 
+    } 
+};
     };
 
     // ຟັງຊັນເປີດກ່ອງປ້ອນຂໍ້ມູນໃບຮັບຮອງແພດ
@@ -6087,10 +6249,48 @@ window.saveStaff = async function() {
     window.insertPETemplate = function() {
         const select = document.getElementById('cst2_pe_template');
         const textarea = document.getElementById('cst2_physical_exam');
-        if(select.value) {
-            textarea.value = textarea.value.trim() !== '' ? textarea.value + '\n' + select.value : select.value;
-            select.value = ''; 
+        const templateType = select.value;
+        
+        if (!templateType) return;
+
+        // 1. ອ່ານຄ່າຈາກ 6 ຊ່ອງດ້ານເທິງ
+        const gen = document.getElementById('cst2_pe_general').value;
+        const heent = document.getElementById('cst2_pe_heent').value;
+        const rs = document.getElementById('cst2_pe_rs').value;
+        const cvs = document.getElementById('cst2_pe_cvs').value;
+        const gi = document.getElementById('cst2_pe_gi').value;
+        const neuro = document.getElementById('cst2_pe_neuro').value;
+
+        let summaryText = "";
+
+        // 2. ຖ້າເລືອກ "ດຶງອາການທັງໝົດທີ່ເລືອກ (Auto Summary)" 
+        if (templateType === "auto_summary") {
+            let arr = [];
+            if (gen) arr.push(`General: ${gen}`);
+            if (heent) arr.push(`HEENT: ${heent}`);
+            if (rs) arr.push(`Respiratory: ${rs}`);
+            if (cvs) arr.push(`Cardio: ${cvs}`);
+            if (gi) arr.push(`Abdomen: ${gi}`);
+            if (neuro) arr.push(`Neuro/Musc: ${neuro}`);
+            
+            if (arr.length > 0) {
+                summaryText = arr.join(' | ');
+            } else {
+                window.showCustomAlert('ກະລຸນາເລືອກອາການຈາກກ່ອງດ້ານເທິງກ່ອນ!', 'ແຈ້ງເຕືອນ', '⚠️');
+                select.value = '';
+                return;
+            }
+        } 
+        // 3. ຖ້າເລືອກແມ່ແບບປົກກະຕິ (ໂຕເກົ່າ)
+        else {
+            summaryText = templateType;
         }
+
+        // 4. ແທນທີ່ຂໍ້ຄວາມເກົ່າດ້ວຍຂໍ້ຄວາມໃໝ່ເລີຍ (ລຶບຂອງເກົ່າຖິ້ມແລ້ວຂຽນທັບໃໝ່)
+        textarea.value = summaryText;
+        
+        // ລ້າງຄ່າ Dropdown ກັບຄືນ
+        select.value = ''; 
     };
 
     window.calcBMI = function() {
@@ -6845,15 +7045,55 @@ window.autoSummarizeAssessment = function() {
 [ສັນຍານຊີບ]: ອຸນຫະພູມ ${temp}°C, ຄວາມດັນ ${bp} mmHg, ຊີບຈອນ ${pulse} bpm, SpO2 ${spo2}%, Pain Score: ${pain}/10
 [ຜົນກວດຮ່າງກາຍ]: ${peText}`;
 
-    // 5. ສົ່ງຂໍ້ຄວາມລົງໄປໃນ Textarea
-    const assessmentBox = document.getElementById('cst2_assessment');
+// ຟັງຊັນ AI (ຈຳລອງ) ສຳລັບວິເຄາະພະຍາດເບື້ອງຕົ້ນຈາກຂໍ້ຄວາມອາການ
+window.autoSuggestDiagnosis = function() {
+    // ດຶງຂໍ້ຄວາມຈາກຊ່ອງອາການ, ປະຫວັດ ແລະ ຜົນກວດຮ່າງກາຍ ມາລວມກັນແລ້ວແປງເປັນຕົວນ້ອຍ
+    const textData = (
+        document.getElementById('cst2_symptoms').value + " " + 
+        document.getElementById('cst2_history').value + " " + 
+        document.getElementById('cst2_assessment').value
+    ).toLowerCase();
     
-    // ຖ້າມີຂໍ້ຄວາມເກົ່າຢູ່ແລ້ວ ໃຫ້ເອົາຂໍ້ຄວາມໃໝ່ຕໍ່ທ້າຍ ເພື່ອບໍ່ໃຫ້ຂໍ້ມູນເກົ່າຫາຍ
-    if (assessmentBox.value.trim() !== '') {
-        assessmentBox.value = assessmentBox.value + '\n\n' + summaryText;
-    } else {
-        assessmentBox.value = summaryText;
+    let primary = "";
+    let secondary = "";
+
+    // ກວດສອບ Keyword ເພື່ອຄາດເດົາພະຍາດ (ສາມາດເພີ່ມເງື່ອນໄຂໄດ້ຕາມຕ້ອງການ)
+    if (textData.includes('ຫອບ') || textData.includes('wheezing') || textData.includes('ຫືດ')) {
+        primary = "ຫອບຫືດ";
+        if (textData.includes('ໄຂ້') || textData.includes('ອັກເສບ')) secondary = "ພະຍາດປອດບວມ";
+    } 
+    else if (textData.includes('ຫົວໃຈ') || textData.includes('ຜິດຈັງຫວະ') || textData.includes('murmur') || textData.includes('cardio')) {
+        primary = "ຫົວໃຈວາຍ";
+        if (textData.includes('ຄວາມດັນ')) secondary = "ຄວາມດັນເລືອດສູງ";
     }
+    else if (textData.includes('ຍ່ຽວ') || textData.includes('ເຈັບທ້ອງນ້ອຍ') || textData.includes('ຍ່ຽວແສບ')) {
+        primary = "ພົກຍ່ຽວອັກເສບ / ໝວກໝາກໄຂ່ຫຼັງອັກເສບ";
+    }
+    else if (textData.includes('ໄຂ້') && (textData.includes('ໄອ') || textData.includes('ເຈັບຄໍ'))) {
+        primary = "ໄຂ້ຫວັດທຳມະດາ";
+        if (textData.includes('ຫາຍໃຈຍາກ')) secondary = "ພະຍາດປອດບວມ";
+    }
+    else if (textData.includes('ຄວາມດັນສູງ') || textData.includes('bp')) {
+        primary = "ຄວາມດັນເລືອດສູງ";
+    }
+    
+    // ຖ້າລະບົບຄາດເດົາບໍ່ໄດ້ (ບໍ່ກົງກັບ Keyword ໃດເລີຍ) ໃຫ້ວາງຄ່າເບື້ອງຕົ້ນໃຫ້ເຫັນຜົນ
+    if (!primary) {
+        primary = "ໄຂ້ຫວັດທຳມະດາ";
+        secondary = "ອ່ອນເພຍ";
+    }
+
+    // ນຳເອົາຜົນການວິເຄາະໄປໃສ່ໃນກ່ອງ (ທ່ານໝໍສາມາດພິມລຶບແກ້ໄຂໄດ້ເອງ)
+    document.getElementById('cst2_diag_primary').value = primary;
+    document.getElementById('cst2_diag_secondary').value = secondary;
+
+    // ເດັ້ງແຈ້ງເຕືອນ
+    window.showCustomAlert('ວິເຄາະພະຍາດເບື້ອງຕົ້ນສຳເລັດ! ທ່ານໝໍສາມາດກວດສອບ ແລະ ແກ້ໄຂໄດ້ຕາມຄວາມເໝາະສົມ.', 'ສຳເລັດ', '🤖');
+};
+
+    // 5. ແທນທີ່ຂໍ້ຄວາມເກົ່າດ້ວຍຂໍ້ຄວາມໃໝ່ເລີຍ (ລຶບຂອງເກົ່າຖິ້ມແລ້ວຂຽນທັບໃໝ່)
+    const assessmentBox = document.getElementById('cst2_assessment');
+    assessmentBox.value = summaryText;
     
     // ເດັ້ງແຈ້ງເຕືອນໜ້ອຍໜຶ່ງໃຫ້ຮູ້ວ່າເຮັດວຽກສຳເລັດ
     window.showCustomAlert('ດຶງຂໍ້ມູນມາສະຫຼຸບລົງໃນຊ່ອງປະເມີນຜົນສຳເລັດແລ້ວ!', 'ສຳເລັດ', '✨');
@@ -6879,14 +7119,9 @@ window.autoSummarizeTreatment = function() {
     }
     planText += `\nແຜນການປະຕິບັດ: ${procText}`;
     
-    // 4. ສົ່ງຂໍ້ຄວາມລົງໄປໃນ Textarea
+    // 4. ແທນທີ່ຂໍ້ຄວາມເກົ່າດ້ວຍຂໍ້ຄວາມໃໝ່ເລີຍ (ລຶບຂອງເກົ່າຖິ້ມແລ້ວຂຽນທັບໃໝ່)
     const planBox = document.getElementById('cst2_treatment_plan');
-    
-    if (planBox.value.trim() !== '') {
-        planBox.value = planBox.value + '\n\n' + planText;
-    } else {
-        planBox.value = planText;
-    }
+    planBox.value = planText;
 
     window.showCustomAlert('ສ້າງແຜນການຮັກສາອັດຕະໂນມັດສຳເລັດແລ້ວ!', 'ສຳເລັດ', '✨');
 };
