@@ -2555,7 +2555,6 @@ window.applyRolePermissions = function(allowedPages, defaultPage) {
     const btnPos = document.getElementById('btn-quick-pos');
     const btnRep = document.getElementById('btn-quick-reports');
 
-    // ຖ້າເປັນແພດ ຈະເຊື່ອງປຸ່ມລົງທະບຽນຄົນເຈັບໃນ Dashboard ເຖິງຈະມີສິດເຂົ້າໜ້າຄົນເຈັບກໍ່ຕາມ
     if(btnRegPt) btnRegPt.style.display = (allowedPages.includes('patients') && !isDoctor) ? 'block' : 'none';
     if(btnRegApt) btnRegApt.style.display = allowedPages.includes('appointments') ? 'block' : 'none';
     if(btnCst) btnCst.style.display = allowedPages.includes('consultations') ? 'block' : 'none';
@@ -2569,10 +2568,19 @@ window.applyRolePermissions = function(allowedPages, defaultPage) {
         btnAddPtPage.style.display = isDoctor ? 'none' : 'inline-block';
     }
 
-    // 4. Auto-Click ໄປຫາໜ້າທຳອິດທີ່ຮັບຜິດຊອບ (Default Workspace)
+    // 4. ບັງຄັບເຊື່ອງໜ້າ Dashboard ກ່ອນ ແລ້ວ Auto-Click ໄປໜ້າທີ່ຖືກຕ້ອງ
     if (defaultPage) {
-        const targetMenu = document.querySelector(`.sidebar .menu-item[data-page="${defaultPage}"]`);
-        if (targetMenu) targetMenu.click();
+        // ເຊື່ອງທຸກໜ້າໄວ້ກ່ອນ ເພື່ອບໍ່ໃຫ້ເຫັນ Dashboard ໂຜ່ຂຶ້ນມາ
+        ['dashboard', 'patients', 'appointments', 'consultations', 'laboratory', 'xray', 'echo', 'pharmacy', 'inventory', 'pos', 'reports', 'finance', 'employees', 'notifications', 'masterdata'].forEach(id => {
+            let el = document.getElementById('page-' + id);
+            if(el) el.style.display = 'none';
+        });
+
+        // ໜ່ວງເວລາ 100 ມິນລິວິນາທີ ໃຫ້ໂຄດ HTML ໂຫຼດສຳເລັດກ່ອນຈຶ່ງກົດປຸ່ມ
+        setTimeout(() => {
+            const targetMenu = document.querySelector(`.sidebar .menu-item[data-page="${defaultPage}"]`);
+            if (targetMenu) targetMenu.click();
+        }, 100);
     }
 };
 
