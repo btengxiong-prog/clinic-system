@@ -3223,10 +3223,10 @@ function renderDashboardTable(patients) {
                 <td><small>${allergy}</small></td>
                 <td><small style="color: #7b8794;">${history}</small></td>
                 <td>${statusBadge}</td>
-                <td style="text-align: center; min-width: 120px; white-space: nowrap;">
+                <td style="text-align: center; min-width: 160px; white-space: nowrap;">
+                    <button class="btn-action" style="background: #16864b; color: white; padding: 4px 10px; font-size: 13px; border-radius: 6px; margin-right: 5px; box-shadow: 0 2px 4px rgba(22, 134, 75, 0.2);" onclick="sendPatientToQueue('${name}')">🩺 ສົ່ງກວດເລີຍ</button>
                     <span class="action-icon" title="ເບິ່ງຂໍ້ມູນ" onclick="viewPatientQuick('${name}')">👁️</span>
                     <span class="action-icon" title="ແກ້ໄຂຂໍ້ມູນ" onclick="editPatient('${ptId}')">✏️</span>
-                    <span class="action-icon" title="ລຶບຂໍ້ມູນທົດລອງ" onclick="deletePatient('${ptId}')" style="color: #d32f2f;">🗑️</span>
                 </td>
             `;
             tbody.appendChild(tr);
@@ -6928,6 +6928,58 @@ window.autoPrescribeAI = async function() {
 };
 // ສັ່ງໃຫ້ດຶງຂໍ້ມູນພະຍາດມາຕຽມໄວ້ໃນ Dropdown ທັນທີທີ່ເປີດລະບົບ
     setTimeout(() => { loadMasterData(); }, 1000);
+
+// ================= ຟັງຊັນໃໝ່: ສົ່ງຄົນເຈັບເຂົ້າຄິວກວດໂດຍກົງ ================= //
+window.sendPatientToQueue = function(patientName) {
+    let visits = JSON.parse(localStorage.getItem('clinic_visits')) || [];
+    const todayStr = new Date().toISOString().split('T')[0];
+
+    // 1. ກວດສອບວ່າເຄີຍສົ່ງໄປແລ້ວຫຼືຍັງໃນມື້ນີ້ (ກັນການສົ່ງຊ້ຳ)
+    const exists = visits.some(v => v.patient_name === patientName && v.date === todayStr && (v.status.includes('ລໍຖ້າກວດ') || v.status.includes('ກຳລັງກວດ')));
+
+    if (exists) {
+        window.showCustomAlert('ຄົນເຈັບລາຍນີ້ມີຄິວລໍຖ້າກວດໃນມື້ນີ້ແລ້ວ!', 'ແຈ້ງເຕືອນ', '⚠️');
+        return;
+    }
+
+    // 2. ສ້າງເລກ Visit ໃໝ່
+    const dateStr = todayStr.replace(/-/g, '');
+    const randomNum = Math.floor(Math.random() * 900) + 100;
+    const visitId = `V-${dateStr}-${randomNum}`;
+
+    // 3. ດຶງລາຍຊື່ແພດມາກຳນົດເປັນຄ່າເລີ່ມຕົ້ນ (ສາມາດໃຫ້ໝໍເລືອກປ່ຽນຊື່ຕົນເອງໄດ້ພາຍຫຼັງ)
+    let doctors = JSON.parse(localStorage.getItem('clinic_doctors')) || [];
+    const defaultDoctor = doctors.length > 0 ? doctors[0].name : 'ດຣ. ທົ່ວໄປ';
+
+    // 4. ດຶງຂໍ້ມູນສຸຂະພາບເບື້ອງຕົ້ນຈາກປະຫວັດຄົນເຈັບ (Vitals) ມາແນບໃສ່ເລີຍ
+    let patients = JSON.parse(localStorage.getItem('clinic_local_patients')) || globalPatientsList || [];
+    let ptData = patients.find(p => p.fullname === patientName) || {};
+
+    const newVisit = {
+        visit_id: visitId,
+        patient_name: patientName,
+        date: todayStr,
+        time: new Date().toTimeString().slice(0,5),
+        doctor: defaultDoctor,
+        status: '🔵 ລໍຖ້າກວດ',
+        symptoms: 'ກວດສຸຂະພາບທົ່ວໄປ', 
+        history: ptData.health_history || '', 
+        temp: ptData.temp || '', bp: ptData.bp || '', pulse: ptData.pulse || '', spo2: ptData.spo2 || '',
+        weight: ptData.weight || '', height: ptData.height || '', bmi: ptData.bmi || '', pain: ptData.pain || '',
+        pe_general: '', pe_heent: '', pe_rs: '', pe_cvs: '', pe_gi: '', pe_neuro: '',
+        physical_exam: '', lab_result: '', diagnosis: '', treatment: '', medicine: '', advice: '', next_apt: ''
+    };
+
+    // 5. ບັນທຶກເຂົ້າຄິວ ແລະ ແຈ້ງເຕືອນ
+    visits.push(newVisit);
+    localStorage.setItem('clinic_visits', JSON.stringify(visits));
+
+    window.showCustomAlert(`ສົ່ງຄົນເຈັບ <strong>${patientName}</strong> ເຂົ້າຄິວຫ້ອງກວດສຳເລັດແລ້ວ!<br><small style="color:#7b8794;">(ທ່ານໝໍສາມາດເບິ່ງເຫັນໃນໜ້າຫ້ອງກວດໄດ້ທັນທີ)</small>`, 'ສົ່ງກວດສຳເລັດ', '🩺');
+    
+    // ອັບເດດຕາຕະລາງຫ້ອງກວດ ຖ້າ Admin ເປີດເບິ່ງຢູ່
+    if(typeof renderConsultationsPage === 'function') renderConsultationsPage();
+};
+
 </script>
 </body>
 </html>
