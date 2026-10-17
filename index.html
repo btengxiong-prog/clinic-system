@@ -1504,8 +1504,6 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
                 <input type="text" id="pt_village" placeholder="ປ້ອນຊື່ບ້ານ...">
             </div>
         </div>
-        <div class="form-group"><label>ແພ້ຢາ / Allergy</label><textarea id="pt_allergy" rows="2"></textarea></div>
-        <div class="form-group"><label>ປະຫວັດສຸຂະພາບ</label><textarea id="pt_health_history" rows="2"></textarea></div>
         
         <div class="section-title">❤️ ສັນຍານຊີບ ແລະ ປະເມີນຄວາມປວດ (Vital Signs & Pain)</div>
         <div class="vital-signs-grid" style="grid-template-columns: repeat(4, 1fr); margin-top: 10px;">
@@ -1624,6 +1622,19 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
 <div class="modal-overlay" id="consultationStep2Modal">
     <div class="modal-card large">
         <h3>📋 ບັນທຶກຜົນການກວດ (Visit: <span id="cst2_visit_id" style="color: #1976d2;"></span>)</h3>
+        
+        <!-- ສ່ວນແຈ້ງເຕືອນ ແລະ ປ້ອນປະຫວັດຄົນເຈັບ -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+            <div class="form-group" style="margin-bottom: 0;">
+                <label style="color: #b42318; font-weight: bold;">⚠️ ປະຫວັດແພ້ຢາ / Allergy</label>
+                <textarea id="cst2_pt_allergy" rows="2" placeholder="ປ້ອນປະຫວັດແພ້ຢາ..." style="border: 1px solid #ffcdd2; background: #fff0f0; color: #d32f2f; font-weight: bold;"></textarea>
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+                <label style="color: #102a43; font-weight: bold;">📋 ປະຫວັດສຸຂະພາບ</label>
+                <textarea id="cst2_pt_history" rows="2" placeholder="ປ້ອນປະຫວັດສຸຂະພາບ..." style="border: 1px solid #e5e9ef; background: #f4f7fb; color: #333;"></textarea>
+            </div>
+        </div>
+
         <div class="info-box" style="display: flex; justify-content: space-between; align-items: center; background: #e3f2fd; border: 1px solid #90caf9;">
             <div><strong>ຄົນເຈັບ:</strong> <span id="cst2_pt_name"></span> &nbsp;|&nbsp; <strong>ແພດ:</strong> <span id="cst2_doctor"></span></div>
             <div><strong>ສະຖານະ:</strong> <select id="cst2_status" style="padding: 4px; border-radius: 4px; border: 1px solid #ccc;"><option value="🔵 ລໍຖ້າກວດ">🔵 ລໍຖ້າກວດ</option><option value="🟡 ກຳລັງກວດ">🟡 ກຳລັງກວດ</option><option value="🟢 ສຳເລັດ">🟢 ສຳເລັດ</option></select></div>
@@ -3854,9 +3865,27 @@ window.toggleFollowUpFields = function() {
     };
 
     window.openConsultationStep2 = function(index) { 
-        let visits = JSON.parse(localStorage.getItem('clinic_visits')) || []; if(index < 0 || index >= visits.length) return; const visit = visits[index]; editingVisitIndex = index; 
-        document.getElementById('cst2_visit_id').innerText = visit.visit_id; document.getElementById('cst2_pt_name').innerText = visit.patient_name; document.getElementById('cst2_doctor').innerText = visit.doctor; document.getElementById('cst2_status').value = visit.status || '🟡 ກຳລັງກວດ'; 
-        document.getElementById('cst2_symptoms').value = visit.symptoms || ''; document.getElementById('cst2_history').value = visit.history || ''; 
+        let visits = JSON.parse(localStorage.getItem('clinic_visits')) || []; 
+        if(index < 0 || index >= visits.length) return; 
+        const visit = visits[index]; 
+        editingVisitIndex = index; 
+        
+        // ດຶງຂໍ້ມູນຄົນເຈັບຈາກຖານຂໍ້ມູນຫຼັກ ມາກວດສອບແພ້ຢາ ແລະ ປະຫວັດ
+        let patients = JSON.parse(localStorage.getItem('clinic_local_patients')) || globalPatientsList || [];
+        let ptData = patients.find(p => p.fullname === visit.patient_name) || {};
+        
+        document.getElementById('cst2_pt_allergy').value = ptData.allergy || '';
+        document.getElementById('cst2_pt_history').value = ptData.health_history || '';
+
+        document.getElementById('cst2_visit_id').innerText = visit.visit_id;        
+        document.getElementById('cst2_pt_name').innerText = visit.patient_name; 
+        document.getElementById('cst2_doctor').innerText = visit.doctor; 
+        document.getElementById('cst2_status').value = visit.status || '🟡 ກຳລັງກວດ'; 
+        
+        // ຖ້າເປັນການກວດຄັ້ງທຳອິດ ໃຫ້ດຶງເອົາເຫດຜົນການນັດໝາຍມາໃສ່ໃນຊ່ອງ "ອາການສຳຄັນ"
+        document.getElementById('cst2_symptoms').value = visit.symptoms || ''; 
+        // ບໍ່ດຶງປະຫວັດການເຈັບປ່ວຍເກົ່າມາໃສ່ຊ່ອງ "ປະຫວັດການເຈັບປ່ວຍ (Present/Past History)" ແລ້ວ ໃຫ້ແພດພິມໃໝ່ເອງສຳລັບແຕ່ລະຄັ້ງ
+        document.getElementById('cst2_history').value = visit.history && visit.history !== ptData.health_history ? visit.history : '';
         document.getElementById('cst2_temp').value = visit.temp || ''; document.getElementById('cst2_bp').value = visit.bp || ''; document.getElementById('cst2_pulse').value = visit.pulse || ''; document.getElementById('cst2_spo2').value = visit.spo2 || ''; document.getElementById('cst2_weight').value = visit.weight || ''; document.getElementById('cst2_height').value = visit.height || ''; document.getElementById('cst2_bmi').value = visit.bmi || ''; document.getElementById('cst2_pain').value = visit.pain || ''; 
         document.getElementById('cst2_pe_general').value = visit.pe_general || ''; document.getElementById('cst2_pe_heent').value = visit.pe_heent || ''; document.getElementById('cst2_pe_rs').value = visit.pe_rs || ''; document.getElementById('cst2_pe_cvs').value = visit.pe_cvs || ''; document.getElementById('cst2_pe_gi').value = visit.pe_gi || ''; document.getElementById('cst2_pe_neuro').value = visit.pe_neuro || ''; document.getElementById('cst2_physical_exam').value = visit.physical_exam || ''; 
         
@@ -3911,6 +3940,18 @@ window.toggleFollowUpFields = function() {
             window.showCustomAlert('ກະລຸນາປ້ອນ "Primary Diagnosis (ພະຍາດຫຼັກ)" ກ່ອນປິດການກວດ!', 'ແຈ້ງເຕືອນ', '⚠️'); 
             return; 
         } 
+
+        // ອັບເດດຂໍ້ມູນແພ້ຢາ ແລະ ປະຫວັດສຸຂະພາບ ກັບຄືນໄປຫາຖານຂໍ້ມູນຄົນເຈັບ (Patient Database)
+        const updatedAllergy = document.getElementById('cst2_pt_allergy').value.trim();
+        const updatedHistory = document.getElementById('cst2_pt_history').value.trim();
+        let patients = JSON.parse(localStorage.getItem('clinic_local_patients')) || globalPatientsList || [];
+        let ptIndex = patients.findIndex(p => p.fullname === visits[editingVisitIndex].patient_name);
+        if (ptIndex !== -1) {
+            patients[ptIndex].allergy = updatedAllergy;
+            patients[ptIndex].health_history = updatedHistory;
+            localStorage.setItem('clinic_local_patients', JSON.stringify(patients));
+            globalPatientsList = patients;
+        }
 
         let procedures = [];
         document.querySelectorAll('#cst2_procedure_list li').forEach(li => {
