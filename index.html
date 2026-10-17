@@ -4648,12 +4648,26 @@ window.openEchoProcessModal = function(index) {
     };
 
     window.loadDoctorsList = function() {
-        let doctors = JSON.parse(localStorage.getItem('clinic_doctors')) || [];
+        let allStaff = JSON.parse(localStorage.getItem('clinic_doctors')) || [];
+        
+        // 1. ກັ່ນຕອງເອົາສະເພາະພະນັກງານທີ່ມີຕຳແໜ່ງເປັນ "ແພດ"
+        let doctorsOnly = allStaff.filter(staff => staff.role === 'ແພດ (Doctor)' || staff.role === 'DOCTOR');
+        
+        // 2. ກັ່ນຕອງປ້ອງກັນລາຍຊື່ຊ້ຳກັນ (ກໍລະນີມີການດຶງຂໍ້ມູນ Realtime ຫຼາຍຄັ້ງ)
+        let uniqueDoctors = [];
+        let seenNames = new Set();
+        doctorsOnly.forEach(doc => {
+            if (!seenNames.has(doc.name)) {
+                seenNames.add(doc.name);
+                uniqueDoctors.push(doc);
+            }
+        });
+
         const mainSelects = document.querySelectorAll('.dynamic-doctor-select');
         mainSelects.forEach(select => {
-            const firstOption = select.options.length > 0 ? select.options[0].outerHTML : '<option value="">-- ເລືອກແພດ --</option>';
-            select.innerHTML = firstOption;
-            doctors.forEach(doc => {
+            // ລ້າງຂໍ້ມູນເກົ່າອອກ ແລ້ວສ້າງ Option ທຳອິດໃໝ່ ເພື່ອບໍ່ໃຫ້ມັນຊ້ອນກັນ
+            select.innerHTML = '<option value="">-- ເລືອກແພດ --</option>';
+            uniqueDoctors.forEach(doc => {
                 select.innerHTML += `<option value="${doc.name}">${doc.name}</option>`;
             });
         });
@@ -4661,9 +4675,10 @@ window.openEchoProcessModal = function(index) {
         const allSelects = document.querySelectorAll('select.filter-input');
         allSelects.forEach(select => {
             if (select.options.length > 0 && select.options[0].text.includes('ແພດ')) {
-                const firstOption = select.options[0].outerHTML;
-                select.innerHTML = firstOption;
-                doctors.forEach(doc => {
+                const firstOptionText = select.options[0].text;
+                // ລ້າງຂໍ້ມູນເກົ່າອອກ ແລ້ວຮັກສາຂໍ້ຄວາມທຳອິດໄວ້ຄືເກົ່າ (ເຊັ່ນ: "-- ແພດທັງໝົດ --")
+                select.innerHTML = `<option value="">${firstOptionText}</option>`;
+                uniqueDoctors.forEach(doc => {
                     select.innerHTML += `<option value="${doc.name}">${doc.name}</option>`;
                 });
             }
