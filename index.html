@@ -1506,6 +1506,19 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
         </div>
         <div class="form-group"><label>ແພ້ຢາ / Allergy</label><textarea id="pt_allergy" rows="2"></textarea></div>
         <div class="form-group"><label>ປະຫວັດສຸຂະພາບ</label><textarea id="pt_health_history" rows="2"></textarea></div>
+        
+        <div class="section-title">❤️ ສັນຍານຊີບ ແລະ ປະເມີນຄວາມປວດ (Vital Signs & Pain)</div>
+        <div class="vital-signs-grid" style="grid-template-columns: repeat(4, 1fr); margin-top: 10px;">
+            <div class="form-group"><label>ອຸນຫະພູມ (°C)</label><input type="number" id="pt_temp" placeholder="36.5" step="0.1"></div>
+            <div class="form-group"><label>ຄວາມດັນ (mmHg)</label><input type="text" id="pt_bp" placeholder="120/80"></div>
+            <div class="form-group"><label>ຊີບຈອນ (bpm)</label><input type="number" id="pt_pulse" placeholder="80"></div>
+            <div class="form-group"><label>SpO2 (%)</label><input type="number" id="pt_spo2" placeholder="98"></div>
+            <div class="form-group"><label>ນ້ຳໜັກ (kg)</label><input type="number" id="pt_weight" placeholder="60" step="0.1" oninput="calcPtBMI()"></div>
+            <div class="form-group"><label>ສ່ວນສູງ (cm)</label><input type="number" id="pt_height" placeholder="165" oninput="calcPtBMI()"></div>
+            <div class="form-group"><label>BMI</label><input type="text" id="pt_bmi" placeholder="-" readonly style="background:#f4f7fb; font-weight:bold;"></div>
+            <div class="form-group"><label style="color:#d32f2f; font-weight:bold;">Pain Score (0-10)</label><input type="number" id="pt_pain" placeholder="0" min="0" max="10"></div>
+        </div>
+
         <div class="modal-actions"><button class="btn-cancel" id="btnCloseModal">ຍົກເລີກ</button><button class="btn-submit" id="btnSavePatient">💾 ບັນທຶກ</button></div>
     </div>
 </div>
@@ -1581,19 +1594,6 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
         
             <div class="form-group"><label>🏥 ພະແນກ/ຫ້ອງ</label><select id="apt_department"><option value="ຫ້ອງກວດທົ່ວໄປ (Room 1)">ຫ້ອງກວດທົ່ວໄປ (Room 1)</option><option value="ຫ້ອງທັນຕະກຳ (Room 2)">ຫ້ອງທັນຕະກຳ (Room 2)</option><option value="ຫ້ອງກວດພິເສດ (Room 3)">ຫ້ອງກວດພິເສດ (Room 3)</option></select></div>
     </div>
-    
-    <div class="section-title">❤️ ສັນຍານຊີບ ແລະ ປະເມີນຄວາມປວດ (Vital Signs & Pain)</div>
-    <div class="vital-signs-grid" style="grid-template-columns: repeat(4, 1fr); margin-top: 10px;">
-        <div class="form-group"><label>ອຸນຫະພູມ (°C)</label><input type="number" id="apt_temp" placeholder="36.5" step="0.1"></div>
-        <div class="form-group"><label>ຄວາມດັນ (mmHg)</label><input type="text" id="apt_bp" placeholder="120/80"></div>
-        <div class="form-group"><label>ຊີບຈອນ (bpm)</label><input type="number" id="apt_pulse" placeholder="80"></div>
-        <div class="form-group"><label>SpO2 (%)</label><input type="number" id="apt_spo2" placeholder="98"></div>
-        <div class="form-group"><label>ນ້ຳໜັກ (kg)</label><input type="number" id="apt_weight" placeholder="60" step="0.1" oninput="calcAptBMI()"></div>
-        <div class="form-group"><label>ສ່ວນສູງ (cm)</label><input type="number" id="apt_height" placeholder="165" oninput="calcAptBMI()"></div>
-        <div class="form-group"><label>BMI</label><input type="text" id="apt_bmi" placeholder="-" readonly style="background:#f4f7fb; font-weight:bold;"></div>
-        <div class="form-group"><label style="color:#d32f2f; font-weight:bold;">Pain Score (0-10)</label><input type="number" id="apt_pain" placeholder="0" min="0" max="10"></div>
-    </div>
-
     <div class="form-group" style="margin-top: 15px;"><label>ເຫດຜົນການນັດ</label><input type="text" id="apt_reason" placeholder="ຕົວຢ່າງ: ກວດທົ່ວໄປ, ນັດຕິດຕາມອາການ, ຕັດໄໝ..."></div>
     <div class="form-group"><label>ໝາຍເຫດ</label><textarea id="apt_note" rows="2" placeholder="ຂໍ້ຄວາມເພີ່ມເຕີມ..."></textarea></div>
     <div class="modal-actions"><button class="btn-cancel" id="btnCloseAptModal">ຍົກເລີກ</button><button class="btn-submit" id="btnSaveAppointment">💾 ບັນທຶກນັດໝາຍ</button></div>
@@ -2960,6 +2960,14 @@ window.showCustomAlert = function(message, title = "ແຈ້ງເຕືອນ"
         document.getElementById('pt_village').value = '';
         document.getElementById('pt_allergy').value = '';
         document.getElementById('pt_health_history').value = '';
+        document.getElementById('pt_temp').value = '';
+        document.getElementById('pt_bp').value = '';
+        document.getElementById('pt_pulse').value = '';
+        document.getElementById('pt_spo2').value = '';
+        document.getElementById('pt_weight').value = '';
+        document.getElementById('pt_height').value = '';
+        document.getElementById('pt_bmi').value = '';
+        document.getElementById('pt_pain').value = '';
         document.getElementById('patientModal').style.display = 'flex';
     };
 
@@ -3287,7 +3295,15 @@ function renderDashboardTable(patients) {
                 status: document.getElementById('pt_status').value, 
                 address: fullAddress || '-', 
                 allergy: document.getElementById('pt_allergy').value.trim() || 'ບໍ່ລະບຸ', 
-                health_history: document.getElementById('pt_health_history').value.trim() || 'ບໍ່ລະບຸ' 
+                health_history: document.getElementById('pt_health_history').value.trim() || 'ບໍ່ລະບຸ',
+                temp: document.getElementById('pt_temp').value,
+                bp: document.getElementById('pt_bp').value,
+                pulse: document.getElementById('pt_pulse').value,
+                spo2: document.getElementById('pt_spo2').value,
+                weight: document.getElementById('pt_weight').value,
+                height: document.getElementById('pt_height').value,
+                bmi: document.getElementById('pt_bmi').value,
+                pain: document.getElementById('pt_pain').value
             };
 
             if (!payload.fullname || !payload.gender) { 
@@ -3680,16 +3696,17 @@ function renderDashboardTable(patients) {
         const timelineContainer = document.getElementById('appointment-timeline'); timelineContainer.innerHTML = ''; const todaysApts = appointments.filter(a => a.appointment_date === todayDate).sort((a,b) => a.appointment_time.localeCompare(b.appointment_time));
         if(todaysApts.length === 0) { timelineContainer.innerHTML = '<p style="color:#7b8794;">ບໍ່ມີນັດໝາຍໃນມື້ນີ້</p>'; } else { todaysApts.forEach(apt => { timelineContainer.innerHTML += `<div class="timeline-item"><div class="timeline-time">${apt.appointment_time}</div><div class="timeline-content"><strong>${apt.patient_name}</strong> &mdash; ພົບແພດ: ${apt.doctor} (${apt.reason}) <span style="font-size:12px; margin-left: 10px;">${apt.status}</span></div></div>`; }); }
     }
-    window.calcAptBMI = function() {
-        const weight = parseFloat(document.getElementById('apt_weight').value);
-        const heightCm = parseFloat(document.getElementById('apt_height').value);
+    
+    window.calcPtBMI = function() {
+        const weight = parseFloat(document.getElementById('pt_weight').value);
+        const heightCm = parseFloat(document.getElementById('pt_height').value);
         if (weight > 0 && heightCm > 0) {
             const heightM = heightCm / 100;
             const bmi = (weight / (heightM * heightM)).toFixed(1);
             let meaning = bmi < 18.5 ? " (ຈ່ອຍ)" : (bmi <= 24.9 ? " (ປົກກະຕິ)" : (bmi <= 29.9 ? " (ນ້ຳໜັກເກີນ)" : " (ຕຸ້ຍ)"));
-            document.getElementById('apt_bmi').value = bmi + meaning;
+            document.getElementById('pt_bmi').value = bmi + meaning;
         } else {
-            document.getElementById('apt_bmi').value = '';
+            document.getElementById('pt_bmi').value = '';
         }
     };
 
@@ -3704,15 +3721,7 @@ function renderDashboardTable(patients) {
             department: document.getElementById('apt_department').value, 
             reason: document.getElementById('apt_reason').value || 'ກວດທົ່ວໄປ', 
             note: document.getElementById('apt_note').value, 
-            status: document.getElementById('apt_status').value,
-            temp: document.getElementById('apt_temp').value,
-            bp: document.getElementById('apt_bp').value,
-            pulse: document.getElementById('apt_pulse').value,
-            spo2: document.getElementById('apt_spo2').value,
-            weight: document.getElementById('apt_weight').value,
-            height: document.getElementById('apt_height').value,
-            bmi: document.getElementById('apt_bmi').value,
-            pain: document.getElementById('apt_pain').value
+            status: document.getElementById('apt_status').value
         }; 
         if (!payload.patient_name || !payload.appointment_date || !payload.appointment_time) { 
             window.showCustomAlert('ກະລຸນາເລືອກ ຄົນເຈັບ, ວັນທີ ແລະ ເວລາ!', 'ແຈ້ງເຕືອນ', '⚠️'); 
@@ -3724,10 +3733,14 @@ function renderDashboardTable(patients) {
         appointments.push(payload); 
         localStorage.setItem('clinic_appointments', JSON.stringify(appointments)); 
         
-        // 2. ສ້າງຄິວກວດ ແລະ ສົ່ງເຂົ້າຫ້ອງກວດອັດຕະໂນມັດ
+        // 2. ສ້າງຄິວກວດ ແລະ ສົ່ງເຂົ້າຫ້ອງກວດອັດຕະໂນມັດ ໂດຍດຶງສັນຍານຊີບຈາກ "ຖານຂໍ້ມູນຄົນເຈັບ"
         const dateStr = payload.appointment_date.replace(/-/g, ''); 
         const randomNum = Math.floor(Math.random() * 900) + 100; 
         const visitId = `V-${dateStr}-${randomNum}`; 
+        
+        let patients = JSON.parse(localStorage.getItem('clinic_local_patients')) || globalPatientsList || [];
+        let ptData = patients.find(p => p.fullname === payload.patient_name) || {};
+
         const newVisit = { 
             visit_id: visitId, 
             patient_name: payload.patient_name, 
@@ -3736,9 +3749,9 @@ function renderDashboardTable(patients) {
             doctor: payload.doctor, 
             status: '🔵 ລໍຖ້າກວດ', 
             symptoms: payload.reason || '', 
-            history: payload.note || '', 
-            temp: payload.temp, bp: payload.bp, pulse: payload.pulse, spo2: payload.spo2, 
-            weight: payload.weight, height: payload.height, bmi: payload.bmi, pain: payload.pain, 
+            history: ptData.health_history || payload.note || '', 
+            temp: ptData.temp || '', bp: ptData.bp || '', pulse: ptData.pulse || '', spo2: ptData.spo2 || '', 
+            weight: ptData.weight || '', height: ptData.height || '', bmi: ptData.bmi || '', pain: ptData.pain || '', 
             pe_general: '', pe_heent: '', pe_rs: '', pe_cvs: '', pe_gi: '', pe_neuro: '', 
             physical_exam: '', lab_result: '', diagnosis: '', treatment: '', medicine: '', advice: '', next_apt: '' 
         }; 
@@ -3753,10 +3766,10 @@ function renderDashboardTable(patients) {
         }); 
         document.getElementById('appointmentModal').style.display = 'none'; 
         
-        // ໂຫຼດໜ້າຈໍຄືນໃຫ້ເຫັນຂໍ້ມູນໃໝ່
         renderAppointmentsPage(); 
         if(typeof renderConsultationsPage === 'function') renderConsultationsPage();
     });
+
     window.deleteAppointment = function(index) { window.showCustomConfirm('ທ່ານຕ້ອງການລຶບນັດໝາຍນີ້ແທ້ຫຼືບໍ່?', 'ຢືນຢັນການລຶບ', function() { let appointments = JSON.parse(localStorage.getItem('clinic_appointments')) || []; appointments.splice(index, 1); localStorage.setItem('clinic_appointments', JSON.stringify(appointments)); renderAppointmentsPage(); window.showCustomAlert('ລຶບນັດໝາຍສຳເລັດແລ້ວ', 'ສຳເລັດ', '✅'); }); };
 
     window.sendAptToConsultation = function(patientName, doctorName, aptNo = null) { 
@@ -5838,6 +5851,14 @@ window.saveStaff = async function() {
             document.getElementById('pt_status').value = patient.status || 'Active';
             document.getElementById('pt_allergy').value = patient.allergy || '';
             document.getElementById('pt_health_history').value = patient.health_history || '';
+            document.getElementById('pt_temp').value = patient.temp || '';
+            document.getElementById('pt_bp').value = patient.bp || '';
+            document.getElementById('pt_pulse').value = patient.pulse || '';
+            document.getElementById('pt_spo2').value = patient.spo2 || '';
+            document.getElementById('pt_weight').value = patient.weight || '';
+            document.getElementById('pt_height').value = patient.height || '';
+            document.getElementById('pt_bmi').value = patient.bmi || '';
+            document.getElementById('pt_pain').value = patient.pain || '';
 
             document.querySelector('#patientModal h3').innerHTML = '✏️ ພົບຂໍ້ມູນເກົ່າ (ກຳລັງແກ້ໄຂ)';
             document.getElementById('pt_patient_code').style.backgroundColor = '#e7f7ef'; 
@@ -5870,6 +5891,14 @@ window.saveStaff = async function() {
         document.getElementById('pt_status').value = patient.status || 'Active';
         document.getElementById('pt_allergy').value = patient.allergy || '';
         document.getElementById('pt_health_history').value = patient.health_history || '';
+        document.getElementById('pt_temp').value = patient.temp || '';
+        document.getElementById('pt_bp').value = patient.bp || '';
+        document.getElementById('pt_pulse').value = patient.pulse || '';
+        document.getElementById('pt_spo2').value = patient.spo2 || '';
+        document.getElementById('pt_weight').value = patient.weight || '';
+        document.getElementById('pt_height').value = patient.height || '';
+        document.getElementById('pt_bmi').value = patient.bmi || '';
+        document.getElementById('pt_pain').value = patient.pain || '';
 
         document.querySelector('#patientModal h3').innerText = '✏️ ແກ້ໄຂຂໍ້ມູນຄົນເຈັບ';
         document.getElementById('patientModal').style.display = 'flex';
