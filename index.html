@@ -3210,6 +3210,21 @@ function renderDashboardTable(patients) {
             const history = p.health_history || 'ບໍ່ລະບຸ'; 
             let statusBadge = (p.status === 'Active') ? '<span class="badge badge-green">Active</span>' : '<span class="badge badge-gray">Inactive</span>';
             
+            // 1. ກວດສອບສິດ (Role) ຂອງຜູ້ໃຊ້ປະຈຸບັນ
+            const loggedUser = JSON.parse(localStorage.getItem('clinic_logged_user')) || {};
+            const isReceptionist = loggedUser.role === 'RECEPTION';
+
+            // 2. ສ້າງປຸ່ມສົ່ງກວດ ເປັນຄ່າເລີ່ມຕົ້ນສຳລັບທຸກຄົນ
+            let actionButtons = `<button class="btn-action" style="background: #16864b; color: white; padding: 4px 10px; font-size: 13px; border-radius: 6px; margin-right: 5px; box-shadow: 0 2px 4px rgba(22, 134, 75, 0.2);" onclick="sendPatientToQueue('${name}')">🩺 ສົ່ງກວດເລີຍ</button>`;
+            
+            // 3. ຖ້າບໍ່ແມ່ນ "ພະນັກງານຕ້ອນຮັບ" ຈຶ່ງເພີ່ມປຸ່ມ ເບິ່ງ(👁️) ແລະ ແກ້ໄຂ(✏️) ເຂົ້າໄປ
+            if (!isReceptionist) {
+                actionButtons += `
+                    <span class="action-icon" title="ເບິ່ງຂໍ້ມູນ" onclick="viewPatientQuick('${name}')">👁️</span>
+                    <span class="action-icon" title="ແກ້ໄຂຂໍ້ມູນ" onclick="editPatient('${ptId}')">✏️</span>
+                `;
+            }
+
             const tr = document.createElement('tr');
             tr.innerHTML = `
                 <td><strong>${ptId}</strong></td>
@@ -3224,9 +3239,7 @@ function renderDashboardTable(patients) {
                 <td><small style="color: #7b8794;">${history}</small></td>
                 <td>${statusBadge}</td>
                 <td style="text-align: center; min-width: 160px; white-space: nowrap;">
-                    <button class="btn-action" style="background: #16864b; color: white; padding: 4px 10px; font-size: 13px; border-radius: 6px; margin-right: 5px; box-shadow: 0 2px 4px rgba(22, 134, 75, 0.2);" onclick="sendPatientToQueue('${name}')">🩺 ສົ່ງກວດເລີຍ</button>
-                    <span class="action-icon" title="ເບິ່ງຂໍ້ມູນ" onclick="viewPatientQuick('${name}')">👁️</span>
-                    <span class="action-icon" title="ແກ້ໄຂຂໍ້ມູນ" onclick="editPatient('${ptId}')">✏️</span>
+                    ${actionButtons}
                 </td>
             `;
             tbody.appendChild(tr);
