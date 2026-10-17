@@ -1505,6 +1505,18 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
             </div>
         </div>
         
+        <!-- ເພີ່ມຊ່ອງ ປະຫວັດແພ້ຢາ ແລະ ພະຍາດປະຈຳຕົວ ທີ່ຂາດຫາຍໄປ -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px;">
+            <div class="form-group">
+                <label style="color: #d32f2f; font-weight: bold;">⚠️ ປະຫວັດແພ້ຢາ</label>
+                <input type="text" id="pt_allergy" placeholder="ລະບຸຊື່ຢາທີ່ແພ້ (ຖ້າມີ)..." style="border: 1px solid #ffcdd2; background: #fff0f0;">
+            </div>
+            <div class="form-group">
+                <label>📋 ປະຫວັດສຸຂະພາບ / ພະຍາດປະຈຳຕົວ</label>
+                <input type="text" id="pt_health_history" placeholder="ເບົາຫວານ, ຄວາມດັນ...">
+            </div>
+        </div>
+        
         <div class="section-title">❤️ ສັນຍານຊີບ ແລະ ປະເມີນຄວາມປວດ (Vital Signs & Pain)</div>
         <div class="vital-signs-grid" style="grid-template-columns: repeat(4, 1fr); margin-top: 10px;">
             <div class="form-group"><label>ອຸນຫະພູມ (°C)</label><input type="number" id="pt_temp" placeholder="36.5" step="0.1"></div>
@@ -3212,14 +3224,22 @@ function renderDashboardTable(patients) {
             
             // 1. ກວດສອບສິດ (Role) ຂອງຜູ້ໃຊ້ປະຈຸບັນ
             const loggedUser = JSON.parse(localStorage.getItem('clinic_logged_user')) || {};
-            const isReceptionist = loggedUser.role === 'RECEPTION';
+            const userRole = loggedUser.role || '';
+            const isReceptionist = userRole === 'RECEPTION';
+            const isDoctor = userRole === 'DOCTOR' || userRole === 'ແພດ (Doctor)';
 
-            // 2. ສ້າງປຸ່ມສົ່ງກວດ ເປັນຄ່າເລີ່ມຕົ້ນສຳລັບທຸກຄົນ
-            let actionButtons = `<button class="btn-action" style="background: #16864b; color: white; padding: 4px 10px; font-size: 13px; border-radius: 6px; margin-right: 5px; box-shadow: 0 2px 4px rgba(22, 134, 75, 0.2);" onclick="sendPatientToQueue('${name}')">🩺 ສົ່ງກວດເລີຍ</button>`;
+            let actionButtons = '';
             
-            // 3. ຖ້າບໍ່ແມ່ນ "ພະນັກງານຕ້ອນຮັບ" ຈຶ່ງເພີ່ມປຸ່ມ ເບິ່ງ(👁️) ແລະ ແກ້ໄຂ(✏️) ເຂົ້າໄປ
-            if (!isReceptionist) {
-                actionButtons += `
+            if (isReceptionist) {
+                // ສຳລັບ ພະນັກງານຕ້ອນຮັບ: ເຫັນແຕ່ປຸ່ມ "ສົ່ງກວດເລີຍ"
+                actionButtons = `<button class="btn-action" style="background: #16864b; color: white; padding: 4px 10px; font-size: 13px; border-radius: 6px; margin-right: 5px; box-shadow: 0 2px 4px rgba(22, 134, 75, 0.2);" onclick="sendPatientToQueue('${name}')">🩺 ສົ່ງກວດເລີຍ</button>`;
+            } else if (isDoctor) {
+                // ສຳລັບ ແພດ: ເຫັນແຕ່ປຸ່ມ "ເບິ່ງຂໍ້ມູນ (👁️)" ຢ່າງດຽວ
+                actionButtons = `<span class="action-icon" title="ເບິ່ງຂໍ້ມູນ" onclick="viewPatientQuick('${name}')">👁️</span>`;
+            } else {
+                // ສຳລັບ Admin ຫລື ຜູ້ບໍລິຫານອື່ນໆ: ເຫັນທຸກປຸ່ມທັງໝົດ
+                actionButtons = `
+                    <button class="btn-action" style="background: #16864b; color: white; padding: 4px 10px; font-size: 13px; border-radius: 6px; margin-right: 5px; box-shadow: 0 2px 4px rgba(22, 134, 75, 0.2);" onclick="sendPatientToQueue('${name}')">🩺 ສົ່ງກວດເລີຍ</button>
                     <span class="action-icon" title="ເບິ່ງຂໍ້ມູນ" onclick="viewPatientQuick('${name}')">👁️</span>
                     <span class="action-icon" title="ແກ້ໄຂຂໍ້ມູນ" onclick="editPatient('${ptId}')">✏️</span>
                 `;
