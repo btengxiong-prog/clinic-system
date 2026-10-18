@@ -869,7 +869,7 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
                     </select>
                 </div>
                 <div class="filter-group">
-                    <button class="btn-action btn-add" id="btn-add-pharmacy-page">➕ ຈ່າຍຢາ / ສັ່ງຢາ</button>
+                    <!-- ປຸ່ມ ➕ ຈ່າຍຢາ ຖືກຕັດອອກຕາມຄຳຂໍ -->
                 </div>
             </div>
 
@@ -1433,50 +1433,75 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
         </div>
     </div>
 </div>
-<!-- 1. PHARMACY MODAL -->
+<!-- 1. PHARMACY MODAL (Clean View ສຳລັບພະນັກງານຈ່າຍຢາ) -->
 <div class="modal-overlay" id="pharmacyModal">
-    <div class="modal-card large">
-        <h3>💊 ສັ່ງຢາ / ຈ່າຍຢາ (Prescription)</h3>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-            <div class="form-group"><label>ເລກໃບຢາ</label><input type="text" id="rx_no" readonly style="background: #f4f7fb; font-weight: bold;"></div>
-            <div class="form-group">
-                <label style="display: flex; justify-content: space-between; align-items: center;">
-                    Visit ID (ການກວດ) *
-                    <button type="button" class="btn-action" style="background: #1976d2; color: white; padding: 2px 8px; font-size: 11px; border-radius: 4px;" onclick="fetchDoctorPrescription()">ດຶງຂໍ້ມູນຢາຈາກໝໍ</button>
-                </label>
-                <!-- ປ່ຽນໃຫ້ສາມາດເລືອກ Visit ID ຈາກ Dropdown ໄດ້ -->
-                <input type="text" id="rx_visit" list="pending_visits_list" placeholder="ປ້ອນ ຫຼື ເລືອກ Visit ID..." onchange="fetchDoctorPrescription()">
-                <datalist id="pending_visits_list"></datalist>
+    <div class="modal-card large" style="background: #e2e8f0; width: 800px; max-width: 95%; padding: 15px;">
+        <div style="background: #fff; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+            
+            <!-- ສ່ວນຫົວໃບສັ່ງຢາ -->
+            <div style="text-align: center; border-bottom: 2px solid #102a43; padding-bottom: 15px; margin-bottom: 20px;">
+                <h2 style="margin:0; color:#102a43; font-size: 24px; text-transform: uppercase;">CLINIC SYSTEM</h2>
+                <h3 style="margin:5px 0 0 0; color: #555; font-size: 16px;">ໃບສັ່ງຢາ (Prescription)</h3>
             </div>
-            <div class="form-group"><label>ສະຖານະ</label><select id="rx_status"><option value="🟡 ລໍຖ້າຈ່າຍ">🟡 ລໍຖ້າຈ່າຍ</option><option value="🟢 ຈ່າຍແລ້ວ">🟢 ຈ່າຍແລ້ວ</option><option value="🔴 ຍົກເລີກ">🔴 ຍົກເລີກ</option></select></div>
-        </div>
-        <div class="form-group"><label>ຄຳແນະນຳການກິນຢາລວມ</label><input type="text" id="rx_instruction" placeholder="ຕົວຢ່າງ: ກິນຫຼັງອາຫານ 15 ນາທີ..."></div>
-        <div class="form-group"><label>ໝາຍເຫດ</label><input type="text" id="rx_note"></div>
-        
-        <div class="section-title">ລາຍການຢາ</div>
-        <div class="table-responsive" style="border: 1px solid #e8edf3; border-radius: 8px;">
-            <table class="med-table">
+            
+            <!-- ຂໍ້ມູນຄົນເຈັບ -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; font-size: 15px; margin-bottom: 25px; line-height: 1.8; background: #f9fbfd; padding: 15px 20px; border-radius: 8px; border: 1px solid #e8edf3;">
+                <div>
+                    <strong style="color:#7b8794;">ຊື່ຄົນເຈັບ:</strong> <span id="rx_view_patient" style="font-weight: bold; color: #102a43;"></span><br>
+                    <strong style="color:#7b8794;">Visit ID:</strong> <span id="rx_view_visit"></span>
+                </div>
+                <div style="text-align: right;">
+                    <strong style="color:#7b8794;">ເລກໃບຢາ:</strong> <span id="rx_view_no" style="font-weight: bold; color: #1976d2; font-size: 16px;"></span><br>
+                    <strong style="color:#7b8794;">ແພດຜູ້ສັ່ງ:</strong> <span id="rx_view_doctor" style="font-weight: bold; color: #102a43;"></span>
+                </div>
+            </div>
+            
+            <!-- ຕາຕະລາງລາຍການຢາ -->
+            <table style="width: 100%; border-collapse: collapse; font-size: 15px; margin-bottom: 25px;">
                 <thead>
-                    <tr><th>ຊື່ຢາ *</th><th>ຄວາມແຮງ</th><th>ຈຳນວນ *</th><th>ໜ່ວຍ</th><th>ວິທີໃຊ້</th><th>ຄວາມຖີ່</th><th>ຈຳນວນວັນ</th></tr>
-                </thead>
-                <tbody id="rx_med_body">
-                    <tr>
-                        <td><input type="text" class="med-name" placeholder="ຊື່ຢາ"></td>
-                        <td><input type="text" class="med-strength" placeholder="500mg"></td>
-                        <td><input type="number" class="med-qty" value="1"></td>
-                        <td><input type="text" class="med-unit" placeholder="ເມັດ"></td>
-                        <td><input type="text" class="med-usage" placeholder="ກິນ"></td>
-                        <td><input type="text" class="med-freq" placeholder="ເຊົ້າ-ແລງ"></td>
-                        <td><input type="number" class="med-days" placeholder="ວັນ"></td>
+                    <tr style="background: #e3f2fd; border-bottom: 2px solid #1976d2;">
+                        <th style="border: 1px solid #cce5ff; padding: 12px; text-align: left; color: #102a43;">ຊື່ຢາ (Medicine)</th>
+                        <th style="border: 1px solid #cce5ff; padding: 12px; text-align: center; width: 100px; color: #102a43;">ຈຳນວນ</th>
+                        <th style="border: 1px solid #cce5ff; padding: 12px; text-align: left; width: 45%; color: #102a43;">ວິທີໃຊ້ / ຄວາມຖີ່ (Usage)</th>
                     </tr>
+                </thead>
+                <tbody id="rx_view_med_body">
+                    <!-- ລາຍການຢາສະແດງຜົນຢູ່ທີ່ນີ້ -->
                 </tbody>
             </table>
-            <div id="rx_add_row_container" style="padding: 10px; text-align: center; background: #f9fbfd;"><button class="btn-action" style="background: #e2e8f0; color: #333;" onclick="addRxRow()">+ ເພີ່ມລາຍການຢາ</button></div>
-        </div>
-        
-        <div class="modal-actions">
-            <button class="btn-cancel" id="btnClosePharmacyModal">ຍົກເລີກ</button>
-            <button class="btn-submit" id="btnSavePharmacy">💾 ບັນທຶກໃບຢາ</button>
+            
+            <!-- ໝາຍເຫດ -->
+            <div style="margin-bottom: 30px; font-size: 14px; background: #fff8df; padding: 15px 20px; border: 1px solid #f3e5b5; border-radius: 8px;">
+                <strong style="color: #a36b00; display: block; margin-bottom: 5px;">ໝາຍເຫດ / ຄຳແນະນຳເພີ່ມເຕີມ:</strong> 
+                <span id="rx_view_note" style="color: #555; line-height: 1.6;"></span>
+            </div>
+            
+            <!-- ❌ Input ທີ່ເຊື່ອງໄວ້ (ເພື່ອບໍ່ໃຫ້ກະທົບກັບລະບົບບັນທຶກເກົ່າ) ❌ -->
+            <input type="hidden" id="rx_no">
+            <input type="hidden" id="rx_visit">
+            <input type="hidden" id="rx_instruction">
+            <input type="hidden" id="rx_note">
+            <!-- ຕ້ອງເອົາ tbody ໃສ່ໄວ້ໃນ table ບຼາວເຊີຈຶ່ງຈະອ່ານຄ່າໄດ້ -->
+            <table style="display:none;"><tbody id="rx_med_body"></tbody></table>
+            
+            <!-- Action Bar (ປ່ຽນສະຖານະ & ບັນທຶກ) -->
+            <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #eee; padding-top: 20px;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <label style="font-weight: bold; color: #102a43; font-size: 15px;">ສະຖານະໃບຢາ:</label>
+                    <select id="rx_status" style="padding: 10px 15px; font-size: 15px; border-radius: 8px; border: 2px solid #ccc; font-weight: bold; outline: none; cursor: pointer;">
+                        <option value="🟡 ລໍຖ້າຈ່າຍ">🟡 ລໍຖ້າຈ່າຍ</option>
+                        <option value="🟢 ຈ່າຍແລ້ວ">🟢 ຈ່າຍແລ້ວ</option>
+                        <option value="🔴 ຍົກເລີກ">🔴 ຍົກເລີກ</option>
+                    </select>
+                </div>
+                <div style="display: flex; gap: 10px;">
+                    <button class="btn-cancel" id="btnClosePharmacyModal" style="padding: 12px 20px; font-size: 15px; border-radius: 8px;" onclick="document.getElementById('pharmacyModal').style.display='none'">ຍົກເລີກ / ປິດ</button>
+                    <!-- ເພີ່ມປຸ່ມພິມໃບຢາເຂົ້າມາໃຫ້ໃນໜ້ານີ້ເລີຍ -->
+                    <button class="btn-print" style="background: #1976d2; color: white; border: none; padding: 12px 20px; font-size: 15px; border-radius: 8px; font-weight: bold; cursor: pointer;" onclick="printPrescription(document.getElementById('rx_no').value)">🖨️ ພິມໃບຢາ</button>
+                    <button class="btn-submit" id="btnSavePharmacy" style="background: #16864b; color: white; border: none; padding: 12px 25px; font-size: 15px; border-radius: 8px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 10px rgba(22, 134, 75, 0.3);">💾 ບັນທຶກການຈ່າຍຢາ</button>
+                </div>
+            </div>
+            
         </div>
     </div>
 </div>
@@ -6194,11 +6219,12 @@ window.saveStaff = async function() {
                 let itemCount = rx.items ? rx.items.length : 0;
                 
                 const trueIndex = rxs.findIndex(r => r.rx_no === rx.rx_no);
-                let printBtn = `<span class="action-icon" title="ພິມໃບຢາ" onclick="printPrescription('${rx.rx_no}')">🖨️</span>`;
-                let editBtn = `<span class="action-icon" title="ເບິ່ງລາຍລະອຽດ / ຈັດການໃບຢາ" onclick="openPharmacyEdit(${trueIndex})">✏️</span>`;
+                
+                // ຕັດປຸ່ມ 🖨️ ແລະ ✏️ ອອກ, ແລ້ວແທນທີ່ດ້ວຍປຸ່ມ "ຈ່າຍຢາ" (ເຊິ່ງຈະເປີດໜ້າຈໍລາຍລະອຽດຂຶ້ນມາຄືເກົ່າ)
+                let dispenseBtn = `<button class="btn-action" style="background: #16864b; color: white; padding: 5px 12px; font-size: 13px; border-radius: 6px; cursor: pointer; box-shadow: 0 2px 4px rgba(22, 134, 75, 0.2);" onclick="openPharmacyEdit(${trueIndex})">💊 ຈ່າຍຢາ</button>`;
                 
                 // ສະແດງປຸ່ມລຶບສະເພາະ Admin
-                let deleteBtn = isAdmin ? `<span class="action-icon" title="ລຶບໃບສັ່ງຢາທົດລອງ" onclick="deletePrescription(${trueIndex})" style="color: #d32f2f;">🗑️</span>` : '';
+                let deleteBtn = isAdmin ? `<span class="action-icon" title="ລຶບໃບສັ່ງຢາ" onclick="deletePrescription(${trueIndex})" style="color: #d32f2f; margin-left: 8px;">🗑️</span>` : '';
                 
                 let tr = document.createElement('tr');
                 tr.innerHTML = `
@@ -6209,7 +6235,7 @@ window.saveStaff = async function() {
                     <td>${rx.doctor}</td>
                     <td style="text-align:center; font-weight:bold;">${itemCount}</td>
                     <td><span class="badge ${badgeClass}">${rx.status}</span></td>
-                    <td style="text-align:center;">${printBtn} ${editBtn} ${deleteBtn}</td>
+                    <td style="text-align:center; white-space: nowrap;">${dispenseBtn} ${deleteBtn}</td>
                 `;
                 tbody.appendChild(tr);
             });
@@ -6223,56 +6249,64 @@ window.saveStaff = async function() {
         editingRxIndex = index;
         const rx = rxs[index];
         
+        // 1. ເກັບຄ່າໄວ້ໃນ Input ທີ່ເຊື່ອງໄວ້ (ເພື່ອໃຫ້ລະບົບຕັດສະຕ໋ອກສາງເຮັດວຽກໄດ້ປົກກະຕິ)
         document.getElementById('rx_no').value = rx.rx_no;
         document.getElementById('rx_visit').value = rx.visit_id;
         document.getElementById('rx_status').value = rx.status;
         document.getElementById('rx_instruction').value = rx.instruction || '';
         document.getElementById('rx_note').value = rx.note || '';
         
-        // 1. ກວດສອບສິດຜູ້ໃຊ້ (Role)
-        const loggedUser = JSON.parse(localStorage.getItem('clinic_logged_user')) || {};
-        const isDoctorOrAdmin = loggedUser.role === 'DOCTOR' || loggedUser.role === 'ແພດ (Doctor)' || loggedUser.role === 'ADMIN' || loggedUser.role === 'ຜູ້ບໍລິຫານ (Admin)' || loggedUser.username === 'XPH-ADMIN';
+        // 2. ດຶງຂໍ້ມູນມາສະແດງຜົນໃນ UI ໃໝ່ທີ່ສະອາດຕາ (Read-Only)
+        document.getElementById('rx_view_no').innerText = rx.rx_no;
+        document.getElementById('rx_view_visit').innerText = rx.visit_id;
+        document.getElementById('rx_view_patient').innerText = rx.patient_name;
+        document.getElementById('rx_view_doctor').innerText = rx.doctor || '-';
         
-        // ຖ້າບໍ່ແມ່ນແພດ ຫຼື ແອັດມິນ ໃຫ້ລັອກຂໍ້ມູນ (Readonly)
-        const readOnlyAttr = !isDoctorOrAdmin ? 'readonly style="background: #f4f7fb; color: #555; border: 1px solid #e8edf3; pointer-events: none;"' : '';
-        const hideBtnStyle = !isDoctorOrAdmin ? 'display: none;' : '';
+        let noteText = rx.instruction || '';
+        if(rx.note) noteText += (noteText ? '<br>' : '') + rx.note;
+        document.getElementById('rx_view_note').innerHTML = noteText || 'ບໍ່ມີຄຳແນະນຳເພີ່ມເຕີມ';
         
-        const tbody = document.getElementById('rx_med_body');
-        tbody.innerHTML = '';
+        const tbodyView = document.getElementById('rx_view_med_body');
+        const tbodyHidden = document.getElementById('rx_med_body'); // ຕາຕະລາງທີ່ເຊື່ອງໄວ້ໃຫ້ໂຄດບັນທຶກອ່ານຄ່າ
+        
+        tbodyView.innerHTML = '';
+        tbodyHidden.innerHTML = '';
         
         if(rx.items && rx.items.length > 0) {
             rx.items.forEach(med => {
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                <td><input type="text" class="med-name" value="${med.name}" ${readOnlyAttr}></td>
-                <td><input type="text" class="med-strength" value="${med.strength||''}" ${readOnlyAttr}></td>
-                <td><input type="number" class="med-qty" value="${med.qty}" ${readOnlyAttr}></td>
-                <td><input type="text" class="med-unit" value="${med.unit||''}" ${readOnlyAttr}></td>
-                <td><input type="text" class="med-usage" value="${med.usage||''}" ${readOnlyAttr}></td>
-                <td><input type="text" class="med-freq" value="${med.freq||''}" ${readOnlyAttr}></td>
-                <td><input type="number" class="med-days" value="${med.days||''}" ${readOnlyAttr}></td>
-                <td style="${hideBtnStyle}"><button type="button" class="btn-remove-row" style="padding: 4px; cursor: pointer;" onclick="this.closest('tr').remove()">🗑️</button></td>
+                // ສ້າງແຖວສະແດງຜົນງາມໆ
+                const trView = document.createElement('tr');
+                const strength = med.strength && med.strength !== '-' ? ` <span style="color:#7b8794; font-size:13px;">(${med.strength})</span>` : '';
+                const usage = `${med.usage||''} ${med.freq && med.freq!=='-'?med.freq:''} ${med.days ? `(${med.days} ວັນ)`:''}`;
+                
+                trView.innerHTML = `
+                    <td style="padding: 12px 10px; border: 1px solid #e8edf3; border-bottom: 1px solid #f0f2f5;">
+                        <strong style="color: #102a43; font-size: 16px;">${med.name}</strong>${strength}
+                    </td>
+                    <td style="padding: 12px 10px; text-align: center; border: 1px solid #e8edf3; border-bottom: 1px solid #f0f2f5;">
+                        <strong style="color: #1976d2; font-size: 16px;">${med.qty}</strong> <span style="color: #555; font-size: 13px;">${med.unit||''}</span>
+                    </td>
+                    <td style="padding: 12px 10px; border: 1px solid #e8edf3; border-bottom: 1px solid #f0f2f5; color: #333; line-height: 1.5;">
+                        ${usage}
+                    </td>
                 `;
-                tbody.appendChild(tr);
+                tbodyView.appendChild(trView);
+                
+                // ສ້າງແຖວເຊື່ອງໄວ້ໃຫ້ລະບົບຕັດສະຕ໋ອກສາງອ່ານຄ່າ
+                const trHidden = document.createElement('tr');
+                trHidden.innerHTML = `
+                    <td><input type="text" class="med-name" value="${med.name}"></td>
+                    <td><input type="text" class="med-strength" value="${med.strength||''}"></td>
+                    <td><input type="number" class="med-qty" value="${med.qty}"></td>
+                    <td><input type="text" class="med-unit" value="${med.unit||''}"></td>
+                    <td><input type="text" class="med-usage" value="${med.usage||''}"></td>
+                    <td><input type="text" class="med-freq" value="${med.freq||''}"></td>
+                    <td><input type="number" class="med-days" value="${med.days||''}"></td>
+                `;
+                tbodyHidden.appendChild(trHidden);
             });
         } else {
-            // ຖ້າບໍ່ມີລາຍການ ແລະ ເປັນ Pharmacist, ບໍ່ຕ້ອງສະແດງແຖວວ່າງ
-            if(isDoctorOrAdmin) addRxRow();
-        }
-        
-        // 2. ເຊື່ອງປຸ່ມ "+ ເພີ່ມລາຍການຢາ" ຖ້າບໍ່ແມ່ນໝໍ
-        const addRowContainer = document.getElementById('rx_add_row_container');
-        if (addRowContainer) {
-            addRowContainer.style.display = isDoctorOrAdmin ? 'block' : 'none';
-        }
-        
-        // 3. ລັອກຊ່ອງ Visit ID ເພື່ອບໍ່ໃຫ້ Pharmacist ໄປດຶງໃບຢາຄົນອື່ນມາສັບສົນ
-        if (!isDoctorOrAdmin) {
-            document.getElementById('rx_visit').setAttribute('readonly', true);
-            document.getElementById('rx_visit').style.backgroundColor = '#f4f7fb';
-        } else {
-            document.getElementById('rx_visit').removeAttribute('readonly');
-            document.getElementById('rx_visit').style.backgroundColor = '#fff';
+            tbodyView.innerHTML = '<tr><td colspan="3" style="text-align:center; padding: 20px; color: #7b8794;">ບໍ່ມີລາຍການຢາໃນໃບສັ່ງນີ້</td></tr>';
         }
         
         document.getElementById('pharmacyModal').style.display = 'flex';
