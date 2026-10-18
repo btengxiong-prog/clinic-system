@@ -3360,20 +3360,24 @@ function renderDashboardTable(patients) {
 
             let actionButtons = '';
             
+            // ສ້າງປຸ່ມສົ່ງກວດທີ່ລັອກອັດຕະໂນມັດ ຖ້າເຄີຍສົ່ງໄປແລ້ວ (ໃຊ້ຮ່ວມກັນທັງ Reception ແລະ Admin)
+            let sendQueueBtn = '';
+            if (visitToday && !visitToday.status.includes('ສຳເລັດ')) {
+                sendQueueBtn = `<button class="btn-action" style="background: #e2e8f0; color: #7b8794; padding: 4px 10px; font-size: 13px; border-radius: 6px; margin-right: 5px; cursor: not-allowed;" disabled>✅ ສົ່ງກວດແລ້ວ</button>`;
+            } else {
+                sendQueueBtn = `<button class="btn-action" style="background: #16864b; color: white; padding: 4px 10px; font-size: 13px; border-radius: 6px; margin-right: 5px; box-shadow: 0 2px 4px rgba(22, 134, 75, 0.2);" onclick="sendPatientToQueue('${name}')">🩺 ສົ່ງກວດເລີຍ</button>`;
+            }
+
             if (isReceptionist) {
-                // ຖ້າຄົນເຈັບຢູ່ໃນຄິວແລ້ວ ປ່ຽນປຸ່ມໃຫ້ເປັນສີເທົາ (ປ້ອງກັນກົດສົ່ງຊ້ຳ)
-                if (visitToday && !visitToday.status.includes('ສຳເລັດ')) {
-                    actionButtons = `<button class="btn-action" style="background: #e2e8f0; color: #7b8794; padding: 4px 10px; font-size: 13px; border-radius: 6px; margin-right: 5px; cursor: not-allowed;" disabled>⏳ ຢູ່ໃນຄິວແລ້ວ</button>`;
-                } else {
-                    actionButtons = `<button class="btn-action" style="background: #16864b; color: white; padding: 4px 10px; font-size: 13px; border-radius: 6px; margin-right: 5px; box-shadow: 0 2px 4px rgba(22, 134, 75, 0.2);" onclick="sendPatientToQueue('${name}')">🩺 ສົ່ງກວດເລີຍ</button>`;
-                }
+                // Receptionist ເຫັນແຕ່ປຸ່ມສົ່ງກວດ
+                actionButtons = sendQueueBtn;
             } else if (isDoctor) {
                 // ສຳລັບ ແພດ: ບໍ່ໃຫ້ເຫັນປຸ່ມໃດໆເລີຍໃນໜ້ານີ້ (ຕັດອອກ)
                 actionButtons = '';
             } else {
                 // ສຳລັບ Admin ຫລື ຜູ້ບໍລິຫານອື່ນໆ: ເຫັນທຸກປຸ່ມທັງໝົດ (ລວມເຖິງປຸ່ມລຶບ)
                 actionButtons = `
-                    <button class="btn-action" style="background: #16864b; color: white; padding: 4px 10px; font-size: 13px; border-radius: 6px; margin-right: 5px; box-shadow: 0 2px 4px rgba(22, 134, 75, 0.2);" onclick="sendPatientToQueue('${name}')">🩺 ສົ່ງກວດເລີຍ</button>
+                    ${sendQueueBtn}
                     <span class="action-icon" title="ເບິ່ງຂໍ້ມູນ" onclick="viewPatientQuick('${name}')">👁️</span>
                     <span class="action-icon" title="ແກ້ໄຂຂໍ້ມູນ" onclick="editPatient('${ptId}')">✏️</span>
                     <span class="action-icon" title="ລຶບຂໍ້ມູນທົດລອງ" onclick="deletePatient('${ptId}')" style="color: #d32f2f;">🗑️</span>
@@ -4277,24 +4281,35 @@ window.renderConsultationsPage = function() {
             // ຕ້ອງອ້າງອີງ Index ຕົວຈິງຈາກອາເຣຫຼັກ (originalVisits) ເພື່ອໃຫ້ກົດແກ້ໄຂຖືກຄົນ
             const trueIndex = originalVisits.findIndex(ov => ov.visit_id === v.visit_id); 
 
-            // 1. ກວດສອບສິດ (Role) ຂອງຜູ້ໃຊ້ປະຈຸບັນ
+            // ກວດສອບສິດ (Role) ຂອງຜູ້ໃຊ້ປະຈຸບັນ
             const loggedUser = JSON.parse(localStorage.getItem('clinic_logged_user')) || {};
             const userRole = loggedUser.role || '';
+            const isReceptionist = userRole === 'RECEPTION';
             const isDoctor = userRole === 'DOCTOR' || userRole === 'ແພດ (Doctor)';
 
             let actionButtons = '';
             
-            if (isDoctor) {
-                // ສຳລັບແພດ: ປ່ຽນເປັນປຸ່ມກົດເຂົ້າກວດຢ່າງດຽວ (ເຊື່ອງປຸ່ມລຶບຖິ້ມ)
-                let btnText = v.status.includes('ກຳລັງກວດ') ? 'ສືບຕໍ່ກວດ' : 'ເລີ່ມກວດ';
-                let btnColor = v.status.includes('ກຳລັງກວດ') ? '#f59e0b' : '#1976d2'; // ສີສົ້ມສຳລັບກຳລັງກວດ, ສີຟ້າສຳລັບເລີ່ມກວດ
-                
-                actionButtons = `<button class="btn-action" style="background: ${btnColor}; color: white; padding: 4px 12px; font-size: 13px; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);" onclick="openConsultationStep2(${trueIndex})">🩺 ${btnText}</button>`;
+            // ສ້າງປຸ່ມສົ່ງກວດທີ່ລັອກອັດຕະໂນມັດ ຖ້າເຄີຍສົ່ງໄປແລ້ວ (ໃຊ້ຮ່ວມກັນສຳລັບທຸກສິດອື່ນໆ)
+            let btnSendQueue = '';
+            if (visitToday && !visitToday.status.includes('ສຳເລັດ')) {
+                btnSendQueue = `<button class="btn-action" style="background: #e2e8f0; color: #7b8794; padding: 4px 10px; font-size: 13px; border-radius: 6px; margin-right: 5px; cursor: not-allowed;" disabled>✅ ສົ່ງກວດແລ້ວ</button>`;
             } else {
-                // ສຳລັບ Admin: ເຫັນປຸ່ມແກ້ໄຂ ແລະ ລຶບຄືເກົ່າ
+                // ສັງເກດ: ເພີ່ມ this ເຂົ້າໄປໃນ onclick ເພື່ອໃຫ້ຟັງຊັນຮູ້ຈັກຕົວປຸ່ມນີ້
+                btnSendQueue = `<button class="btn-action" style="background: #16864b; color: white; padding: 4px 10px; font-size: 13px; border-radius: 6px; margin-right: 5px; box-shadow: 0 2px 4px rgba(22, 134, 75, 0.2);" onclick="sendPatientToQueue('${name}', this)">🩺 ສົ່ງກວດເລີຍ</button>`;
+            }
+
+            if (isReceptionist) {
+                actionButtons = btnSendQueue;
+            } else if (isDoctor) {
+                // ສຳລັບ ແພດ: ບໍ່ໃຫ້ເຫັນປຸ່ມໃດໆເລີຍໃນໜ້ານີ້ (ຕັດອອກ)
+                actionButtons = '';
+            } else {
+                // ສຳລັບ Admin ຫລື ຜູ້ບໍລິຫານອື່ນໆ: ເຫັນທຸກປຸ່ມທັງໝົດ (ລວມເຖິງປຸ່ມລຶບ)
                 actionButtons = `
-                    <span class="action-icon" title="ບັນທຶກຜົນການກວດ / ແກ້ໄຂ" onclick="openConsultationStep2(${trueIndex})">✏️</span>
-                    <span class="action-icon" title="ລຶບຂໍ້ມູນການກວດ" onclick="deleteConsultation(${trueIndex})" style="color: #d32f2f;">🗑️</span>
+                    ${btnSendQueue}
+                    <span class="action-icon" title="ເບິ່ງຂໍ້ມູນ" onclick="viewPatientQuick('${name}')">👁️</span>
+                    <span class="action-icon" title="ແກ້ໄຂຂໍ້ມູນ" onclick="editPatient('${ptId}')">✏️</span>
+                    <span class="action-icon" title="ລຶບຂໍ້ມູນທົດລອງ" onclick="deletePatient('${ptId}')" style="color: #d32f2f;">🗑️</span>
                 `;
             }
 
@@ -7246,57 +7261,83 @@ window.autoPrescribeAI = async function() {
 // ສັ່ງໃຫ້ດຶງຂໍ້ມູນພະຍາດມາຕຽມໄວ້ໃນ Dropdown ທັນທີທີ່ເປີດລະບົບ
     setTimeout(() => { loadMasterData(); }, 1000);
 
-// ================= ຟັງຊັນໃໝ່: ສົ່ງຄົນເຈັບເຂົ້າຄິວກວດໂດຍກົງ ================= //
-window.sendPatientToQueue = function(patientName) {
-    let visits = JSON.parse(localStorage.getItem('clinic_visits')) || [];
-    const todayStr = new Date().toISOString().split('T')[0];
+// ================= ຟັງຊັນສົ່ງຄົນເຈັບເຂົ້າຄິວກວດໂດຍກົງ (ອັບເດດແກ້ບັກ) ================= //
+window.sendPatientToQueue = function(patientName, btnElement = null) {
+    try {
+        let visits = JSON.parse(localStorage.getItem('clinic_visits')) || [];
+        const todayStr = new Date().toISOString().split('T')[0];
 
-    // 1. ກວດສອບວ່າເຄີຍສົ່ງໄປແລ້ວຫຼືຍັງໃນມື້ນີ້ (ກັນການສົ່ງຊ້ຳ)
-    const exists = visits.some(v => v.patient_name === patientName && v.date === todayStr && (v.status.includes('ລໍຖ້າກວດ') || v.status.includes('ກຳລັງກວດ')));
+        // 1. ກວດສອບວ່າເຄີຍສົ່ງໄປແລ້ວຫຼືຍັງໃນມື້ນີ້ (ກັນການສົ່ງຊ້ຳ)
+        const exists = visits.some(v => v.patient_name === patientName && v.date === todayStr && !v.status.includes('ສຳເລັດ'));
 
-    if (exists) {
-        window.showCustomAlert('ຄົນເຈັບລາຍນີ້ມີຄິວລໍຖ້າກວດໃນມື້ນີ້ແລ້ວ!', 'ແຈ້ງເຕືອນ', '⚠️');
-        return;
+        if (exists) {
+            window.showCustomAlert('ຄົນເຈັບລາຍນີ້ມີຄິວລໍຖ້າກວດໃນມື້ນີ້ແລ້ວ!', 'ແຈ້ງເຕືອນ', '⚠️');
+            // ຖ້າມີຄິວແລ້ວ ກໍປ່ຽນປຸ່ມໃຫ້ເປັນ disabled ທັນທີ (ກັນບັກ)
+            if (btnElement) {
+                btnElement.innerHTML = '✅ ສົ່ງກວດແລ້ວ';
+                btnElement.style.background = '#e2e8f0';
+                btnElement.style.color = '#7b8794';
+                btnElement.style.cursor = 'not-allowed';
+                btnElement.disabled = true;
+                btnElement.removeAttribute('onclick');
+            }
+            return;
+        }
+
+        // 2. ສ້າງເລກ Visit ໃໝ່
+        const dateStr = todayStr.replace(/-/g, '');
+        const randomNum = Math.floor(Math.random() * 900) + 100;
+        const visitId = `V-${dateStr}-${randomNum}`;
+
+        // 3. ດຶງລາຍຊື່ແພດມາກຳນົດເປັນຄ່າເລີ່ມຕົ້ນ
+        let doctors = JSON.parse(localStorage.getItem('clinic_doctors')) || [];
+        const defaultDoctor = doctors.length > 0 ? doctors[0].name : 'ດຣ. ທົ່ວໄປ';
+
+        // 4. ດຶງຂໍ້ມູນສຸຂະພາບເບື້ອງຕົ້ນຈາກປະຫວັດຄົນເຈັບ (Vitals) ມາແນບໃສ່
+        let patients = JSON.parse(localStorage.getItem('clinic_local_patients')) || (typeof globalPatientsList !== 'undefined' ? globalPatientsList : []);
+        let ptData = patients.find(p => p.fullname === patientName) || {};
+
+        const newVisit = {
+            visit_id: visitId,
+            patient_name: patientName,
+            date: todayStr,
+            time: new Date().toTimeString().slice(0,5),
+            doctor: defaultDoctor,
+            status: '🔵 ລໍຖ້າກວດ',
+            symptoms: 'ກວດສຸຂະພາບທົ່ວໄປ', 
+            history: ptData.health_history || '', 
+            temp: ptData.temp || '', bp: ptData.bp || '', pulse: ptData.pulse || '', spo2: ptData.spo2 || '',
+            weight: ptData.weight || '', height: ptData.height || '', bmi: ptData.bmi || '', pain: ptData.pain || '',
+            pe_general: '', pe_heent: '', pe_rs: '', pe_cvs: '', pe_gi: '', pe_neuro: '',
+            physical_exam: '', lab_result: '', diagnosis: '', treatment: '', medicine: '', advice: '', next_apt: ''
+        };
+
+        // 5. ບັນທຶກເຂົ້າຄິວ 
+        visits.push(newVisit);
+        localStorage.setItem('clinic_visits', JSON.stringify(visits));
+
+        // * ປ່ຽນສະຖານະປຸ່ມທັນທີ ກ່ອນການແຈ້ງເຕືອນ ເພື່ອລັອກບໍ່ໃຫ້ຜູ້ໃຊ້ກົດຊ້ຳລົວໆ *
+        if (btnElement) {
+            btnElement.innerHTML = '✅ ສົ່ງກວດແລ້ວ';
+            btnElement.style.background = '#e2e8f0';
+            btnElement.style.color = '#7b8794';
+            btnElement.style.cursor = 'not-allowed';
+            btnElement.disabled = true;
+            btnElement.removeAttribute('onclick');
+        }
+
+        window.showCustomAlert(`ສົ່ງຄົນເຈັບ <strong>${patientName}</strong> ເຂົ້າຄິວຫ້ອງກວດສຳເລັດແລ້ວ!`, 'ສົ່ງກວດສຳເລັດ', '🩺');
+        
+        // 6. ອັບເດດໜ້າຈໍທັນທີ
+        if(typeof renderPatientsPage === 'function') renderPatientsPage();
+        if(typeof renderDashboardTable === 'function') renderDashboardTable(patients);
+        if(typeof renderConsultationsPage === 'function') renderConsultationsPage();
+
+    } catch (error) {
+        console.error("Error sending patient to queue:", error);
+        window.showCustomAlert('ເກີດຂໍ້ຜິດພາດໃນການສົ່ງຄົນເຈັບເຂົ້າຄິວ: ' + error.message, 'ຜິດພາດ', '❌');
     }
-
-    // 2. ສ້າງເລກ Visit ໃໝ່
-    const dateStr = todayStr.replace(/-/g, '');
-    const randomNum = Math.floor(Math.random() * 900) + 100;
-    const visitId = `V-${dateStr}-${randomNum}`;
-
-    // 3. ດຶງລາຍຊື່ແພດມາກຳນົດເປັນຄ່າເລີ່ມຕົ້ນ (ສາມາດໃຫ້ໝໍເລືອກປ່ຽນຊື່ຕົນເອງໄດ້ພາຍຫຼັງ)
-    let doctors = JSON.parse(localStorage.getItem('clinic_doctors')) || [];
-    const defaultDoctor = doctors.length > 0 ? doctors[0].name : 'ດຣ. ທົ່ວໄປ';
-
-    // 4. ດຶງຂໍ້ມູນສຸຂະພາບເບື້ອງຕົ້ນຈາກປະຫວັດຄົນເຈັບ (Vitals) ມາແນບໃສ່ເລີຍ
-    let patients = JSON.parse(localStorage.getItem('clinic_local_patients')) || globalPatientsList || [];
-    let ptData = patients.find(p => p.fullname === patientName) || {};
-
-    const newVisit = {
-        visit_id: visitId,
-        patient_name: patientName,
-        date: todayStr,
-        time: new Date().toTimeString().slice(0,5),
-        doctor: defaultDoctor,
-        status: '🔵 ລໍຖ້າກວດ',
-        symptoms: 'ກວດສຸຂະພາບທົ່ວໄປ', 
-        history: ptData.health_history || '', 
-        temp: ptData.temp || '', bp: ptData.bp || '', pulse: ptData.pulse || '', spo2: ptData.spo2 || '',
-        weight: ptData.weight || '', height: ptData.height || '', bmi: ptData.bmi || '', pain: ptData.pain || '',
-        pe_general: '', pe_heent: '', pe_rs: '', pe_cvs: '', pe_gi: '', pe_neuro: '',
-        physical_exam: '', lab_result: '', diagnosis: '', treatment: '', medicine: '', advice: '', next_apt: ''
-    };
-
-    // 5. ບັນທຶກເຂົ້າຄິວ ແລະ ແຈ້ງເຕືອນ
-    visits.push(newVisit);
-    localStorage.setItem('clinic_visits', JSON.stringify(visits));
-
-    window.showCustomAlert(`ສົ່ງຄົນເຈັບ <strong>${patientName}</strong> ເຂົ້າຄິວຫ້ອງກວດສຳເລັດແລ້ວ!<br><small style="color:#7b8794;">(ທ່ານໝໍສາມາດເບິ່ງເຫັນໃນໜ້າຫ້ອງກວດໄດ້ທັນທີ)</small>`, 'ສົ່ງກວດສຳເລັດ', '🩺');
-    
-    // ອັບເດດຕາຕະລາງຫ້ອງກວດ ຖ້າ Admin ເປີດເບິ່ງຢູ່
-    if(typeof renderConsultationsPage === 'function') renderConsultationsPage();
 };
-
 </script>
 </body>
 </html>
