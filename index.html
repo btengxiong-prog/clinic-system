@@ -1439,7 +1439,15 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
         <h3>💊 ສັ່ງຢາ / ຈ່າຍຢາ (Prescription)</h3>
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
             <div class="form-group"><label>ເລກໃບຢາ</label><input type="text" id="rx_no" readonly style="background: #f4f7fb; font-weight: bold;"></div>
-            <div class="form-group"><label>Visit ID (ການກວດ) *</label><input type="text" id="rx_visit" placeholder="ປ້ອນ Visit ID"></div>
+            <div class="form-group">
+                <label style="display: flex; justify-content: space-between; align-items: center;">
+                    Visit ID (ການກວດ) *
+                    <button type="button" class="btn-action" style="background: #1976d2; color: white; padding: 2px 8px; font-size: 11px; border-radius: 4px;" onclick="fetchDoctorPrescription()">ດຶງຂໍ້ມູນຢາຈາກໝໍ</button>
+                </label>
+                <!-- ປ່ຽນໃຫ້ສາມາດເລືອກ Visit ID ຈາກ Dropdown ໄດ້ -->
+                <input type="text" id="rx_visit" list="pending_visits_list" placeholder="ປ້ອນ ຫຼື ເລືອກ Visit ID..." onchange="fetchDoctorPrescription()">
+                <datalist id="pending_visits_list"></datalist>
+            </div>
             <div class="form-group"><label>ສະຖານະ</label><select id="rx_status"><option value="🟡 ລໍຖ້າຈ່າຍ">🟡 ລໍຖ້າຈ່າຍ</option><option value="🟢 ຈ່າຍແລ້ວ">🟢 ຈ່າຍແລ້ວ</option><option value="🔴 ຍົກເລີກ">🔴 ຍົກເລີກ</option></select></div>
         </div>
         <div class="form-group"><label>ຄຳແນະນຳການກິນຢາລວມ</label><input type="text" id="rx_instruction" placeholder="ຕົວຢ່າງ: ກິນຫຼັງອາຫານ 15 ນາທີ..."></div>
@@ -3153,10 +3161,88 @@ window.showCustomAlert = function(message, title = "ແຈ້ງເຕືອນ"
         const randomNum = Math.floor(Math.random() * 900) + 100;
         document.getElementById('rx_no').value = `RX-${dateStr}-${randomNum}`;
         document.getElementById('rx_visit').value = '';
+        document.getElementById('rx_status').value = '🟡 ລໍຖ້າຈ່າຍ';
         document.getElementById('rx_instruction').value = '';
         document.getElementById('rx_note').value = '';
-        document.getElementById('rx_med_body').innerHTML = `<tr><td><input type="text" class="med-name" placeholder="ຊື່ຢາ"></td><td><input type="text" class="med-strength" placeholder="500mg"></td><td><input type="number" class="med-qty" value="1"></td><td><input type="text" class="med-unit" placeholder="ເມັດ"></td><td><input type="text" class="med-usage" placeholder="ກິນ"></td><td><input type="text" class="med-freq" placeholder="ເຊົ້າ-ແລງ"></td><td><input type="number" class="med-days" placeholder="ວັນ"></td></tr>`;
+        
+        const tbody = document.getElementById('rx_med_body');
+        tbody.innerHTML = '';
+        
+        // ອັບເດດ Datalist ໃຫ້ເລືອກ Visit ID ງ່າຍຂຶ້ນ (ດຶງສະເພາະຄົນທີ່ມີໃບສັ່ງຢາ)
+        const dataList = document.getElementById('pending_visits_list');
+        if(dataList) {
+            dataList.innerHTML = '';
+            const visits = JSON.parse(localStorage.getItem('clinic_visits')) || [];
+            visits.forEach(v => {
+                if(v.prescriptions && v.prescriptions.length > 0) {
+                    dataList.innerHTML += `<option value="${v.visit_id}">${v.patient_name} (ໝໍ: ${v.doctor})</option>`;
+                }
+            });
+        }
+        
+        // ກວດສິດການໃຊ້ງານ
+        const loggedUser = JSON.parse(localStorage.getItem('clinic_logged_user')) || {};
+        const isDoctorOrAdmin = loggedUser.role === 'DOCTOR' || loggedUser.role === 'ແພດ (Doctor)' || loggedUser.role === 'ADMIN' || loggedUser.role === 'ຜູ້ບໍລິຫານ (Admin)' || loggedUser.username === 'XPH-ADMIN';
+        
+        if (isDoctorOrAdmin) {
+            addRxRow();
+        }
+        
+        const addRowContainer = document.getElementById('rx_add_row_container');
+        if (addRowContainer) {
+            addRowContainer.style.display = isDoctorOrAdmin ? 'block' : 'none';
+        }
+        
+        document.getElementById('rx_visit').removeAttribute('readonly');
+        document.getElementById('rx_visit').style.backgroundColor = '#fff';
+
         document.getElementById('pharmacyModal').style.display = 'flex';
+    };
+
+    // ຟັງຊັນໃໝ່ສຳລັບດຶງຂໍ້ມູນລາຍການຢາຈາກໝໍ ມາປ້ອນລົງຕາຕະລາງອັດຕະໂນມັດ
+    window.fetchDoctorPrescription = function() {
+        const visitId = document.getElementById('rx_visit').value.trim();
+        if(!visitId) return;
+        
+        const visits = JSON.parse(localStorage.getItem('clinic_visits')) || [];
+        const visit = visits.find(v => v.visit_id === visitId);
+        
+        if(!visit) {
+            window.showCustomAlert('ບໍ່ພົບປະຫວັດການກວດ (Visit ID) ນີ້ໃນລະບົບ!', 'ບໍ່ພົບຂໍ້ມູນ', '❌');
+            return;
+        }
+        
+        if(!visit.prescriptions || visit.prescriptions.length === 0) {
+            window.showCustomAlert('ທ່ານໝໍບໍ່ໄດ້ສັ່ງຢາໃນການກວດຄັ້ງນີ້!', 'ແຈ້ງເຕືອນ', 'ℹ️');
+            return;
+        }
+        
+        const tbody = document.getElementById('rx_med_body');
+        tbody.innerHTML = '';
+        
+        const loggedUser = JSON.parse(localStorage.getItem('clinic_logged_user')) || {};
+        const isDoctorOrAdmin = loggedUser.role === 'DOCTOR' || loggedUser.role === 'ແພດ (Doctor)' || loggedUser.role === 'ADMIN' || loggedUser.role === 'ຜູ້ບໍລິຫານ (Admin)' || loggedUser.username === 'XPH-ADMIN';
+        
+        const readOnlyAttr = !isDoctorOrAdmin ? 'readonly style="background: #f4f7fb; color: #555; border: 1px solid #e8edf3; pointer-events: none;"' : '';
+        const hideBtnStyle = !isDoctorOrAdmin ? 'display: none;' : '';
+        
+        visit.prescriptions.forEach(med => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+            <td><input type="text" class="med-name" value="${med.name}" ${readOnlyAttr}></td>
+            <td><input type="text" class="med-strength" value="${med.strength||''}" ${readOnlyAttr}></td>
+            <td><input type="number" class="med-qty" value="${med.qty}" ${readOnlyAttr}></td>
+            <td><input type="text" class="med-unit" value="${med.unit||''}" ${readOnlyAttr}></td>
+            <td><input type="text" class="med-usage" value="${med.usage||''}" ${readOnlyAttr}></td>
+            <td><input type="text" class="med-freq" value="${med.freq||''}" ${readOnlyAttr}></td>
+            <td><input type="number" class="med-days" value="${med.days||''}" ${readOnlyAttr}></td>
+            <td style="${hideBtnStyle}"><button type="button" class="btn-remove-row" style="padding: 4px; cursor: pointer;" onclick="this.closest('tr').remove()">🗑️</button></td>
+            `;
+            tbody.appendChild(tr);
+        });
+        
+        document.getElementById('rx_instruction').value = visit.advice || '';
+        window.showCustomAlert('ດຶງຂໍ້ມູນລາຍການຢາຈາກທ່ານໝໍສຳເລັດແລ້ວ!', 'ສຳເລັດ', '✅');
     };
 
     window.addRxRow = function() {
