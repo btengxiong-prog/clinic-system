@@ -1433,10 +1433,52 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
         </div>
     </div>
 </div>
-<!-- 1. PHARMACY MODAL (Clean View ສຳລັບພະນັກງານຈ່າຍຢາ) -->
+
+<!-- 1. PHARMACY MODAL (Clean View ສຳລັບພະນັກງານຈ່າຍຢາ & ພິມ) -->
+<style>
+@media print {
+    /* 1. ເຊື່ອງທຸກຢ່າງໃນໜ້າຈໍ ຍົກເວັ້ນໂຕ Modal ຈ່າຍຢາ */
+    body.printing-pharmacy > *:not(#pharmacyModal) { display: none !important; }
+    body.printing-pharmacy { background: white !important; margin: 0; padding: 0; }
+    
+    /* 2. ປົດລັອກ Modal ຈາກການລອຍໜ້າຈໍ ໃຫ້ເປັນກອບປົກກະຕິເຕັມໜ້າເຈ້ຍ */
+    body.printing-pharmacy #pharmacyModal { 
+        position: absolute !important; 
+        left: 0 !important; 
+        top: 0 !important; 
+        width: 100% !important; 
+        height: auto !important; 
+        display: block !important; 
+        overflow: visible !important; 
+        background: white !important; 
+    }
+    
+    /* 3. ລຶບເງົາ ແລະ ກອບຂອບມົນຕ່າງໆອອກ ເພື່ອພິມໃຫ້ງາມ */
+    body.printing-pharmacy #pharmacyModal .modal-card { 
+        position: static !important; 
+        margin: 0 !important; 
+        padding: 0 !important; 
+        width: 100% !important; 
+        max-width: 100% !important; 
+        box-shadow: none !important; 
+        background: white !important; 
+    }
+    
+    body.printing-pharmacy #rx_direct_print_area { 
+        box-shadow: none !important; 
+        padding: 20px !important; 
+        margin: 0 !important; 
+        width: 100% !important; 
+    }
+    
+    /* 4. ເຊື່ອງປຸ່ມກົດຕ່າງໆຕອນພິມ */
+    body.printing-pharmacy #rx_action_bar { display: none !important; }
+}
+</style>
+
 <div class="modal-overlay" id="pharmacyModal">
     <div class="modal-card xlarge" style="background: #e2e8f0; width: 950px; max-width: 98%; padding: 15px;">
-        <div style="background: #fff; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 100%; box-sizing: border-box;">
+        <div id="rx_direct_print_area" style="background: #fff; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 100%; box-sizing: border-box;">
             
             <!-- ສ່ວນຫົວໃບສັ່ງຢາ -->
             <div style="text-align: center; border-bottom: 2px solid #102a43; padding-bottom: 15px; margin-bottom: 20px;">
@@ -1444,8 +1486,8 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
                 <h3 style="margin:5px 0 0 0; color: #555; font-size: 16px;">ໃບສັ່ງຢາ (Prescription)</h3>
             </div>
             
-            <!-- ຂໍ້ມູນຄົນເຈັບ -->
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; font-size: 15px; margin-bottom: 25px; line-height: 1.8; background: #f9fbfd; padding: 15px 20px; border-radius: 8px; border: 1px solid #e8edf3;">
+            <!-- ຂໍ້ມູນຄົນເຈັບ (ປ່ຽນຈາກ Grid ເປັນ Flex ເພື່ອແກ້ບັກຕອນພິມ) -->
+            <div style="display: flex; justify-content: space-between; font-size: 15px; margin-bottom: 25px; line-height: 1.8; background: #f9fbfd; padding: 15px 20px; border-radius: 8px; border: 1px solid #e8edf3;">
                 <div>
                     <strong style="color:#7b8794;">ຊື່ຄົນເຈັບ:</strong> <span id="rx_view_patient" style="font-weight: bold; color: #102a43;"></span><br>
                     <strong style="color:#7b8794;">Visit ID:</strong> <span id="rx_view_visit"></span>
@@ -1456,8 +1498,8 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
                 </div>
             </div>
             
-            <!-- ຕາຕະລາງລາຍການຢາ (ແກ້ໄຂ overflow ດ້ວຍການປົດລັອກ min-width 1100px) -->
-            <div style="width: 100%; overflow-x: hidden;">
+            <!-- ຕາຕະລາງລາຍການຢາ -->
+            <div style="width: 100%; overflow: visible !important;">
                 <table style="width: 100%; min-width: 0 !important; border-collapse: collapse; font-size: 15px; margin-bottom: 25px; table-layout: auto;">
                     <thead>
                         <tr style="background: #e3f2fd; border-bottom: 2px solid #1976d2;">
@@ -1478,16 +1520,25 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
                 <span id="rx_view_note" style="color: #555; line-height: 1.6;"></span>
             </div>
             
+            <!-- ລາຍເຊັນ -->
+            <div style="display: flex; justify-content: flex-end; margin-top: 10px; margin-bottom: 20px; font-size: 15px;">
+                <div style="text-align: center;">
+                    <div style="border-bottom: 1px solid #000; width: 220px; display: inline-block; margin-bottom: 8px;"></div><br>
+                    <strong style="color: #102a43;">ລາຍເຊັນແພດ (Doctor Signature)</strong>
+                </div>
+            </div>
+            
             <!-- ❌ Input ທີ່ເຊື່ອງໄວ້ (ເພື່ອບໍ່ໃຫ້ກະທົບກັບລະບົບບັນທຶກເກົ່າ) ❌ -->
-            <input type="hidden" id="rx_no">
-            <input type="hidden" id="rx_visit">
-            <input type="hidden" id="rx_instruction">
-            <input type="hidden" id="rx_note">
-            <!-- ຕ້ອງເອົາ tbody ໃສ່ໄວ້ໃນ table ບຼາວເຊີຈຶ່ງຈະອ່ານຄ່າໄດ້ -->
-            <table style="display:none;"><tbody id="rx_med_body"></tbody></table>
+            <div style="display:none;">
+                <input type="hidden" id="rx_no">
+                <input type="hidden" id="rx_visit">
+                <input type="hidden" id="rx_instruction">
+                <input type="hidden" id="rx_note">
+                <table style="display:none;"><tbody id="rx_med_body"></tbody></table>
+            </div>
             
             <!-- Action Bar (ປ່ຽນສະຖານະ & ບັນທຶກ) -->
-            <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #eee; padding-top: 20px;">
+            <div id="rx_action_bar" style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #eee; padding-top: 20px;">
                 <div style="display: flex; align-items: center; gap: 10px;">
                     <label style="font-weight: bold; color: #102a43; font-size: 15px;">ສະຖານະໃບຢາ:</label>
                     <select id="rx_status" style="padding: 10px 15px; font-size: 15px; border-radius: 8px; border: 2px solid #ccc; font-weight: bold; outline: none; cursor: pointer;">
@@ -1498,8 +1549,10 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
                 </div>
                 <div style="display: flex; gap: 10px;">
                     <button class="btn-cancel" id="btnClosePharmacyModal" style="padding: 12px 20px; font-size: 15px; border-radius: 8px;" onclick="document.getElementById('pharmacyModal').style.display='none'">ຍົກເລີກ / ປິດ</button>
-                    <!-- ເພີ່ມປຸ່ມພິມໃບຢາເຂົ້າມາໃຫ້ໃນໜ້ານີ້ເລີຍ -->
-                    <button class="btn-print" style="background: #1976d2; color: white; border: none; padding: 12px 20px; font-size: 15px; border-radius: 8px; font-weight: bold; cursor: pointer;" onclick="printPrescription(document.getElementById('rx_no').value)">🖨️ ພິມໃບຢາ</button>
+                    
+                    <!-- ປ່ຽນຄຳສັ່ງເປັນ executeCustomPrint('pharmacy') ລະບົບກໍຈະພິມໄດ້ທັນທີ -->
+                    <button class="btn-print" style="background: #1976d2; color: white; border: none; padding: 12px 20px; font-size: 15px; border-radius: 8px; font-weight: bold; cursor: pointer;" onclick="executeCustomPrint('pharmacy')">🖨️ ພິມໃບຢາ</button>
+                    
                     <button class="btn-submit" id="btnSavePharmacy" style="background: #16864b; color: white; border: none; padding: 12px 25px; font-size: 15px; border-radius: 8px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 10px rgba(22, 134, 75, 0.3);">💾 ບັນທຶກການຈ່າຍຢາ</button>
                 </div>
             </div>
