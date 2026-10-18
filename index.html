@@ -6083,6 +6083,10 @@ window.saveStaff = async function() {
         const tbody = document.getElementById('pharmacy-table-body');
         if(!tbody) return;
         tbody.innerHTML = '';
+
+        // ກວດສອບສິດວ່າເປັນ Admin ຫຼື ບໍ່
+        const loggedUser = JSON.parse(localStorage.getItem('clinic_logged_user')) || {};
+        const isAdmin = loggedUser.role === 'ADMIN' || loggedUser.role === 'ຜູ້ບໍລິຫານ (Admin)' || loggedUser.username === 'XPH-ADMIN';
         
         if (rxs.length === 0) {
             tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding: 20px; color: #7b8794;">ຍັງບໍ່ມີຂໍ້ມູນການສັ່ງຢາ / ຈ່າຍຢາ</td></tr>';
@@ -6095,6 +6099,9 @@ window.saveStaff = async function() {
                 let printBtn = `<span class="action-icon" title="ພິມໃບຢາ" onclick="printPrescription('${rx.rx_no}')">🖨️</span>`;
                 let editBtn = `<span class="action-icon" title="ເບິ່ງລາຍລະອຽດ / ຈັດການໃບຢາ" onclick="openPharmacyEdit(${trueIndex})">✏️</span>`;
                 
+                // ສະແດງປຸ່ມລຶບສະເພາະ Admin
+                let deleteBtn = isAdmin ? `<span class="action-icon" title="ລຶບໃບສັ່ງຢາທົດລອງ" onclick="deletePrescription(${trueIndex})" style="color: #d32f2f;">🗑️</span>` : '';
+                
                 let tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td><strong>${rx.rx_no}</strong></td>
@@ -6104,7 +6111,7 @@ window.saveStaff = async function() {
                     <td>${rx.doctor}</td>
                     <td style="text-align:center; font-weight:bold;">${itemCount}</td>
                     <td><span class="badge ${badgeClass}">${rx.status}</span></td>
-                    <td style="text-align:center;">${printBtn} ${editBtn}</td>
+                    <td style="text-align:center;">${printBtn} ${editBtn} ${deleteBtn}</td>
                 `;
                 tbody.appendChild(tr);
             });
@@ -6145,6 +6152,19 @@ window.saveStaff = async function() {
         }
         
         document.getElementById('pharmacyModal').style.display = 'flex';
+    };
+
+    // ================= ຟັງຊັນລຶບໃບສັ່ງຢາ (ສະເພາະ Admin) ================= //
+    window.deletePrescription = function(index) {
+        window.showCustomConfirm('ທ່ານຕ້ອງການລຶບໃບສັ່ງຢານີ້ ແທ້ຫຼືບໍ່? (ເໝາະສຳລັບລຶບຂໍ້ມູນທົດລອງ)', 'ຢືນຢັນການລຶບ', function() {
+            let rxs = JSON.parse(localStorage.getItem('clinic_prescriptions')) || [];
+            if (index >= 0 && index < rxs.length) {
+                rxs.splice(index, 1);
+                localStorage.setItem('clinic_prescriptions', JSON.stringify(rxs));
+                if(typeof window.renderPharmacyPage === 'function') window.renderPharmacyPage();
+                window.showCustomAlert('ລຶບຂໍ້ມູນໃບສັ່ງຢາສຳເລັດແລ້ວ', 'ສຳເລັດ', '✅');
+            }
+        });
     };
 
     window.printPrescription = function(rxNo) {
