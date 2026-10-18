@@ -3243,8 +3243,12 @@ function renderDashboardTable(patients) {
             // ກວດສອບວ່າຄົນເຈັບຄົນນີ້ມີ Visit (ຖືກສົ່ງໄປຫ້ອງກວດ) ແລ້ວ ຫຼือกຍັງ?
             const hasBeenConsulted = visits.some(v => v.patient_name === name);
 
-            // ຖ້າຖືກສົ່ງໄປຫ້ອງກວດແລ້ວ ຈະ "ເຊື່ອງປຸ່ມລຶບ" ບໍ່ໃຫ້ສະແດງ
-            let deleteButtonHtml = hasBeenConsulted 
+            // ກວດສອບສິດ ວ່າແມ່ນ Admin ຫຼື ບໍ່
+            const loggedUser = JSON.parse(localStorage.getItem('clinic_logged_user')) || {};
+            const isAdmin = loggedUser.role === 'ADMIN' || loggedUser.role === 'ຜູ້ບໍລິຫານ (Admin)' || loggedUser.username === 'XPH-ADMIN';
+
+            // ຖ້າເປັນ Admin ສາມາດລຶບໄດ້ສະເໝີ. ແຕ່ຖ້າເປັນພະນັກງານທົ່ວໄປ ຈະຖືກລັອກຖ້າສົ່ງກວດແລ້ວ
+            let deleteButtonHtml = (hasBeenConsulted && !isAdmin)
                 ? `<span style="color: #adb5bd; font-size: 12px;" title="ສົ່ງຫ້ອງກວດແລ້ວ ບໍ່ສາມາດລຶບໄດ້">🔒 ລັອກແລ້ວ</span>` 
                 : `<span class="action-icon" title="ລຶບຂໍ້ມູນທົດລອງ" onclick="deletePatient('${ptId}')" style="color: #d32f2f;">🗑️</span>`;
 
@@ -3358,11 +3362,12 @@ function renderDashboardTable(patients) {
                 // ສຳລັບ ແພດ: ບໍ່ໃຫ້ເຫັນປຸ່ມໃດໆເລີຍໃນໜ້ານີ້ (ຕັດອອກ)
                 actionButtons = '';
             } else {
-                // ສຳລັບ Admin ຫລື ຜູ້ບໍລິຫານອື່ນໆ: ເຫັນທຸກປຸ່ມທັງໝົດ
+                // ສຳລັບ Admin ຫລື ຜູ້ບໍລິຫານອື່ນໆ: ເຫັນທຸກປຸ່ມທັງໝົດ (ລວມເຖິງປຸ່ມລຶບ)
                 actionButtons = `
                     <button class="btn-action" style="background: #16864b; color: white; padding: 4px 10px; font-size: 13px; border-radius: 6px; margin-right: 5px; box-shadow: 0 2px 4px rgba(22, 134, 75, 0.2);" onclick="sendPatientToQueue('${name}')">🩺 ສົ່ງກວດເລີຍ</button>
                     <span class="action-icon" title="ເບິ່ງຂໍ້ມູນ" onclick="viewPatientQuick('${name}')">👁️</span>
                     <span class="action-icon" title="ແກ້ໄຂຂໍ້ມູນ" onclick="editPatient('${ptId}')">✏️</span>
+                    <span class="action-icon" title="ລຶບຂໍ້ມູນທົດລອງ" onclick="deletePatient('${ptId}')" style="color: #d32f2f;">🗑️</span>
                 `;
             }
 
