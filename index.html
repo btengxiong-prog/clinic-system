@@ -364,6 +364,7 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
                     <table>
                         <thead>
                             <tr>
+                                <th style="width: 40px; text-align: center;"><input type="checkbox" onclick="toggleSelectAllPatients(this)"></th>
                                 <th>ID</th>
                                 <th>HN</th>
                                 <th>ຊື່ ແລະ ນາມສະກຸນ</th>
@@ -6087,6 +6088,23 @@ window.saveStaff = async function() {
             document.getElementById('pt_status').value = patient.status || 'Active';
             document.getElementById('pt_allergy').value = patient.allergy || '';
             document.getElementById('pt_health_history').value = patient.health_history || '';
+            
+            // ແຍກຂໍ້ມູນທີ່ຢູ່ (ແຂວງ, ເມືອງ, ບ້ານ) ມາຍັດໃສ່ຟອມຄືນ
+            let address = patient.address || '';
+            let prov = '', dist = '', vill = '';
+            if (address && address !== '-') {
+                let parts = address.split(', ');
+                parts.forEach(part => {
+                    if(part.startsWith('ແຂວງ ')) prov = part.replace('ແຂວງ ', '');
+                    if(part.startsWith('ເມືອງ ')) dist = part.replace('ເມືອງ ', '');
+                    if(part.startsWith('ບ້ານ ')) vill = part.replace('ບ້ານ ', '');
+                });
+            }
+            document.getElementById('pt_province').value = prov;
+            updateDistricts(); // ອັບເດດລາຍຊື່ເມືອງ
+            document.getElementById('pt_district').value = dist;
+            document.getElementById('pt_village').value = vill;
+
             document.getElementById('pt_temp').value = patient.temp || '';
             document.getElementById('pt_bp').value = patient.bp || '';
             document.getElementById('pt_pulse').value = patient.pulse || '';
@@ -6127,6 +6145,23 @@ window.saveStaff = async function() {
         document.getElementById('pt_status').value = patient.status || 'Active';
         document.getElementById('pt_allergy').value = patient.allergy || '';
         document.getElementById('pt_health_history').value = patient.health_history || '';
+        
+        // ແຍກຂໍ້ມູນທີ່ຢູ່ (ແຂວງ, ເມືອງ, ບ້ານ) ມາຍັດໃສ່ຟອມຄືນ
+        let address = patient.address || '';
+        let prov = '', dist = '', vill = '';
+        if (address && address !== '-') {
+            let parts = address.split(', ');
+            parts.forEach(part => {
+                if(part.startsWith('ແຂວງ ')) prov = part.replace('ແຂວງ ', '');
+                if(part.startsWith('ເມືອງ ')) dist = part.replace('ເມືອງ ', '');
+                if(part.startsWith('ບ້ານ ')) vill = part.replace('ບ້ານ ', '');
+            });
+        }
+        document.getElementById('pt_province').value = prov;
+        updateDistricts(); // ອັບເດດລາຍຊື່ເມືອງ
+        document.getElementById('pt_district').value = dist;
+        document.getElementById('pt_village').value = vill;
+
         document.getElementById('pt_temp').value = patient.temp || '';
         document.getElementById('pt_bp').value = patient.bp || '';
         document.getElementById('pt_pulse').value = patient.pulse || '';
