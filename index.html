@@ -108,6 +108,10 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
 .modal-card { background: white; padding: 25px; border-radius: 12px; width: 420px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); margin: 40px auto; position: relative;}
 .modal-card.large { width: 750px; max-width: 95%; max-height: 90vh; overflow-y: auto; }
 .modal-card.xlarge { width: 900px; max-width: 95%; max-height: 90vh; overflow-y: auto; }
+/* ເພີ່ມ Class ສຳລັບເຕັມຈໍແລ້ວເບິ່ງງາມ (ຈົ່ງຂອບໄວ້ນິດໜຶ່ງບໍ່ໃຫ້ຕິດຂອບຈໍເກີນໄປ) */
+/* ປັບຄວາມກວ້າງໃຫ້ພໍດີ ບໍ່ຍືດຈົນເກີນໄປ (1200px) ແຕ່ຍັງຮັກສາຄວາມສູງເຕັມຈໍໄວ້ */
+/* ຂະຫຍາຍກວ້າງຂຶ້ນເປັນ 1400px ເພື່ອໃຫ້ຕາຕະລາງມີພື້ນທີ່ຍືດອອກ */
+.modal-card.fullscreen { width: 1400px; max-width: 98%; height: 96vh; max-height: 96vh; margin: 2vh auto; overflow-y: auto; border-radius: 12px; }
 .modal-card h3 { margin-bottom: 20px; font-size: 18px; color: #102a43; border-bottom: 1px solid #eee; padding-bottom: 10px; }
 .form-group { margin-bottom: 15px; }
 .form-group label { display: block; margin-bottom: 5px; color: #555; font-size: 14px;}
@@ -1668,7 +1672,7 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
 </div>
 
 <div class="modal-overlay" id="consultationStep2Modal">
-    <div class="modal-card large">
+    <div class="modal-card fullscreen">
         <h3>📋 ບັນທຶກຜົນການກວດ (Visit: <span id="cst2_visit_id" style="color: #1976d2;"></span>)</h3>
         
         <!-- ສ່ວນແຈ້ງເຕືອນ ແລະ ປ້ອນປະຫວັດຄົນເຈັບ -->
@@ -1908,10 +1912,11 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
             <table class="med-table" style="min-width: 100%; width: 100%;">
                 <thead style="background: #f4f7fb;">
                     <tr>
-                        <th style="width: 25%;">ເລືອກຢາ (Medicine Name)</th>
-                        <th style="width: 80px; text-align: center;">ຈຳນວນ</th>
-                        <th style="width: 120px; text-align: center;">Dose (ເທື່ອລະ)</th>
-                        <th style="width: 45%;">ເວລາ / ວິທີໃຊ້ (ກົດຕິກເລືອກ)</th>
+                        <th style="width: 25%; min-width: 200px;">ເລືອກຢາ (Medicine Name)</th>
+                        <th style="width: 60px; text-align: center;">ຈຳນວນ</th>
+                        <th style="width: 100px; text-align: center;">Dose (ເທື່ອລະ)</th>
+                        <!-- ຂະຫຍາຍຄວາມກວ້າງຂອງຫ້ອງນີ້ໃຫ້ເຕັມພໍດີກັບປຸ່ມ -->
+                        <th style="width: auto; min-width: 480px;">ເວລາ / ວິທີໃຊ້ (ກົດຕິກເລືອກ)</th>
                         <th style="width: 50px; text-align: center;">ລຶບ</th>
                     </tr>
                 </thead>
@@ -4080,34 +4085,36 @@ window.toggleFollowUpFields = function() {
             <td><input type="text" class="med-name" value="${name}" placeholder="ຊື່ຢາ... (ພິມ ຫຼື ເລືອກ)" list="medicine_list" style="width: 100%; border:1px solid #ccc; padding:6px; border-radius:4px; font-family:inherit; box-sizing: border-box;"></td>
             <td style="text-align: center;"><input type="number" class="med-qty" value="${qty}" style="width: 60px; text-align: center; border:1px solid #ccc; padding:6px; border-radius:4px; font-family:inherit;"></td>
             <td><input type="text" class="med-dose" value="${doseVal}" placeholder="1 ເມັດ" style="width: 100%; border:1px solid #ccc; padding:6px; border-radius:4px; font-family:inherit; text-align: center; box-sizing: border-box;"></td>
-            <td>
-                <div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center; font-size: 13px;">
-                    <!-- ເວລາ -->
-                    <label style="background: #e3f2fd; padding: 2px 6px; border-radius: 4px; cursor: pointer; border: 1px solid #90caf9;">
-                        <input type="checkbox" class="cb-time" value="ເຊົ້າ" ${chkMorn}> ເຊົ້າ
-                    </label>
-                    <label style="background: #fff3e0; padding: 2px 6px; border-radius: 4px; cursor: pointer; border: 1px solid #ffcc80;">
-                        <input type="checkbox" class="cb-time" value="ສວາຍ" ${chkNoon}> ສວາຍ
-                    </label>
-                    <label style="background: #f3e5f5; padding: 2px 6px; border-radius: 4px; cursor: pointer; border: 1px solid #ce93d8;">
-                        <input type="checkbox" class="cb-time" value="ແລງ" ${chkEve}> ແລງ
-                    </label>
-                    <label style="background: #e8f5e9; padding: 2px 6px; border-radius: 4px; cursor: pointer; border: 1px solid #a5d6a7;">
-                        <input type="checkbox" class="cb-time" value="ກ່ອນນອນ" ${chkSleep}> ນອນ
-                    </label>
-                    <label style="background: #ffebee; padding: 2px 6px; border-radius: 4px; cursor: pointer; border: 1px solid #ffcdd2;">
-                        <input type="checkbox" class="cb-time" value="ເວລາມີອາການປວດ" ${chkPain}> ເວລາປວດ
-                    </label>
-                    
-                    <span style="color: #ccc;">|</span>
-                    
-                    <!-- ວິທີກິນ -->
-                    <label style="cursor: pointer;">
-                        <input type="radio" name="meal_${uniqueId}" class="rd-meal" value="ກ່ອນອາຫານ" ${radioBefore}> ກ່ອນອາຫານ
-                    </label>
-                    <label style="cursor: pointer;">
-                        <input type="radio" name="meal_${uniqueId}" class="rd-meal" value="ຫຼັງອາຫານ" ${radioAfter}> ຫຼັງອາຫານ
-                    </label>
+            <td style="width: auto; padding: 4px 8px;">
+                <div style="overflow-x: auto; width: 100%; padding-bottom: 4px;">
+                    <div style="display: flex; gap: 6px; align-items: center; font-size: 13px; min-width: max-content;">
+                        <!-- ເວລາ -->
+                        <label style="display: flex; align-items: center; gap: 4px; background: #e3f2fd; padding: 5px 8px; border-radius: 6px; cursor: pointer; border: 1px solid #90caf9; white-space: nowrap; flex-shrink: 0;">
+                            <input type="checkbox" class="cb-time" value="ເຊົ້າ" ${chkMorn}> ເຊົ້າ
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 4px; background: #fff3e0; padding: 5px 8px; border-radius: 6px; cursor: pointer; border: 1px solid #ffcc80; white-space: nowrap; flex-shrink: 0;">
+                            <input type="checkbox" class="cb-time" value="ສວາຍ" ${chkNoon}> ສວາຍ
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 4px; background: #f3e5f5; padding: 5px 8px; border-radius: 6px; cursor: pointer; border: 1px solid #ce93d8; white-space: nowrap; flex-shrink: 0;">
+                            <input type="checkbox" class="cb-time" value="ແລງ" ${chkEve}> ແລງ
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 4px; background: #e8f5e9; padding: 5px 8px; border-radius: 6px; cursor: pointer; border: 1px solid #a5d6a7; white-space: nowrap; flex-shrink: 0;">
+                            <input type="checkbox" class="cb-time" value="ກ່ອນນອນ" ${chkSleep}> ນອນ
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 4px; background: #ffebee; padding: 5px 8px; border-radius: 6px; cursor: pointer; border: 1px solid #ffcdd2; white-space: nowrap; flex-shrink: 0;">
+                            <input type="checkbox" class="cb-time" value="ເວລາມີອາການປວດ" ${chkPain}> ເວລາປວດ
+                        </label>
+                        
+                        <span style="color: #ccc; margin: 0 2px; flex-shrink: 0;">|</span>
+                        
+                        <!-- ວິທີກິນ -->
+                        <label style="display: flex; align-items: center; gap: 4px; cursor: pointer; background: #f4f7fb; padding: 5px 8px; border-radius: 6px; border: 1px solid #e8edf3; white-space: nowrap; flex-shrink: 0;">
+                            <input type="radio" name="meal_${uniqueId}" class="rd-meal" value="ກ່ອນອາຫານ" ${radioBefore}> ກ່ອນອາຫານ
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 4px; cursor: pointer; background: #f4f7fb; padding: 5px 8px; border-radius: 6px; border: 1px solid #e8edf3; white-space: nowrap; flex-shrink: 0;">
+                            <input type="radio" name="meal_${uniqueId}" class="rd-meal" value="ຫຼັງອາຫານ" ${radioAfter}> ຫຼັງອາຫານ
+                        </label>
+                    </div>
                 </div>
             </td>
             <td style="text-align:center;"><button type="button" class="btn-remove-row" style="padding: 4px; cursor: pointer;" onclick="this.closest('tr').remove()">🗑️</button></td>
