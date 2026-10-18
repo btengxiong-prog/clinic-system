@@ -1331,6 +1331,34 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
 </main>
 
 <!-- ================= ALL MODALS ================= -->
+ <!-- ================= STATUS CONFIRM MODAL (ເລືອກສະຖານະກ່ອນບັນທຶກ) ================= -->
+<div class="modal-overlay" id="statusConfirmModal" style="z-index: 3500;">
+    <div class="modal-card" style="width: 380px; text-align: center;">
+        <h3 style="margin-bottom: 20px; color: #102a43;">ກະລຸນາຢືນຢັນສະຖານະການກວດ</h3>
+        
+        <div style="display: flex; flex-direction: column; gap: 15px; margin-bottom: 25px; text-align: left; padding: 0 30px;">
+            <label style="cursor: pointer; display: flex; align-items: center; gap: 12px; font-size: 16px; padding: 12px; border: 1px solid #90caf9; border-radius: 8px; background: #e3f2fd;">
+                <input type="radio" name="final_cst_status" value="🔵 ລໍຖ້າກວດ" style="width: 20px; height: 20px; cursor: pointer;"> 
+                <strong>🔵 ລໍຖ້າກວດ</strong>
+            </label>
+            
+            <label style="cursor: pointer; display: flex; align-items: center; gap: 12px; font-size: 16px; padding: 12px; border: 1px solid #f3e5b5; border-radius: 8px; background: #fff8df;">
+                <input type="radio" name="final_cst_status" value="🟡 ກຳລັງກວດ" style="width: 20px; height: 20px; cursor: pointer;"> 
+                <strong>🟡 ກຳລັງກວດ</strong>
+            </label>
+            
+            <label style="cursor: pointer; display: flex; align-items: center; gap: 12px; font-size: 16px; padding: 12px; border: 1px solid #a5d6a7; border-radius: 8px; background: #e8f5e9;">
+                <input type="radio" name="final_cst_status" value="🟢 ສຳເລັດ" style="width: 20px; height: 20px; cursor: pointer;"> 
+                <strong>🟢 ສຳເລັດ</strong>
+            </label>
+        </div>
+        
+        <div class="modal-actions" style="justify-content: center; border-top: none; padding-top: 0;">
+            <button class="btn-cancel" onclick="document.getElementById('statusConfirmModal').style.display='none'">ຍົກເລີກ</button>
+            <button class="btn-submit" style="background: #1976d2; padding: 10px 40px; font-size: 16px;" onclick="confirmSaveConsultation()">ຕົກລົງ</button>
+        </div>
+    </div>
+</div>
 <!-- ================= ຟອມກອກຂໍ້ມູນໃບຮັບຮອງແພດ ================= -->
 <div class="modal-overlay" id="medCertModal">
     <div class="modal-card">
@@ -1875,20 +1903,20 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
             <button type="button" class="btn-action" style="background: #6a1b9a; color: white; padding: 4px 12px; font-size: 13px; border-radius: 20px; box-shadow: 0 2px 5px rgba(106, 27, 154, 0.3);" onclick="autoPrescribeAI()">🤖 ວິເຄາະ & ຈັດຢາອັດຕະໂນມັດ</button>
         </div>
 
-        <!-- 2. ຕາຕະລາງໃໝ່ (ເອົາມາວາງຕໍ່ກ້ອງຫົວຂໍ້ ເພື່ອໃຫ້ມີ Datalist ໃຫ້ເລືອກຢາ) -->
-        <div class="table-responsive" style="border: 1px solid #e8edf3; border-radius: 8px; margin-bottom: 15px;">
-            <table class="med-table">
+        <!-- 2. ຕາຕະລາງໃໝ່ (ແບບຕິກເລືອກ) -->
+        <div class="table-responsive" style="border: 1px solid #e8edf3; border-radius: 8px; margin-bottom: 15px; overflow-x: auto;">
+            <table class="med-table" style="min-width: 100%; width: 100%;">
                 <thead style="background: #f4f7fb;">
-                    <tr><th>ເລືອກຢາ (Medicine Name)</th><th>ຈຳນວນ</th><th>ວິທີໃຊ້ / ຄວາມຖີ່ (Usage)</th><th>ລຶບ</th></tr>
+                    <tr>
+                        <th style="width: 25%;">ເລືອກຢາ (Medicine Name)</th>
+                        <th style="width: 80px; text-align: center;">ຈຳນວນ</th>
+                        <th style="width: 120px; text-align: center;">Dose (ເທື່ອລະ)</th>
+                        <th style="width: 45%;">ເວລາ / ວິທີໃຊ້ (ກົດຕິກເລືອກ)</th>
+                        <th style="width: 50px; text-align: center;">ລຶບ</th>
+                    </tr>
                 </thead>
                 <tbody id="cst2_prescription_body">
-                    <!-- ແຖວປ້ອນຢາ -->
-                    <tr>
-                        <td><input type="text" class="med-name" placeholder="ຊື່ຢາ... (ພິມ ຫຼື ເລືອກ)" list="medicine_list" style="width: 100%; border:1px solid #ccc; padding:6px; border-radius:4px; font-family:inherit;"></td>
-                        <td><input type="number" class="med-qty" value="1" style="width: 100%; border:1px solid #ccc; padding:6px; border-radius:4px; font-family:inherit;"></td>
-                        <td><input type="text" class="med-usage" placeholder="ເຊົ້າ-ແລງ ຫຼັງອາຫານ" style="width: 100%; border:1px solid #ccc; padding:6px; border-radius:4px; font-family:inherit;"></td>
-                        <td style="text-align: center;"><span class="action-icon" onclick="this.parentElement.parentElement.remove()" style="color: #d32f2f;">🗑️</span></td>
-                    </tr>
+                    <!-- ແຖວປ້ອນຢາຈະຖືກສ້າງດ້ວຍ JavaScript ດ້ານລຸ່ມ -->
                 </tbody>
             </table>
             
@@ -3365,7 +3393,7 @@ function renderDashboardTable(patients) {
             if (visitToday && !visitToday.status.includes('ສຳເລັດ')) {
                 sendQueueBtn = `<button class="btn-action" style="background: #e2e8f0; color: #7b8794; padding: 4px 10px; font-size: 13px; border-radius: 6px; margin-right: 5px; cursor: not-allowed;" disabled>✅ ສົ່ງກວດແລ້ວ</button>`;
             } else {
-                sendQueueBtn = `<button class="btn-action" style="background: #16864b; color: white; padding: 4px 10px; font-size: 13px; border-radius: 6px; margin-right: 5px; box-shadow: 0 2px 4px rgba(22, 134, 75, 0.2);" onclick="sendPatientToQueue('${name}')">🩺 ສົ່ງກວດເລີຍ</button>`;
+                sendQueueBtn = `<button class="btn-action" style="background: #16864b; color: white; padding: 4px 10px; font-size: 13px; border-radius: 6px; margin-right: 5px; box-shadow: 0 2px 4px rgba(22, 134, 75, 0.2);" onclick="sendPatientToQueue('${name}')">🩺 ສົ່ງໄປກວດ</button>`;
             }
 
             if (isReceptionist) {
@@ -4027,11 +4055,62 @@ window.toggleFollowUpFields = function() {
     window.addConsultRxRow = function(name = '', qty = 1, usage = '') {
         const tbody = document.getElementById('cst2_prescription_body');
         const tr = document.createElement('tr');
+        
+        // ສ້າງ ID ທີ່ບໍ່ຊ້ຳກັນສຳລັບ Radio ປ້ອງກັນການກົດແລ້ວໄປຕິດແຖວອື່ນ
+        const uniqueId = Date.now() + Math.floor(Math.random() * 1000);
+        
+        // ພະຍາຍາມແຍກຂໍ້ມູນການກິນຢາຈາກ Text (ຖ້າມີມາຈາກ AI ຫຼື ປະຫວັດເກົ່າ)
+        let chkMorn = usage.includes('ເຊົ້າ') ? 'checked' : '';
+        let chkNoon = usage.includes('ສວາຍ') ? 'checked' : '';
+        let chkEve = usage.includes('ແລງ') ? 'checked' : '';
+        let chkSleep = usage.includes('ກ່ອນນອນ') ? 'checked' : '';
+        let chkPain = usage.includes('ປວດ') ? 'checked' : '';
+        
+        let radioBefore = usage.includes('ກ່ອນອາຫານ') ? 'checked' : '';
+        let radioAfter = (usage.includes('ຫຼັງອາຫານ') || (!radioBefore && usage)) ? 'checked' : ''; // ຕັ້ງຄ່າເລີ່ມຕົ້ນເປັນຫຼັງອາຫານ
+        
+        // ຖ້າເປັນຢາທາ ໃຫ້ເຊື່ອງກ່ອນ/ຫຼັງອາຫານ
+        let doseVal = "1 ເມັດ/ຊ້ອນ";
+        if (usage.includes('ທາ')) doseVal = "ທາ";
+        if (usage.match(/\d+\s*(ເມັດ|ຊ້ອນ|ແຄັບຊູນ|ຢອດ)/)) {
+            doseVal = usage.match(/\d+\s*(ເມັດ|ຊ້ອນ|ແຄັບຊູນ|ຢອດ)/)[0];
+        }
+
         tr.innerHTML = `
-            <td><input type="text" class="med-name" value="${name}" placeholder="ຊື່ຢາ... (ພິມ ຫຼື ເລືອກ)" list="medicine_list" style="width: 100%; border:1px solid #ccc; padding:6px; border-radius:4px; font-family:inherit;"></td>
-            <td><input type="number" class="med-qty" value="${qty}" style="width: 100%; border:1px solid #ccc; padding:6px; border-radius:4px; font-family:inherit;"></td>
-            <td><input type="text" class="med-usage" value="${usage}" placeholder="ເຊົ້າ-ແລງ ຫຼັງອາຫານ..." style="width: 100%; border:1px solid #ccc; padding:6px; border-radius:4px; font-family:inherit;"></td>
-            <td style="text-align:center;"><button type="button" class="btn-remove-row" style="padding: 4px;" onclick="this.closest('tr').remove()">🗑️</button></td>
+            <td><input type="text" class="med-name" value="${name}" placeholder="ຊື່ຢາ... (ພິມ ຫຼື ເລືອກ)" list="medicine_list" style="width: 100%; border:1px solid #ccc; padding:6px; border-radius:4px; font-family:inherit; box-sizing: border-box;"></td>
+            <td style="text-align: center;"><input type="number" class="med-qty" value="${qty}" style="width: 60px; text-align: center; border:1px solid #ccc; padding:6px; border-radius:4px; font-family:inherit;"></td>
+            <td><input type="text" class="med-dose" value="${doseVal}" placeholder="1 ເມັດ" style="width: 100%; border:1px solid #ccc; padding:6px; border-radius:4px; font-family:inherit; text-align: center; box-sizing: border-box;"></td>
+            <td>
+                <div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center; font-size: 13px;">
+                    <!-- ເວລາ -->
+                    <label style="background: #e3f2fd; padding: 2px 6px; border-radius: 4px; cursor: pointer; border: 1px solid #90caf9;">
+                        <input type="checkbox" class="cb-time" value="ເຊົ້າ" ${chkMorn}> ເຊົ້າ
+                    </label>
+                    <label style="background: #fff3e0; padding: 2px 6px; border-radius: 4px; cursor: pointer; border: 1px solid #ffcc80;">
+                        <input type="checkbox" class="cb-time" value="ສວາຍ" ${chkNoon}> ສວາຍ
+                    </label>
+                    <label style="background: #f3e5f5; padding: 2px 6px; border-radius: 4px; cursor: pointer; border: 1px solid #ce93d8;">
+                        <input type="checkbox" class="cb-time" value="ແລງ" ${chkEve}> ແລງ
+                    </label>
+                    <label style="background: #e8f5e9; padding: 2px 6px; border-radius: 4px; cursor: pointer; border: 1px solid #a5d6a7;">
+                        <input type="checkbox" class="cb-time" value="ກ່ອນນອນ" ${chkSleep}> ນອນ
+                    </label>
+                    <label style="background: #ffebee; padding: 2px 6px; border-radius: 4px; cursor: pointer; border: 1px solid #ffcdd2;">
+                        <input type="checkbox" class="cb-time" value="ເວລາມີອາການປວດ" ${chkPain}> ເວລາປວດ
+                    </label>
+                    
+                    <span style="color: #ccc;">|</span>
+                    
+                    <!-- ວິທີກິນ -->
+                    <label style="cursor: pointer;">
+                        <input type="radio" name="meal_${uniqueId}" class="rd-meal" value="ກ່ອນອາຫານ" ${radioBefore}> ກ່ອນອາຫານ
+                    </label>
+                    <label style="cursor: pointer;">
+                        <input type="radio" name="meal_${uniqueId}" class="rd-meal" value="ຫຼັງອາຫານ" ${radioAfter}> ຫຼັງອາຫານ
+                    </label>
+                </div>
+            </td>
+            <td style="text-align:center;"><button type="button" class="btn-remove-row" style="padding: 4px; cursor: pointer;" onclick="this.closest('tr').remove()">🗑️</button></td>
         `;
         tbody.appendChild(tr);
     };
@@ -4105,10 +4184,39 @@ window.toggleFollowUpFields = function() {
 
     document.getElementById('btnSaveCst2').addEventListener('click', () => { 
         if(editingVisitIndex === -1) return; 
+        
+        // 1. ເປີດ Modal ໃຫ້ເລືອກສະຖານະກ່ອນ
+        document.getElementById('statusConfirmModal').style.display = 'flex';
+        
+        // 2. ດຶງຄ່າປັດຈຸບັນມາຕິກໄວ້ເປັນຄ່າຕັ້ງຕົ້ນ (Default)
+        const currentStatus = document.getElementById('cst2_status').value;
+        document.querySelectorAll('input[name="final_cst_status"]').forEach(radio => {
+            if (currentStatus.includes(radio.value.substring(3))) {
+                radio.checked = true;
+            }
+        });
+    });
+
+    // ຟັງຊັນທີ່ຈະຖືກເອີ້ນໃຊ້ເມື່ອກົດ "ຕົກລົງ" ໃນກ່ອງ Popup ເລືອກສະຖານະ
+    window.confirmSaveConsultation = function() {
+        const selectedRadio = document.querySelector('input[name="final_cst_status"]:checked');
+        if (!selectedRadio) {
+            window.showCustomAlert('ກະລຸນາເລືອກສະຖານະການກວດ!', 'ແຈ້ງເຕືອນ', '⚠️');
+            return;
+        }
+        
+        const finalStatus = selectedRadio.value;
+        // ອັບເດດຄ່າລົງໃນ Dropdown ຫຼັກ
+        document.getElementById('cst2_status').value = finalStatus;
+        
+        // ປິດ Modal ເລືອກສະຖານະ
+        document.getElementById('statusConfirmModal').style.display = 'none';
+
+        // ====== ເລີ່ມຕົ້ນໂຄດບັນທຶກຂໍ້ມູນທັງໝົດ ======
         let visits = JSON.parse(localStorage.getItem('clinic_visits')) || []; 
         
         const diagnosis = document.getElementById('cst2_diag_primary').value; 
-        if(!diagnosis.trim() && document.getElementById('cst2_status').value === '🟢 ສຳເລັດ') { 
+        if(!diagnosis.trim() && finalStatus === '🟢 ສຳເລັດ') { 
             window.showCustomAlert('ກະລຸນາປ້ອນ "Primary Diagnosis (ພະຍາດຫຼັກ)" ກ່ອນປິດການກວດ!', 'ແຈ້ງເຕືອນ', '⚠️'); 
             return; 
         } 
@@ -4132,12 +4240,31 @@ window.toggleFollowUpFields = function() {
 
         let prescriptions = [];
         document.querySelectorAll('#cst2_prescription_body tr').forEach(tr => {
-            let name = tr.querySelector('.med-name').value.trim(); // ໃຫ້ແນ່ໃຈວ່າເປັນ .med-name
+            let name = tr.querySelector('.med-name').value.trim(); 
             if(name) {
+                // ດຶງຂໍ້ມູນທີ່ຕິກໄວ້ໃນແຖວນີ້ມາວິເຄາະ
+                let dose = tr.querySelector('.med-dose').value.trim();
+                let times = [];
+                tr.querySelectorAll('.cb-time:checked').forEach(cb => times.push(cb.value));
+                
+                let meal = '';
+                const mealRadio = tr.querySelector('.rd-meal:checked');
+                if (mealRadio) meal = mealRadio.value;
+
+                // ປະກອບຮ່າງປະໂຫຍກ Usage
+                let generatedUsage = '';
+                if (dose.includes('ທາ') || dose.includes('ຢອດ')) {
+                    generatedUsage = `${dose} ${times.join('-')}`;
+                } else if (times.length > 0) {
+                    generatedUsage = `ກິນ ${dose} ${times.join('-')} ${meal}`;
+                } else {
+                    generatedUsage = `${dose} ${meal}`; // ຖ້າບໍ່ຕິກເວລາຫຍັງເລີຍ
+                }
+
                 prescriptions.push({
                     name: name,
                     qty: tr.querySelector('.med-qty').value,
-                    usage: tr.querySelector('.med-usage').value
+                    usage: generatedUsage.trim()
                 });
             }
         });
@@ -4146,7 +4273,7 @@ window.toggleFollowUpFields = function() {
 
         visits[editingVisitIndex] = { 
             ...visits[editingVisitIndex], 
-            status: document.getElementById('cst2_status').value, 
+            status: finalStatus, 
             symptoms: document.getElementById('cst2_symptoms').value, 
             history: document.getElementById('cst2_history').value, 
             temp: document.getElementById('cst2_temp').value, 
@@ -4182,7 +4309,7 @@ window.toggleFollowUpFields = function() {
         localStorage.setItem('clinic_visits', JSON.stringify(visits)); 
         window.showCustomAlert('ບັນທຶກຂໍ້ມູນການວິນິດໄສ ແລະ ສັ່ງຢາ ສຳເລັດ!', 'ສຳເລັດ', '✅'); 
         
-        if(prescriptions.length > 0 && document.getElementById('cst2_status').value === '🟢 ສຳເລັດ') {
+        if(prescriptions.length > 0 && finalStatus === '🟢 ສຳເລັດ') {
             let rxs = JSON.parse(localStorage.getItem('clinic_prescriptions')) || [];
             let existingRx = rxs.find(r => r.visit_id === visits[editingVisitIndex].visit_id);
             
@@ -4218,29 +4345,9 @@ window.toggleFollowUpFields = function() {
 
         document.getElementById('consultationStep2Modal').style.display = 'none'; 
         renderConsultationsPage(); 
-    });
+    };
     
-window.renderConsultationsPage = function() { 
-        const visits = JSON.parse(localStorage.getItem('clinic_visits')) || []; 
-        const todayDate = new Date().toISOString().split('T')[0]; 
-        let countToday = 0; let countProgress = 0; let countCompleted = 0; let countWaiting = 0; 
-        
-        visits.forEach(v => { 
-            if(v.date === todayDate) countToday++; 
-            if(v.status.includes('ກຳລັງກວດ')) countProgress++; 
-            if(v.status.includes('ສຳເລັດ')) countCompleted++; 
-            if(v.status.includes('ລໍຖ້າ')) countWaiting++; 
-        }); 
-        
-        document.getElementById('cst-stat-today').innerText = countToday + ' ຄັ້ງ'; 
-        document.getElementById('cst-stat-progress').innerText = countProgress + ' ຄົນ'; 
-        document.getElementById('cst-stat-completed').innerText = countCompleted + ' ຄົນ'; 
-        document.getElementById('cst-stat-waiting').innerText = countWaiting + ' ຄົນ'; 
-        
-        const tbody = document.getElementById('consultation-table-body'); 
-        tbody.innerHTML = ''; 
-        
-        window.renderConsultationsPage = function() { 
+    window.renderConsultationsPage = function() { 
     const visits = JSON.parse(localStorage.getItem('clinic_visits')) || []; 
     const todayDate = new Date().toISOString().split('T')[0]; 
     let countToday = 0; let countProgress = 0; let countCompleted = 0; let countWaiting = 0; 
@@ -4253,12 +4360,18 @@ window.renderConsultationsPage = function() {
         if(v.status.includes('ລໍຖ້າ')) countWaiting++; 
     }); 
     
-    document.getElementById('cst-stat-today').innerText = countToday + ' ຄັ້ງ'; 
-    document.getElementById('cst-stat-progress').innerText = countProgress + ' ຄົນ'; 
-    document.getElementById('cst-stat-completed').innerText = countCompleted + ' ຄົນ'; 
-    document.getElementById('cst-stat-waiting').innerText = countWaiting + ' ຄົນ'; 
+    const statToday = document.getElementById('cst-stat-today');
+    const statProgress = document.getElementById('cst-stat-progress');
+    const statCompleted = document.getElementById('cst-stat-completed');
+    const statWaiting = document.getElementById('cst-stat-waiting');
+
+    if(statToday) statToday.innerText = countToday + ' ຄັ້ງ'; 
+    if(statProgress) statProgress.innerText = countProgress + ' ຄົນ'; 
+    if(statCompleted) statCompleted.innerText = countCompleted + ' ຄົນ'; 
+    if(statWaiting) statWaiting.innerText = countWaiting + ' ຄົນ'; 
     
     const tbody = document.getElementById('consultation-table-body'); 
+    if(!tbody) return;
     tbody.innerHTML = ''; 
     
     // 💡 ຕອງເອົາສະເພາະຄົນເຈັບທີ່ "ຍັງບໍ່ສຳເລັດ" ມາສະແດງໃນຕາຕະລາງເທົ່ານັ້ນ
@@ -4281,35 +4394,24 @@ window.renderConsultationsPage = function() {
             // ຕ້ອງອ້າງອີງ Index ຕົວຈິງຈາກອາເຣຫຼັກ (originalVisits) ເພື່ອໃຫ້ກົດແກ້ໄຂຖືກຄົນ
             const trueIndex = originalVisits.findIndex(ov => ov.visit_id === v.visit_id); 
 
-            // ກວດສອບສິດ (Role) ຂອງຜູ້ໃຊ້ປະຈຸບັນ
+            // 1. ກວດສອບສິດ (Role) ຂອງຜູ້ໃຊ້ປະຈຸບັນ
             const loggedUser = JSON.parse(localStorage.getItem('clinic_logged_user')) || {};
             const userRole = loggedUser.role || '';
-            const isReceptionist = userRole === 'RECEPTION';
             const isDoctor = userRole === 'DOCTOR' || userRole === 'ແພດ (Doctor)';
 
             let actionButtons = '';
             
-            // ສ້າງປຸ່ມສົ່ງກວດທີ່ລັອກອັດຕະໂນມັດ ຖ້າເຄີຍສົ່ງໄປແລ້ວ (ໃຊ້ຮ່ວມກັນສຳລັບທຸກສິດອື່ນໆ)
-            let btnSendQueue = '';
-            if (visitToday && !visitToday.status.includes('ສຳເລັດ')) {
-                btnSendQueue = `<button class="btn-action" style="background: #e2e8f0; color: #7b8794; padding: 4px 10px; font-size: 13px; border-radius: 6px; margin-right: 5px; cursor: not-allowed;" disabled>✅ ສົ່ງກວດແລ້ວ</button>`;
+            if (isDoctor) {
+                // ສຳລັບແພດ: ປ່ຽນເປັນປຸ່ມກົດເຂົ້າກວດຢ່າງດຽວ (ເຊື່ອງປຸ່ມລຶບຖິ້ມ)
+                let btnText = v.status.includes('ກຳລັງກວດ') ? 'ສືບຕໍ່ກວດ' : 'ເລີ່ມກວດ';
+                let btnColor = v.status.includes('ກຳລັງກວດ') ? '#f59e0b' : '#1976d2'; // ສີສົ້ມສຳລັບກຳລັງກວດ, ສີຟ້າສຳລັບເລີ່ມກວດ
+                
+                actionButtons = `<button class="btn-action" style="background: ${btnColor}; color: white; padding: 4px 12px; font-size: 13px; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);" onclick="openConsultationStep2(${trueIndex})">🩺 ${btnText}</button>`;
             } else {
-                // ສັງເກດ: ເພີ່ມ this ເຂົ້າໄປໃນ onclick ເພື່ອໃຫ້ຟັງຊັນຮູ້ຈັກຕົວປຸ່ມນີ້
-                btnSendQueue = `<button class="btn-action" style="background: #16864b; color: white; padding: 4px 10px; font-size: 13px; border-radius: 6px; margin-right: 5px; box-shadow: 0 2px 4px rgba(22, 134, 75, 0.2);" onclick="sendPatientToQueue('${name}', this)">🩺 ສົ່ງກວດເລີຍ</button>`;
-            }
-
-            if (isReceptionist) {
-                actionButtons = btnSendQueue;
-            } else if (isDoctor) {
-                // ສຳລັບ ແພດ: ບໍ່ໃຫ້ເຫັນປຸ່ມໃດໆເລີຍໃນໜ້ານີ້ (ຕັດອອກ)
-                actionButtons = '';
-            } else {
-                // ສຳລັບ Admin ຫລື ຜູ້ບໍລິຫານອື່ນໆ: ເຫັນທຸກປຸ່ມທັງໝົດ (ລວມເຖິງປຸ່ມລຶບ)
+                // ສຳລັບ Admin: ເຫັນປຸ່ມແກ້ໄຂ ແລະ ລຶບຄືເກົ່າ
                 actionButtons = `
-                    ${btnSendQueue}
-                    <span class="action-icon" title="ເບິ່ງຂໍ້ມູນ" onclick="viewPatientQuick('${name}')">👁️</span>
-                    <span class="action-icon" title="ແກ້ໄຂຂໍ້ມູນ" onclick="editPatient('${ptId}')">✏️</span>
-                    <span class="action-icon" title="ລຶບຂໍ້ມູນທົດລອງ" onclick="deletePatient('${ptId}')" style="color: #d32f2f;">🗑️</span>
+                    <span class="action-icon" title="ບັນທຶກຜົນການກວດ / ແກ້ໄຂ" onclick="openConsultationStep2(${trueIndex})">✏️</span>
+                    <span class="action-icon" title="ລຶບຂໍ້ມູນການກວດ" onclick="deleteConsultation(${trueIndex})" style="color: #d32f2f;">🗑️</span>
                 `;
             }
 
@@ -4330,7 +4432,6 @@ window.renderConsultationsPage = function() {
         }); 
     } 
 };
-    };
 
     // ຟັງຊັນເປີດກ່ອງປ້ອນຂໍ້ມູນໃບຮັບຮອງແພດ
     window.openMedCertModal = function(index) {
