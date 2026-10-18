@@ -1463,7 +1463,7 @@ td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vert
                     </tr>
                 </tbody>
             </table>
-            <div style="padding: 10px; text-align: center; background: #f9fbfd;"><button class="btn-action" style="background: #e2e8f0; color: #333;" onclick="addRxRow()">+ ເພີ່ມລາຍການຢາ</button></div>
+            <div id="rx_add_row_container" style="padding: 10px; text-align: center; background: #f9fbfd;"><button class="btn-action" style="background: #e2e8f0; color: #333;" onclick="addRxRow()">+ ເພີ່ມລາຍການຢາ</button></div>
         </div>
         
         <div class="modal-actions">
@@ -6143,6 +6143,14 @@ window.saveStaff = async function() {
         document.getElementById('rx_instruction').value = rx.instruction || '';
         document.getElementById('rx_note').value = rx.note || '';
         
+        // 1. ກວດສອບສິດຜູ້ໃຊ້ (Role)
+        const loggedUser = JSON.parse(localStorage.getItem('clinic_logged_user')) || {};
+        const isDoctorOrAdmin = loggedUser.role === 'DOCTOR' || loggedUser.role === 'ແພດ (Doctor)' || loggedUser.role === 'ADMIN' || loggedUser.role === 'ຜູ້ບໍລິຫານ (Admin)' || loggedUser.username === 'XPH-ADMIN';
+        
+        // ຖ້າບໍ່ແມ່ນແພດ ຫຼື ແອັດມິນ ໃຫ້ລັອກຂໍ້ມູນ (Readonly)
+        const readOnlyAttr = !isDoctorOrAdmin ? 'readonly style="background: #f4f7fb; color: #555; border: 1px solid #e8edf3; pointer-events: none;"' : '';
+        const hideBtnStyle = !isDoctorOrAdmin ? 'display: none;' : '';
+        
         const tbody = document.getElementById('rx_med_body');
         tbody.innerHTML = '';
         
@@ -6150,17 +6158,35 @@ window.saveStaff = async function() {
             rx.items.forEach(med => {
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
-                <td><input type="text" class="med-name" value="${med.name}"></td>
-                <td><input type="text" class="med-strength" value="${med.strength||''}"></td>
-                <td><input type="number" class="med-qty" value="${med.qty}"></td>
-                <td><input type="text" class="med-unit" value="${med.unit||''}"></td>
-                <td><input type="text" class="med-usage" value="${med.usage||''}"></td>
-                <td><input type="text" class="med-freq" value="${med.freq||''}"></td>
-                <td><input type="number" class="med-days" value="${med.days||''}"></td>`;
+                <td><input type="text" class="med-name" value="${med.name}" ${readOnlyAttr}></td>
+                <td><input type="text" class="med-strength" value="${med.strength||''}" ${readOnlyAttr}></td>
+                <td><input type="number" class="med-qty" value="${med.qty}" ${readOnlyAttr}></td>
+                <td><input type="text" class="med-unit" value="${med.unit||''}" ${readOnlyAttr}></td>
+                <td><input type="text" class="med-usage" value="${med.usage||''}" ${readOnlyAttr}></td>
+                <td><input type="text" class="med-freq" value="${med.freq||''}" ${readOnlyAttr}></td>
+                <td><input type="number" class="med-days" value="${med.days||''}" ${readOnlyAttr}></td>
+                <td style="${hideBtnStyle}"><button type="button" class="btn-remove-row" style="padding: 4px; cursor: pointer;" onclick="this.closest('tr').remove()">🗑️</button></td>
+                `;
                 tbody.appendChild(tr);
             });
         } else {
-            addRxRow();
+            // ຖ້າບໍ່ມີລາຍການ ແລະ ເປັນ Pharmacist, ບໍ່ຕ້ອງສະແດງແຖວວ່າງ
+            if(isDoctorOrAdmin) addRxRow();
+        }
+        
+        // 2. ເຊື່ອງປຸ່ມ "+ ເພີ່ມລາຍການຢາ" ຖ້າບໍ່ແມ່ນໝໍ
+        const addRowContainer = document.getElementById('rx_add_row_container');
+        if (addRowContainer) {
+            addRowContainer.style.display = isDoctorOrAdmin ? 'block' : 'none';
+        }
+        
+        // 3. ລັອກຊ່ອງ Visit ID ເພື່ອບໍ່ໃຫ້ Pharmacist ໄປດຶງໃບຢາຄົນອື່ນມາສັບສົນ
+        if (!isDoctorOrAdmin) {
+            document.getElementById('rx_visit').setAttribute('readonly', true);
+            document.getElementById('rx_visit').style.backgroundColor = '#f4f7fb';
+        } else {
+            document.getElementById('rx_visit').removeAttribute('readonly');
+            document.getElementById('rx_visit').style.backgroundColor = '#fff';
         }
         
         document.getElementById('pharmacyModal').style.display = 'flex';
