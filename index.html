@@ -4071,11 +4071,26 @@ function renderDashboardTable(patients) {
                 }
             });
             localStorage.setItem('clinic_inventory', JSON.stringify(inv)); localStorage.setItem('clinic_inventory_logs', JSON.stringify(logs));
-            if(outOfStockWarnings.length > 0) { setTimeout(() => window.showCustomAlert(`ຈ່າຍຢາສຳເລັດ! ແຕ່ມີລາຍການ Stock ບໍ່ພໍ: <br>${outOfStockWarnings.join('<br>')}`, 'ແຈ້ງເຕືອນ Stock', '⚠️'), 500); }
+            
+            // ເພີ່ມການແຈ້ງເຕືອນຕອນຕັດສະຕ໋ອກສຳເລັດ
+            if(outOfStockWarnings.length > 0) { 
+                setTimeout(() => window.showCustomAlert(`ຈ່າຍຢາສຳເລັດ! ແຕ່ມີລາຍການ Stock ບໍ່ພໍ: <br>${outOfStockWarnings.join('<br>')}`, 'ແຈ້ງເຕືອນ Stock', '⚠️'), 500); 
+            } else {
+                setTimeout(() => window.showCustomAlert('ບັນທຶກການຈ່າຍຢາ ແລະ ຕັດສະຕ໋ອກສຳເລັດແລ້ວ!', 'ສຳເລັດ', '✅'), 500);
+            }
         }
 
         if (editingRxIndex === -1) { rxs.push(newRx); } else { newRx.date = rxs[editingRxIndex].date; rxs[editingRxIndex] = newRx; } 
-        localStorage.setItem('clinic_prescriptions', JSON.stringify(rxs)); if(!isNewDispense){ window.showCustomAlert('ບັນທຶກໃບຢາສຳເລັດ!', 'ສຳເລັດ', '✅'); } document.getElementById('pharmacyModal').style.display = 'none'; 
+        localStorage.setItem('clinic_prescriptions', JSON.stringify(rxs)); 
+        
+        if(!isNewDispense){ window.showCustomAlert('ບັນທຶກໃບຢາສຳເລັດ!', 'ສຳເລັດ', '✅'); } 
+        
+        document.getElementById('pharmacyModal').style.display = 'none'; 
+        
+        // ✨ ສັ່ງໃຫ້ໜ້າຈໍອັບເດດຕາຕະລາງ ແລະ ຕົວເລກສະຖິຕິທັນທີ ຫຼັງຈາກບັນທຶກສຳເລັດ ✨
+        if (typeof window.renderPharmacyPage === 'function') {
+            window.renderPharmacyPage();
+        }
     });
 
     function renderAppointmentsPage() { 
